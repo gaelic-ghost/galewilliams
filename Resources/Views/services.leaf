@@ -1,0 +1,28 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro">
+            <p class="eyebrow">#(eyebrow)</p>
+            <h1>#(heading)</h1>
+            <p class="summary">#(summary)</p>
+        </section>
+
+        <section class="service-list">
+            <article>
+                <h2>Agent prototype</h2>
+                <p>A scoped assistant or maintainer workflow that reads real inputs, writes durable outputs, and keeps human approval where it belongs.</p>
+            </article>
+            <article>
+                <h2>Plugin or app integration</h2>
+                <p>Connect an API, local tool, repository workflow, or service surface so the experience feels like one coherent product.</p>
+            </article>
+            <article>
+                <h2>Apple-platform app slice</h2>
+                <p>Build a focused SwiftUI, AppKit, or server-backed feature that can grow without turning the first release into a science project.</p>
+            </article>
+            <article>
+                <h2>Automation and operations</h2>
+                <p>Turn repeated manual work into inspectable scripts, dashboards, reports, or agent-assisted review flows.</p>
+            </article>
+        </section>
+    #endexport
+#endextend

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#(title)</title>
+    <link rel="icon" href="/images/sharp-icon.png" type="image/png">
+    <link rel="stylesheet" href="/styles/site.css">
+</head>
+<body>
+    <div class="scanline-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="Gale Williams home">
+                <img src="/images/sharp-icon.png" alt="" class="brand-mark">
+                <span class="brand-name">Gale Williams</span>
+            </a>
+            <nav class="site-nav" aria-label="Primary navigation">
+                #for(item in navItems):
+                    <a href="#(item.path)">#(item.label)</a>
+                #endfor
+            </nav>
+        </header>
+
+        <main>
+            #import("body")
+        </main>
+
+        <footer class="site-footer">
+            <span>Agentic apps, plugins, integrations, and Apple-platform software.</span>
+            <a href="/contact">Start a project</a>
+        </footer>
+    </div>
+</body>
+</html>

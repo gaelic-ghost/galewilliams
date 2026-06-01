@@ -1,0 +1,18 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro about-intro">
+            <div>
+                <p class="eyebrow">#(eyebrow)</p>
+                <h1>#(heading)</h1>
+                <p class="summary">#(summary)</p>
+            </div>
+            <img src="/images/socket-banner.png" alt="" class="about-banner">
+        </section>
+
+        <section class="text-band">
+            <h2>How I work</h2>
+            <p>I like tools that are direct, inspectable, and kind to the operator. That usually means a narrow first slice, real validation, useful logs, and fewer mystery boxes between the user and the outcome.</p>
+            <p>The sweet spot is pragmatic engineering with a little neon on the dashboard: Swift apps, web backends, AI-assisted workflows, and integrations that make a messy process easier to trust.</p>
+        </section>
+    #endexport
+#endextend

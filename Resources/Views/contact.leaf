@@ -1,0 +1,42 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro">
+            <p class="eyebrow">#(eyebrow)</p>
+            <h1>#(heading)</h1>
+            <p class="summary">#(summary)</p>
+        </section>
+
+        #if(statusMessage):
+            <p class="status-message">#(statusMessage)</p>
+        #endif
+
+        <form class="intake-form" method="post" action="/contact">
+            <label>
+                Name
+                <input name="name" type="text" autocomplete="name" required>
+            </label>
+            <label>
+                Email
+                <input name="email" type="email" autocomplete="email" required>
+            </label>
+            <label>
+                Project type
+                <select name="projectType" required>
+                    <option value="agent-prototype">Agent prototype</option>
+                    <option value="plugin-integration">Plugin or integration</option>
+                    <option value="app-build">App build</option>
+                    <option value="automation">Automation workflow</option>
+                </select>
+            </label>
+            <label>
+                Timeline
+                <input name="timeline" type="text" placeholder="Example: prototype in 2 weeks" required>
+            </label>
+            <label class="full-span">
+                Details
+                <textarea name="details" rows="7" placeholder="What should exist when this project is done?" required></textarea>
+            </label>
+            <button type="submit">Send intake</button>
+        </form>
+    #endexport
+#endextend

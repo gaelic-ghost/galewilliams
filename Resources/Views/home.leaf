@@ -1,0 +1,36 @@
+#extend("layout"):
+    #export("body"):
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">#(eyebrow)</p>
+                <h1>#(heading)</h1>
+                <p class="summary">#(summary)</p>
+                <div class="action-row">
+                    <a class="button primary" href="/services">View services</a>
+                    <a class="button secondary" href="/contact">Start a project</a>
+                </div>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <img src="/images/speak-swiftly-banner.png" alt="">
+            </div>
+        </section>
+
+        <section class="signal-grid" aria-label="Core work">
+            <article>
+                <span class="card-kicker">Agents</span>
+                <h2>Workflow agents that earn trust.</h2>
+                <p>Scoped agents with explicit inputs, review gates, durable reports, and practical handoff paths.</p>
+            </article>
+            <article>
+                <span class="card-kicker">Apps</span>
+                <h2>Small apps with real product shape.</h2>
+                <p>Swift, web, and API-backed tools designed around the work people repeat every day.</p>
+            </article>
+            <article>
+                <span class="card-kicker">Integrations</span>
+                <h2>Systems that talk cleanly.</h2>
+                <p>Stripe, OpenAI, GitHub, Cloudflare, Apple services, and the connective code between them.</p>
+            </article>
+        </section>
+    #endexport
+#endextend
