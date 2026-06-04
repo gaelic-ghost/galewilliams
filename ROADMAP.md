@@ -121,6 +121,29 @@ Goal: add an `Apps` page that can grow from a simple software catalog into a dow
 - Keep all Stripe secrets, signing keys, and license private keys outside the repository.
 - Add clear operator logs for every failed fulfillment, license issuance, and webhook verification error.
 
+### Package And Integration Research
+
+Current package candidates to evaluate before implementing the commerce/download/licensing stack:
+
+- [`vapor-community/stripe-kit`](https://swiftpackageindex.com/vapor-community/stripe-kit): strongest Swift server candidate for Stripe API work. Use this for Checkout Session creation, Customer Portal sessions, webhook event parsing, and Stripe object models if it covers the needed current API surface.
+- [`vapor-community/stripe`](https://swiftpackageregistry.com/vapor-community/stripe): older Vapor helper around StripeKit. Treat as a secondary candidate only if it still adds useful Vapor-specific request/application integration after reviewing the current API.
+- [Stripe Checkout](https://docs.stripe.com/payments/checkout) and [Stripe Express Checkout Element](https://docs.stripe.com/elements/express-checkout-element): preferred Apple Pay path for first commerce flows. Apple Pay support should come through Stripe-hosted Checkout or Express Checkout before attempting a direct Apple Pay JS integration.
+- [Stripe Apple Pay docs](https://docs.stripe.com/apple-pay?platform=web): verify domain registration, dashboard payment-method activation, browser/device support, and currency/account constraints before promising Apple Pay visibility on every client.
+- [Apple Pay on the Web server setup](https://developer.apple.com/documentation/applepayontheweb/setting-up-your-server): direct Apple Pay JS support is a later option if Stripe-hosted flows are not enough; it adds merchant ID, certificate, domain verification, merchant validation, and HTTPS requirements.
+- [`vapor/queues`](https://swiftpackageindex.com/vapor/queues): use a queue driver before sending email, issuing licenses, generating release metadata, or doing webhook fulfillment work that should not block a request.
+- [`vapor/jwt`](https://swiftpackageindex.com/vapor/jwt): likely useful for mobile API tokens, admin/client sessions, signed short-lived download claims, or service-to-service auth.
+- [`swift-server/webauthn-swift`](https://www.swift.org/documentation/server/guides/passkeys.html): candidate for passkeys when client accounts are real. The Swift.org guide includes a Vapor example and calls out relying-party domain/origin constraints.
+- [Swift Crypto](https://www.swift.org/blog/crypto/): preferred signing/verification foundation for offline-validatable license keys before considering smaller third-party Ed25519 packages.
+- [AWS SDK for Swift S3](https://docs.aws.amazon.com/sdk-for-swift/latest/developer-guide/using-services-s3.html) plus [Cloudflare R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/): likely download-delivery path for paid `.dmg` files. Generate short-lived download URLs after entitlement checks instead of proxying large files through Vapor.
+- [`vapor-community/wallet`](https://swiftpackageindex.com/vapor-community/wallet/0.7.1/documentation/vaporwallet): Apple Wallet/pass package, not Apple Pay. Keep in mind only if future products need wallet passes, coupons, tickets, or order passes.
+
+Open questions:
+
+- Does `stripe-kit` expose the current Checkout, Customer Portal, webhook signature, and Apple Pay-relevant fields we need, or should the app use lightweight direct HTTP calls for the first Stripe slice?
+- Can Cloudflare R2 presigned URLs satisfy the desired branded download UX, given R2 presigned URLs use the S3 API hostname rather than custom domains?
+- Should license keys be signed JSON payloads, compact binary payloads, or JWT-like tokens? Decide after defining the first paid downloadable product.
+- Does any Codex marketplace surface expose a stable install deeplink or CLI install command? Keep this separate from Stripe/download work until verified.
+
 ## Phase 2: Durable Intake
 
 - Add a Fluent model and migration for contact/project intake.
