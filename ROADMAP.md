@@ -166,6 +166,8 @@ Goal: add an `Apps` page that can grow from a simple software catalog into a dow
   - `agent-service`
   - `custom-project`
 - Use Stripe Checkout for first purchase flows.
+- Use dynamic payment methods through Stripe's Dashboard-driven payment method settings instead of hard-coding `payment_method_types` unless a specific checkout flow requires an exclusion.
+- Use Apple Pay through Stripe Checkout first. Do not build direct Apple Pay JS or merchant-validation plumbing unless Checkout cannot support a real requirement.
 - Use Stripe webhooks as the source of truth for fulfillment, not browser redirects.
 - Store checkout sessions, payment events, customer identifiers, product identifiers, fulfillment state, and idempotency keys in PostgreSQL.
 - Keep purchase completion separate from delivery:
@@ -174,6 +176,25 @@ Goal: add an `Apps` page that can grow from a simple software catalog into a dow
   - license or download access issued
   - customer notified
   - support path available
+
+First implementation slice:
+
+- Add product/package records with stable internal slugs and Stripe price lookup keys.
+- Add a server endpoint that creates a Checkout Session from a selected offer and redirects to Stripe-hosted Checkout.
+- Store a local checkout session record before redirecting.
+- Include local order or intake identifiers in Stripe metadata and `client_reference_id` for reconciliation.
+- Add a webhook endpoint that verifies the Stripe signature before decoding or persisting the event.
+- Handle `checkout.session.completed` first, then expand to `checkout.session.expired`, `payment_intent.succeeded`, `payment_intent.payment_failed`, refund/dispute events, and subscription events only when those products exist.
+- Make every Stripe-driven write idempotent using Stripe event IDs, local idempotency keys, and fulfillment state transitions.
+- Record detailed operator-facing logs for rejected signatures, unknown product mappings, duplicate events, missing metadata, and failed fulfillment steps.
+
+Required production secrets and settings:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_*` or database-backed Stripe price lookup keys
+- public success and cancel URLs for Checkout redirects
+- registered payment method domains in Stripe for every production and test domain that should show Apple Pay
 
 ### License Keys And Key Server
 
@@ -201,13 +222,16 @@ Goal: add an `Apps` page that can grow from a simple software catalog into a dow
 
 ### Package And Integration Research
 
-Current package candidates to evaluate before implementing the commerce/download/licensing stack:
+Current package choices for the commerce/download/licensing stack:
 
-- [`vapor-community/stripe-kit`](https://swiftpackageindex.com/vapor-community/stripe-kit): strongest Swift server candidate for Stripe API work. Use this for Checkout Session creation, Customer Portal sessions, webhook event parsing, and Stripe object models if it covers the needed current API surface.
-- [`vapor-community/stripe`](https://swiftpackageregistry.com/vapor-community/stripe): older Vapor helper around StripeKit. Treat as a secondary candidate only if it still adds useful Vapor-specific request/application integration after reviewing the current API.
-- [Stripe Checkout](https://docs.stripe.com/payments/checkout) and [Stripe Express Checkout Element](https://docs.stripe.com/elements/express-checkout-element): preferred Apple Pay path for first commerce flows. Apple Pay support should come through Stripe-hosted Checkout or Express Checkout before attempting a direct Apple Pay JS integration.
-- [Stripe Apple Pay docs](https://docs.stripe.com/apple-pay?platform=web): verify domain registration, dashboard payment-method activation, browser/device support, and currency/account constraints before promising Apple Pay visibility on every client.
-- [Apple Pay on the Web server setup](https://developer.apple.com/documentation/applepayontheweb/setting-up-your-server): direct Apple Pay JS support is a later option if Stripe-hosted flows are not enough; it adds merchant ID, certificate, domain verification, merchant validation, and HTTPS requirements.
+- [`vapor-community/stripe-kit`](https://swiftpackageindex.com/vapor-community/stripe-kit): preferred Swift server package for Stripe API work. Use it for Checkout Session creation, Customer Portal sessions, webhook event parsing, Stripe object models, idempotency headers, and webhook signature verification when its current API covers the needed fields.
+- Lightweight direct Stripe HTTP calls through Vapor's HTTP client: approved fallback for a narrow endpoint or parameter when StripeKit lags Stripe's current API. Keep fallback code isolated behind the same local commerce service so the rest of the app does not care whether a call used StripeKit or a direct request.
+- [`vapor-community/stripe`](https://swiftpackageregistry.com/vapor-community/stripe): do not use for new work unless a fresh review finds a current, concrete benefit. Its README presents an older Vapor helper around StripeKit and still demonstrates direct Charges-style usage, which is not the desired integration model.
+- [Stripe Checkout](https://docs.stripe.com/payments/checkout): first payment UI for services, apps, plugins, agent packages, and license purchases.
+- [Stripe dynamic payment methods](https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods): default payment-method strategy so the Dashboard can manage cards, Link, wallets, and regional methods without code changes.
+- [Stripe Apple Pay docs](https://docs.stripe.com/apple-pay?platform=web): preferred Apple Pay path is Stripe Checkout. No extra Apple Pay code is required for Checkout, but every domain and subdomain that displays Apple Pay must be registered in Stripe's payment method domains.
+- [Stripe payment method domain registration](https://docs.stripe.com/payments/payment-methods/pmd-registration): required setup for Apple Pay on production and test domains.
+- [Apple Pay on the Web server setup](https://developer.apple.com/documentation/applepayontheweb/setting-up-your-server): direct Apple Pay JS support is a later option only if Stripe Checkout or Elements cannot support a real requirement; it adds merchant ID, certificate, domain verification, merchant validation, and HTTPS requirements.
 - [`vapor/queues`](https://swiftpackageindex.com/vapor/queues): use a queue driver before sending email, issuing licenses, generating release metadata, or doing webhook fulfillment work that should not block a request.
 - [`vapor/jwt`](https://swiftpackageindex.com/vapor/jwt): likely useful for mobile API tokens, admin/client sessions, signed short-lived download claims, or service-to-service auth.
 - [`swift-server/webauthn-swift`](https://www.swift.org/documentation/server/guides/passkeys.html): candidate for passkeys when client accounts are real. The Swift.org guide includes a Vapor example and calls out relying-party domain/origin constraints.
@@ -217,10 +241,12 @@ Current package candidates to evaluate before implementing the commerce/download
 
 Open questions:
 
-- Does `stripe-kit` expose the current Checkout, Customer Portal, webhook signature, and Apple Pay-relevant fields we need, or should the app use lightweight direct HTTP calls for the first Stripe slice?
+- Does StripeKit expose every current Checkout Session field needed for this app's first offer shape, including metadata, `client_reference_id`, dynamic payment methods, automatic tax, invoice creation, custom fields, and branding settings?
 - Can Cloudflare R2 presigned URLs satisfy the desired branded download UX, given R2 presigned URLs use the S3 API hostname rather than custom domains?
 - Should license keys be signed JSON payloads, compact binary payloads, or JWT-like tokens? Decide after defining the first paid downloadable product.
 - Does any Codex marketplace surface expose a stable install deeplink or CLI install command? Keep this separate from Stripe/download work until verified.
+- Does the first purchasable product need sales tax/VAT handling through Stripe Tax before launch, or can the first payment flow stay invite-only/test-mode until the tax posture is clear?
+- Which payment events should trigger human review instead of automatic fulfillment for custom service work?
 
 ## Phase 2: Durable Intake
 
