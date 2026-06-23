@@ -9,9 +9,32 @@ Chosen foundation:
 - Vapor for the Swift web app and future JSON API.
 - Leaf for server-rendered public pages.
 - Fluent with PostgreSQL for persistence.
-- Docker or Docker Compose first for Mac mini hosting.
-- Cloudflare Tunnel for public ingress to the Mac mini.
+- Docker first for deploy portability across low-cost hosts.
+- Cloudflare DNS, caching, R2 downloads, and possibly Cloudflare Containers when the container workflow is proven.
 - Stripe Checkout and webhooks for paid productized services once the offer is ready.
+
+## Vapor 5 Strategy
+
+Vapor 5 has an alpha release, but the current production site should not depend on it until the ecosystem pieces this app needs are confirmed.
+
+Current position:
+
+- Keep the production-intended branch on stable Vapor 4 until Vapor 5 has the required packages and deployment path.
+- Create a separate experiment branch for Vapor 5 alpha once the public pages and intake flow are stable enough to compare.
+- Track whether Leaf, Fluent, Fluent Postgres, Stripe integration, queues, JWT, and any auth/passkey packages have Vapor 5-compatible releases.
+- Use the Vapor 5 experiment to evaluate:
+  - type-safe routing
+  - controller macros
+  - structured-concurrency cleanup
+  - Docker image size and startup behavior
+  - memory use on the smallest viable host
+- Do not migrate the production roadmap to Vapor 5 until the experiment can build, run, render Leaf pages or an equivalent template strategy, connect to Postgres, and pass the same smoke tests as the Vapor 4 app.
+
+References:
+
+- [Vapor 5 Alpha 1 release](https://github.com/vapor/vapor/releases/tag/5.0.0-alpha.1)
+- [Vapor Docker deployment docs](https://docs.vapor.codes/deploy/docker/)
+- [Vapor Fly.io deployment docs](https://docs.vapor.codes/deploy/fly/)
 
 ## Phase 1: Public Presence
 
@@ -180,7 +203,25 @@ Open questions:
 
 ## Hosting Notes
 
-- Start production hosting with Docker or Docker Compose on the Mac mini.
-- Keep Apple container tooling as an experiment until restart, logging, volumes, service supervision, and deployment behavior are proven.
-- Put Cloudflare Tunnel in front of the app, with Cloudflare DNS and TLS.
+- The Mac mini is no longer the production origin. Remove Cloudflare Tunnel as the primary production plan.
+- Keep the app Dockerized so the same Vapor build can move between Cloudflare Containers, Fly.io, Railway, Render, Koyeb, or a small VPS.
+- Cheapest likely production shape:
+  - Cloudflare DNS, TLS, caching, and R2 for downloadable assets.
+  - A tiny container host for the Vapor app.
+  - Managed Postgres from the cheapest reliable provider that supports backups and connection limits compatible with Fluent.
+- Cloudflare Workers alone is not the right target for a normal Vapor binary. Use Cloudflare Containers only if the app can fit the `lite` instance type and the Worker-to-container deployment model stays simple.
+- Cloudflare Containers are attractive because they can scale to zero and bill only while active, but they require the Workers Paid plan and also bill Workers/Durable Objects usage around the container.
+- Fly.io is the most straightforward Docker/Vapor deployment candidate because Vapor has deployment guidance for it and it can run the app as a normal container.
+- Railway, Render, and Koyeb remain useful fallback candidates when deployment simplicity matters more than absolute minimum cost.
+- Avoid committing to Cloudflare D1 for the Vapor app while the data layer is Fluent/PostgreSQL; D1 would be a separate architecture decision, not a host swap.
 - Add monitoring, backups, and webhook retry visibility before taking paid work through the site.
+
+Hosting references to keep current:
+
+- [Cloudflare Containers pricing](https://developers.cloudflare.com/containers/pricing/)
+- [Cloudflare Containers limits and instance types](https://developers.cloudflare.com/containers/platform-details/limits/)
+- [Cloudflare Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)
+- [Fly.io resource pricing](https://fly.io/docs/about/pricing/)
+- [Render pricing](https://render.com/pricing)
+- [Railway pricing](https://railway.com/pricing)
+- [Koyeb pricing](https://www.koyeb.com/pricing)
