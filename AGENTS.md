@@ -33,6 +33,9 @@
 
 ## Local Runtime
 
+- Prefer a small application-owned settings type backed by environment variables for runtime configuration.
+- Use `apple/swift-configuration` as the preferred configuration facade if it builds cleanly with Vapor, Leaf, Fluent, and the current Swift toolchain.
+- Keep configuration code framework-neutral when practical so future Vapor and Hummingbird apps can share the same shape.
 - The app reads PostgreSQL configuration from:
   - `DATABASE_HOST`
   - `DATABASE_PORT`

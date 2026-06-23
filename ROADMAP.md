@@ -10,8 +10,62 @@ Chosen foundation:
 - Leaf for server-rendered public pages.
 - Fluent with PostgreSQL for persistence.
 - Docker first for deploy portability across low-cost hosts.
-- Cloudflare DNS, caching, R2 downloads, and possibly Cloudflare Containers when the container workflow is proven.
+- Fly.io first for running Swift containers.
+- Cloudflare DNS, TLS, caching, R2 downloads, and possibly Cloudflare Containers when the container workflow is proven.
 - Stripe Checkout and webhooks for paid productized services once the offer is ready.
+
+## Reusable Swift Web App Standard
+
+Use this site to establish a small repeatable deployment and runtime shape for Gale's future Vapor and Hummingbird apps.
+
+Default production shape:
+
+- Build every app as a Docker container so the same artifact can run on Fly.io, Cloudflare Containers, Railway, Render, Koyeb, AWS, or a small VPS.
+- Use Fly.io as the first deploy target for normal Vapor and Hummingbird services because it runs standard containers and has official Vapor deployment guidance.
+- Put Cloudflare in front for DNS, TLS, cache rules, redirects, security rules, and static/download asset delivery through R2 where appropriate.
+- Keep PostgreSQL as the default relational database and use Fluent where it fits so Vapor and Hummingbird apps can share model and migration patterns.
+- Expose a lightweight `/api/health` endpoint in every service.
+- Configure services entirely through environment variables and host-managed secrets; do not require machine-local config files for production.
+- Keep the app stateless between requests unless a concrete feature introduces durable storage through PostgreSQL, R2, Redis, or another explicit backend.
+
+Provider ranking for Swift web apps:
+
+1. Fly.io for the default Swift container host.
+2. Cloudflare Containers as an experiment track after a proof of concept validates the Worker-to-container model, cost, cold starts, and operational complexity.
+3. Railway, Render, or Koyeb when a particular project benefits from their simpler managed app/database flow.
+4. AWS only when a client, product, or integration already benefits from AWS services enough to justify the extra operational surface.
+
+Standard Cloudflare pieces:
+
+- DNS and TLS for all public domains.
+- R2 for `.dmg` downloads, release artifacts, and other large static assets.
+- Cache and redirect rules for public pages and marketing assets.
+- Turnstile, WAF rules, or bot protections later if intake forms or license APIs attract abuse.
+- Cloudflare Containers only after it proves cheaper and smoother than Fly.io for at least one real Swift service.
+
+## Configuration Strategy
+
+Use `apple/swift-configuration` as the preferred configuration facade if it integrates cleanly with the app's chosen web framework.
+
+Current position:
+
+- Start by keeping the existing environment variable names for Vapor and database config.
+- Add a small application-owned settings type before configuration grows beyond database and server settings.
+- Evaluate `swift-configuration` for the first config cleanup slice rather than hand-rolling more `Environment.get` calls.
+- Prefer `EnvironmentVariablesProvider` as the production provider.
+- Consider JSON, YAML, or property-list providers only for local development, examples, or future non-secret structured config.
+- Keep secrets in Fly.io secrets, Cloudflare secrets, or the selected host's secret store rather than committed config files.
+- For Hummingbird apps, use Hummingbird's `ConfigurationSupport` trait when it is compatible with the package graph.
+- For Vapor apps, import `Configuration` directly if the package builds cleanly with Vapor, Leaf, Fluent, and the selected Swift toolchain.
+- Keep the config type web-framework-neutral where practical so shared libraries can work in both Vapor and Hummingbird.
+
+Configuration references:
+
+- [`apple/swift-configuration`](https://github.com/apple/swift-configuration)
+- [`swift-configuration` documentation](https://swiftpackageindex.com/apple/swift-configuration/documentation/configuration)
+- [SwiftPM package traits](https://docs.swift.org/swiftpm/documentation/packagemanagerdocs/addingdependencies#Packages-with-Traits)
+- [Hummingbird package manifest](https://github.com/hummingbird-project/hummingbird/blob/main/Package.swift)
+- [HummingbirdFluent](https://github.com/hummingbird-project/hummingbird-fluent)
 
 ## Vapor 5 Strategy
 
