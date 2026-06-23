@@ -33,9 +33,9 @@
 
 ## Local Runtime
 
-- Prefer a small application-owned settings type backed by environment variables for runtime configuration.
-- Use `apple/swift-configuration` as the preferred configuration facade if it builds cleanly with Vapor, Leaf, Fluent, and the current Swift toolchain.
-- Keep configuration code framework-neutral when practical so future Vapor and Hummingbird apps can share the same shape.
+- Use Vapor's `Environment` API as the default runtime configuration path for this app.
+- Prefer `Environment.detect()`, `app.environment`, `Environment.get(...)`, dotenv support, and Fluent configuration in `configure.swift` over adding a separate configuration package.
+- Add `apple/swift-configuration` only if Vapor's native environment API becomes a concrete source of duplication, weak typing, or unclear error handling.
 - The app reads PostgreSQL configuration from:
   - `DATABASE_HOST`
   - `DATABASE_PORT`

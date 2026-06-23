@@ -45,22 +45,23 @@ Standard Cloudflare pieces:
 
 ## Configuration Strategy
 
-Use `apple/swift-configuration` as the preferred configuration facade if it integrates cleanly with the app's chosen web framework.
+Use the active web framework's native configuration path first. For this Vapor app, that means Vapor's `Environment` API and Fluent configuration in `configure.swift`.
 
 Current position:
 
 - Start by keeping the existing environment variable names for Vapor and database config.
-- Add a small application-owned settings type before configuration grows beyond database and server settings.
-- Evaluate `swift-configuration` for the first config cleanup slice rather than hand-rolling more `Environment.get` calls.
-- Prefer `EnvironmentVariablesProvider` as the production provider.
-- Consider JSON, YAML, or property-list providers only for local development, examples, or future non-secret structured config.
+- Keep Vapor apps on `Environment.detect()`, `app.environment`, `Environment.get(...)`, and dotenv support unless a real limitation appears.
+- Add a small application-owned settings type only after configuration grows beyond database and server settings.
 - Keep secrets in Fly.io secrets, Cloudflare secrets, or the selected host's secret store rather than committed config files.
+- Use `.env` as a local development template only; do not commit sensitive `.env.*` files.
 - For Hummingbird apps, use Hummingbird's `ConfigurationSupport` trait when it is compatible with the package graph.
-- For Vapor apps, import `Configuration` directly if the package builds cleanly with Vapor, Leaf, Fluent, and the selected Swift toolchain.
-- Keep the config type web-framework-neutral where practical so shared libraries can work in both Vapor and Hummingbird.
+- Consider `apple/swift-configuration` for Hummingbird apps, framework-neutral libraries, or shared packages where a framework-owned config API would leak the wrong dependency.
+- Do not add `swift-configuration` to this Vapor app unless Vapor's native environment API becomes a concrete source of duplication, weak typing, or unclear error handling.
 
 Configuration references:
 
+- [Vapor Environment](https://docs.vapor.codes/basics/environment/)
+- [Vapor Fluent configuration](https://docs.vapor.codes/fluent/overview/#configuration)
 - [`apple/swift-configuration`](https://github.com/apple/swift-configuration)
 - [`swift-configuration` documentation](https://swiftpackageindex.com/apple/swift-configuration/documentation/configuration)
 - [SwiftPM package traits](https://docs.swift.org/swiftpm/documentation/packagemanagerdocs/addingdependencies#Packages-with-Traits)
