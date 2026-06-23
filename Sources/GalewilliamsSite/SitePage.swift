@@ -10,6 +10,7 @@ struct SitePage: Encodable {
     let navItems: [NavigationItem] = [
         .init(label: "Home", path: "/"),
         .init(label: "Services", path: "/services"),
+        .init(label: "Apps", path: "/apps"),
         .init(label: "About", path: "/about"),
         .init(label: "Contact", path: "/contact"),
     ]
@@ -25,9 +26,17 @@ struct SitePage: Encodable {
     static let services = SitePage(
         title: "Services | Gale Williams",
         eyebrow: "Services",
-        heading: "Focused builds for agents, apps, plugins, and integrations.",
-        summary: "Pick a concrete outcome: prototype an agent, automate a workflow, integrate an API, build a small app, or turn a fuzzy tool idea into something customers can actually use.",
+        heading: "Clear ways to start, from tiny automations to full app builds.",
+        summary: "Pick the lane that matches your problem. Personal tools stay lightweight and direct. Business builds get the intake, review, and delivery structure they need.",
         path: "/services"
+    )
+
+    static let apps = SitePage(
+        title: "Apps | Gale Williams",
+        eyebrow: "Apps",
+        heading: "Apps, plugins, and agents ready to install or buy.",
+        summary: "This will become the distribution shelf for downloadable apps, Codex and ChatGPT plugins, license-backed tools, and release notes. For now, it marks the product surface we are building toward.",
+        path: "/apps"
     )
 
     static let about = SitePage(
@@ -69,6 +78,42 @@ struct SitePage: Encodable {
 struct NavigationItem: Encodable {
     let label: String
     let path: String
+}
+
+struct ServiceTrackPage: Encodable {
+    let title: String
+    let navItems: [NavigationItem]
+    let page: SitePage
+    let audience: String
+    let offers: [ServiceOffer]
+    let consultationNote: String
+
+    init(page: SitePage, audience: String, offers: [ServiceOffer], consultationNote: String) {
+        self.title = page.title
+        self.navItems = page.navItems
+        self.page = page
+        self.audience = audience
+        self.offers = offers
+        self.consultationNote = consultationNote
+    }
+}
+
+struct ServiceOffer: Encodable {
+    let kicker: String
+    let title: String
+    let summary: String
+    let details: [String]
+    let actionLabel: String
+    let actionPath: String
+}
+
+struct AppListing: Encodable {
+    let status: String
+    let title: String
+    let summary: String
+    let platform: String
+    let actionLabel: String
+    let actionPath: String
 }
 
 struct ContactIntake: Content {

@@ -1,0 +1,39 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro">
+            <p class="eyebrow">#(page.eyebrow)</p>
+            <h1>#(page.heading)</h1>
+            <p class="summary">#(page.summary)</p>
+        </section>
+
+        <section class="section-lede">
+            <span class="card-kicker">#(audience)</span>
+            <p>Each offer starts with the minimum useful detail, then moves to checkout, review, or a consultation when the next step is obvious.</p>
+        </section>
+
+        <section class="offer-grid" aria-label="Service offers">
+            #for(offer in offers):
+                <article class="offer-panel">
+                    <span class="card-kicker">#(offer.kicker)</span>
+                    <h2>#(offer.title)</h2>
+                    <p>#(offer.summary)</p>
+                    <ul class="detail-list">
+                        #for(detail in offer.details):
+                            <li>#(detail)</li>
+                        #endfor
+                    </ul>
+                    <a class="button secondary" href="#(offer.actionPath)">#(offer.actionLabel)</a>
+                </article>
+            #endfor
+        </section>
+
+        <section class="text-band">
+            <h2>Consultation path</h2>
+            <p>#(consultationNote)</p>
+            <div class="action-row compact">
+                <a class="button primary" href="/contact">Schedule free consultation</a>
+                <a class="button secondary" href="/services">Compare service tracks</a>
+            </div>
+        </section>
+    #endexport
+#endextend

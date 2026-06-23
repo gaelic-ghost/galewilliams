@@ -22,10 +22,14 @@
             <label>
                 Project type
                 <select name="projectType" required>
-                    <option value="agent-prototype">Agent prototype</option>
-                    <option value="plugin-integration">Plugin or integration</option>
-                    <option value="app-build">App build</option>
-                    <option value="automation">Automation workflow</option>
+                    <option value="personal-agent">Personal local AI agent</option>
+                    <option value="personal-automation">Personal automation workflow</option>
+                    <option value="plugin-integration">Plugin or tool integration</option>
+                    <option value="business-automation">Business automation workflow</option>
+                    <option value="website-webapp">Website or web app</option>
+                    <option value="mobile-app">Mobile app</option>
+                    <option value="web-mobile-bundle">Web plus mobile bundle</option>
+                    <option value="consultation">Free consultation</option>
                 </select>
             </label>
             <label>

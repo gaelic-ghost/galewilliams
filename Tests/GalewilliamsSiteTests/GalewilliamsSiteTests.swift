@@ -4,8 +4,15 @@ import Testing
 @Test func primaryPagesExposeExpectedPaths() async throws {
     #expect(SitePage.home.path == "/")
     #expect(SitePage.services.path == "/services")
+    #expect(SitePage.apps.path == "/apps")
     #expect(SitePage.about.path == "/about")
     #expect(SitePage.contact().path == "/contact")
+}
+
+@Test func primaryNavigationIncludesApps() async throws {
+    let labels = SitePage.home.navItems.map(\.label)
+
+    #expect(labels == ["Home", "Services", "Apps", "About", "Contact"])
 }
 
 @Test func contactPageCanCarryStatusMessage() async throws {
