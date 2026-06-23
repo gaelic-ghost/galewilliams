@@ -51,5 +51,6 @@
 - Prefer `vapor-community/stripe-kit` for Stripe API work; avoid the older `vapor-community/stripe` wrapper unless a fresh review finds a current concrete benefit.
 - Apple Pay should come through Stripe Checkout and Stripe payment method domain setup before considering direct Apple Pay JS integration.
 - The intake workflow should store submissions first, then add agent-assisted completeness checks behind explicit review gates.
+- A site agent may help visitors qualify ideas, complete missing intake details, and schedule consultations, but it must not finalize custom scope, pricing exceptions, refunds, legal/tax claims, or fulfillment commitments without Gale's review.
 - Client accounts, Sign in with Apple, passkeys, and a client portal should wait until there is a real account-backed workflow to expose.
 - Blog support should be a later content model and route group, not mixed into the initial public-page slice.

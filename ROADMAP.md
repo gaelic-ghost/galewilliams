@@ -107,6 +107,107 @@ Current status:
 - Public routes and `/api/health` scaffolded.
 - Existing icon/banner assets copied into `Public/images`.
 
+## Commercial Offer Architecture
+
+Goal: make Gale's services easy to understand, easy to start, and easy to buy without collecting unnecessary detail before the customer has momentum.
+
+### Storefront Tracks
+
+- Consumer-facing pages:
+  - local AI agent setup
+  - personal automation workflow
+  - ChatGPT, Codex, Claude, Xcode, or Zed plugin setup
+  - small personal AI app or helper tool
+  - consultation-first custom idea
+- SMB-facing pages:
+  - business automation workflow
+  - internal AI agent or assistant
+  - team plugin or developer workflow integration
+  - flat-rate website or web app
+  - flat-rate mobile app
+  - web app plus cross-platform mobile app bundle
+  - consultation-first custom project
+- Apps page:
+  - downloadable apps
+  - installable plugins
+  - license-key-backed products
+  - updates, support, and release notes
+
+### Offer Types
+
+- `buy_now_fixed`: bounded, batteries-included products with a clear deliverable, a clear base price, and a short post-purchase intake.
+- `buy_now_reviewed`: paid packages that reserve work but still require Gale's review before final scope is accepted.
+- `consultation`: free scheduling path for customers who are unsure, have sensitive constraints, or need a deeper conversation.
+- `lead_only`: no payment upfront; capture enough detail for Gale to qualify and reply.
+- `download`: app or plugin purchase that can fulfill automatically after payment.
+- `license_key`: app or plugin purchase that issues a signed license or entitlement after payment.
+
+### Initial Offer Catalog
+
+- Local AI Agent Setup: consumer and SMB variants; review-first unless the supported tools and deliverables are tightly defined.
+- AI App Or Assistant Prototype: small scoped app/agent with required concept, target platform, and integration notes.
+- Automation Workflow: personal or business workflow; collect apps involved, current manual process, desired output, and privacy constraints.
+- Plugin Or Integration: ChatGPT, Codex, Claude, Xcode, Zed, or related developer-tool integration; collect target host, desired commands/actions, inputs, outputs, and install/distribution needs.
+- Flat-Rate Website Or Web App: review-first package with a minimum brief, target pages/workflows, data needs, auth needs, and design references.
+- Flat-Rate Mobile App: review-first package for iOS, Android, or cross-platform delivery; collect target platforms, core screens, login/account needs, offline needs, push notification needs, and store/distribution expectations.
+- Web App Plus Mobile Bundle: review-first package that should require consultation or agent-assisted intake before checkout is considered final.
+- Free Consultation: available from Contact, Services, Apps, consumer pages, SMB pages, and post-checkout next-step pages.
+
+### Minimum Intake Fields
+
+Keep the first step short:
+
+- name
+- email
+- customer type: personal, solo business, SMB, nonprofit, other
+- offer or topic
+- one-paragraph concept
+- target platform or tool, if known
+- timeline
+- budget comfort or selected package
+- privacy or compliance concern, if any
+- preference: buy now, schedule a consultation, or ask the site agent for help
+
+Collect deeper detail only after one of these happens:
+
+- the customer chooses a package
+- the customer schedules a consultation
+- the site agent needs missing information to qualify the lead
+- Gale manually requests more detail
+
+### Consultation Scheduling
+
+- Add a persistent "Schedule free consultation" action to Contact, Services, Apps, consumer offer pages, SMB offer pages, checkout success pages, and agent chat outcomes.
+- First version can link to a manually configured Google Calendar appointment schedule.
+- Prefer Google Meet for the default meeting location because Google Calendar appointment schedules can create Meet appointments directly.
+- Fantastical can stay in Gale's personal calendar workflow; the public site should use a stable booking URL or later integrate with Google Calendar APIs rather than depend on a Mac-only local app.
+- Store the selected consultation path with the lead or order so Gale can connect scheduling context back to the customer's original concept.
+
+### Lead And Checkout Agent
+
+- Add a site agent after the public pages and durable intake model exist.
+- First job: help visitors turn a rough idea into the minimum useful intake fields.
+- Second job: help paid customers complete missing post-checkout details.
+- Third job: offer the free consultation path when the customer is unsure, the idea is too custom, or the risk is high.
+- Keep the agent advisory, not authoritative. It should qualify, summarize, ask follow-up questions, and route to Gale rather than accept final scope changes alone.
+- Store agent conversations as lead/order context with clear consent and retention copy.
+- Make the same agent workflow available through the future JSON API so an iOS app can host the same guided intake experience later.
+
+### Tax And Compliance Notes
+
+- Gale's current Stripe account is an individual US account. Treat tax handling as a launch checklist item, not a code-only decision.
+- Use Stripe Tax for Checkout when live paid sales begin, unless a tax professional or Stripe setting review says a narrower approach is acceptable.
+- Assign product tax codes before selling downloadable software, services, consulting, or mixed bundles because each category can have different tax treatment.
+- Keep test mode or invite-only payment links until Stripe Tax settings, business address, payment method domains, terms, refund policy, and support contact are ready.
+
+Commercial offer references:
+
+- [Google Calendar appointment schedules](https://support.google.com/calendar/answer/10729749)
+- [Stripe Tax](https://docs.stripe.com/tax)
+- [Collect tax with Checkout](https://docs.stripe.com/tax/checkout)
+- [Stripe products and prices](https://docs.stripe.com/products-prices/how-products-and-prices-work)
+- [Checkout Session create API](https://docs.stripe.com/api/checkout/sessions/create)
+
 ## Apps And Software Distribution Plan
 
 Goal: add an `Apps` page that can grow from a simple software catalog into a download, purchase, licensing, and update surface for Gale's apps, plugins, and agent products.
@@ -258,15 +359,15 @@ Open questions:
 
 ## Phase 3: Productized Services And Stripe
 
-- Define concrete service packages such as:
-  - Agent prototype.
-  - Plugin or integration.
-  - Small app build.
-  - Automation workflow.
+- Define concrete service packages from the Commercial Offer Architecture catalog.
+- Separate packages into consumer-facing, SMB-facing, apps/downloads, and consultation-first groups.
+- Decide which offers are safe for `buy_now_fixed`, which require `buy_now_reviewed`, and which should stay `lead_only` until Gale approves scope.
 - Create Stripe products/prices or lookup keys for package offerings.
 - Add server-side Checkout Session creation.
 - Add Stripe webhook verification and idempotent fulfillment records.
 - Keep payment success separate from work approval; paid intake should still be reviewed before work begins.
+- Add "Schedule free consultation" links to all offer pages and checkout next-step pages.
+- Add the lead/checkout agent only after lead persistence and the first manual intake loop are working.
 
 ## Phase 4: Auth And Client Portal
 
