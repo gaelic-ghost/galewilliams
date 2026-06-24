@@ -29,6 +29,13 @@ docker compose up -d db
 swift run GalewilliamsSite migrate --yes
 ```
 
+Owner admin routes are protected with HTTP Basic credentials from:
+
+```sh
+ADMIN_USERNAME
+ADMIN_PASSWORD
+```
+
 ## Local Docker
 
 Validate the Compose file:
