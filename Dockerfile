@@ -22,7 +22,8 @@ COPY . .
 RUN mkdir /staging
 
 # Build the application with optimizations, static Swift runtime linking, and jemalloc.
-RUN swift build -c release \
+RUN --mount=type=cache,target=/build/.build \
+    swift build -c release \
         --product GalewilliamsSite \
         --static-swift-stdlib \
         -Xlinker -ljemalloc && \

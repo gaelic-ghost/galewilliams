@@ -5,7 +5,6 @@
 # deployment definition.
 #
 # Build images: docker compose build
-# Legacy fallback: docker-compose build
 # Start app: docker compose up app
 # Start database: docker compose up db
 # Run migrations: docker compose run migrate

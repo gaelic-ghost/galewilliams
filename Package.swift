@@ -31,6 +31,7 @@ let package = Package(
             dependencies: [
                 "GalewilliamsSite",
                 .product(name: "Vapor", package: "vapor"),
+                .product(name: "VaporTesting", package: "vapor"),
             ]
         ),
     ],

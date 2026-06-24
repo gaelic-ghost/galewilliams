@@ -30,12 +30,6 @@ Validate the Compose file:
 docker compose config
 ```
 
-If this Docker install only has the legacy Compose binary, use:
-
-```sh
-docker-compose config
-```
-
 Build the app image:
 
 ```sh
