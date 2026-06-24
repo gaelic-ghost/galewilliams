@@ -183,6 +183,14 @@ Collect deeper detail only after one of these happens:
 - Fantastical can stay in Gale's personal calendar workflow; the public site should use a stable booking URL or later integrate with Google Calendar APIs rather than depend on a Mac-only local app.
 - Store the selected consultation path with the lead or order so Gale can connect scheduling context back to the customer's original concept.
 
+### Lead Notifications
+
+- Add a near-term notification path when a contact form submission or qualified lead arrives.
+- First practical version can send a concise email to Gale with the lead summary, selected offer/topic, timeline, and a private follow-up link.
+- Keep a personal push-notification app as a soon-after experiment: a tiny iOS/macOS app that registers a device token, lets the Vapor server send APNS notifications for new leads, and becomes the seed for a future lightweight operator console.
+- Do not send sensitive project details in push notification bodies; use push to alert and link Gale back to the authenticated admin surface or email details.
+- Track delivery attempts and failures so missed notifications do not silently drop important leads.
+
 ### Lead And Checkout Agent
 
 - Add a site agent after the public pages and durable intake model exist.
