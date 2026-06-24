@@ -29,17 +29,7 @@ func routes(_ app: Application) throws {
         try await request.view.render("about", SitePage.about).encodeResponse(for: request)
     }
 
-    app.get("contact") { request async throws in
-        try await request.view.render("contact", SitePage.contact()).encodeResponse(for: request)
-    }
-
-    app.post("contact") { request async throws in
-        let intake = try request.content.decode(ContactIntake.self)
-        request.logger.info("Received contact intake for \(intake.email) about \(intake.projectType).")
-
-        let message = "Thanks. Your project details are captured locally for the next intake workflow slice."
-        return try await request.view.render("contact", SitePage.contact(statusMessage: message)).encodeResponse(for: request)
-    }
+    try app.register(collection: ContactController())
 
     app.group("api") { api in
         api.get("health") { _ in
