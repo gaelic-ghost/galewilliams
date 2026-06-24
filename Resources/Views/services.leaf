@@ -1,28 +1,39 @@
 #extend("layout"):
     #export("body"):
         <section class="page-intro">
-            <p class="eyebrow">#(eyebrow)</p>
-            <h1>#(heading)</h1>
-            <p class="summary">#(summary)</p>
+            <p class="eyebrow">#(page.eyebrow)</p>
+            <h1>#(page.heading)</h1>
+            <p class="summary">#(page.summary)</p>
         </section>
 
-        <section class="service-list">
-            <article>
-                <h2>Agent prototype</h2>
-                <p>A scoped assistant or maintainer workflow that reads real inputs, writes durable outputs, and keeps human approval where it belongs.</p>
-            </article>
-            <article>
-                <h2>Plugin or app integration</h2>
-                <p>Connect an API, local tool, repository workflow, or service surface so the experience feels like one coherent product.</p>
-            </article>
-            <article>
-                <h2>Apple-platform app slice</h2>
-                <p>Build a focused SwiftUI, AppKit, or server-backed feature that can grow without turning the first release into a science project.</p>
-            </article>
-            <article>
-                <h2>Automation and operations</h2>
-                <p>Turn repeated manual work into inspectable scripts, dashboards, reports, or agent-assisted review flows.</p>
-            </article>
+        <section class="choice-grid" aria-label="Service tracks">
+            <a class="choice-panel" href="/services/personal">
+                <span class="card-kicker">Personal</span>
+                <h2>AI tools for your own workflow.</h2>
+                <p>Local agents, personal automations, and plugins for the tools you already use.</p>
+                <span class="panel-link">View personal services</span>
+            </a>
+            <a class="choice-panel" href="/services/business">
+                <span class="card-kicker">SMB</span>
+                <h2>Flat-rate software starting points.</h2>
+                <p>Business workflows, web apps, mobile apps, and internal AI assistants with reviewed scope.</p>
+                <span class="panel-link">View business services</span>
+            </a>
+            <a class="choice-panel" href="/apps">
+                <span class="card-kicker">Apps</span>
+                <h2>Installable products and plugins.</h2>
+                <p>The future shelf for apps, plugin installs, downloads, license keys, and release notes.</p>
+                <span class="panel-link">View apps</span>
+            </a>
+        </section>
+
+        <section class="text-band">
+            <h2>Not sure where the idea fits?</h2>
+            <p>Start with the shortest useful description of the outcome. The intake flow can route a fixed product, a reviewed package, or a free consultation once the shape is clearer.</p>
+            <div class="action-row compact">
+                <a class="button primary" href="/contact">Start intake</a>
+                <a class="button secondary" href="/contact">Schedule free consultation</a>
+            </div>
         </section>
     #endexport
 #endextend

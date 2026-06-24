@@ -1,0 +1,12 @@
+.build/
+.swiftpm/
+.git/
+.github/
+.codex/
+.env
+.env.*
+!.env.example
+.DS_Store
+DerivedData/
+xcuserdata/
+.playwright-mcp/
