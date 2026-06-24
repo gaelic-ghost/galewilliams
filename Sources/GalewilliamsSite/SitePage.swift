@@ -116,14 +116,6 @@ struct AppListing: Encodable {
     let actionPath: String
 }
 
-struct ContactIntake: Content {
-    let name: String
-    let email: String
-    let projectType: String
-    let timeline: String
-    let details: String
-}
-
 struct HealthResponse: Content {
     let status: String
     let service: String

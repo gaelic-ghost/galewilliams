@@ -1,7 +1,7 @@
+@testable import GalewilliamsSite
 import Testing
 import Vapor
 import VaporTesting
-@testable import GalewilliamsSite
 
 @Suite("GalewilliamsSite Tests")
 struct GalewilliamsSiteTests {
@@ -39,6 +39,58 @@ struct GalewilliamsSiteTests {
 
         #expect(page.statusMessage == "Captured.")
         #expect(page.title.contains("Contact"))
+    }
+
+    @Test("Contact intake validation trims values")
+    func contactIntakeValidationTrimsValues() throws {
+        let intake = ContactIntake(
+            name: "  Gale  ",
+            email: "  gale@example.com  ",
+            projectType: "  plugin-integration  ",
+            timeline: "  prototype in 2 weeks  ",
+            details: "  Build a Codex plugin intake flow with enough detail.  "
+        )
+
+        let validated = try intake.validated()
+
+        #expect(validated.name == "Gale")
+        #expect(validated.email == "gale@example.com")
+        #expect(validated.projectType == "plugin-integration")
+        #expect(validated.timeline == "prototype in 2 weeks")
+        #expect(validated.details == "Build a Codex plugin intake flow with enough detail.")
+    }
+
+    @Test("Contact intake validation rejects incomplete details")
+    func contactIntakeValidationRejectsIncompleteDetails() throws {
+        let intake = ContactIntake(
+            name: "Gale",
+            email: "gale@example.com",
+            projectType: "plugin-integration",
+            timeline: "prototype in 2 weeks",
+            details: "Too short."
+        )
+
+        #expect(throws: Abort.self) {
+            try intake.validated()
+        }
+    }
+
+    @Test("Lead submissions start in new status")
+    func leadSubmissionsStartInNewStatus() throws {
+        let intake = try ContactIntake(
+            name: "Gale",
+            email: "gale@example.com",
+            projectType: "plugin-integration",
+            timeline: "prototype in 2 weeks",
+            details: "Build a Codex plugin intake flow with enough detail."
+        ).validated()
+
+        let submission = LeadSubmission(intake: intake)
+
+        #expect(submission.name == "Gale")
+        #expect(submission.email == "gale@example.com")
+        #expect(submission.projectType == "plugin-integration")
+        #expect(submission.status == "new")
     }
 
     @Test("Public routes render successfully")

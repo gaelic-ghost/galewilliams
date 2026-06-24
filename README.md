@@ -22,6 +22,13 @@ Start the development server:
 swift run GalewilliamsSite serve --hostname 127.0.0.1 --port 8080
 ```
 
+Run migrations against the local Compose database:
+
+```sh
+docker compose up -d db
+swift run GalewilliamsSite migrate --yes
+```
+
 ## Local Docker
 
 Validate the Compose file:
@@ -40,6 +47,12 @@ Start PostgreSQL and the app:
 
 ```sh
 docker compose up db app
+```
+
+Run database migrations:
+
+```sh
+docker compose run migrate
 ```
 
 The Compose file uses safe development defaults from `.env.example`. Keep real
