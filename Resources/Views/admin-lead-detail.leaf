@@ -1,0 +1,44 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro compact-intro">
+            <p class="eyebrow">Admin</p>
+            <h1>#(lead.name)</h1>
+            <p class="summary">#(lead.projectType) request from #(lead.email)</p>
+        </section>
+
+        <section class="admin-detail">
+            <dl class="detail-grid">
+                <div>
+                    <dt>Status</dt>
+                    <dd>#(lead.status)</dd>
+                </div>
+                <div>
+                    <dt>Timeline</dt>
+                    <dd>#(lead.timeline)</dd>
+                </div>
+                <div>
+                    <dt>Email</dt>
+                    <dd><a href="mailto:#(lead.email)">#(lead.email)</a></dd>
+                </div>
+                <div>
+                    <dt>Project type</dt>
+                    <dd>#(lead.projectType)</dd>
+                </div>
+            </dl>
+
+            <article class="text-band admin-notes">
+                <h2>Project Details</h2>
+                <p>#(lead.details)</p>
+            </article>
+
+            <div class="action-row compact">
+                <a class="button" href="/admin/leads">Back to leads</a>
+                #if(lead.canMarkReviewed):
+                    <form class="inline-action" method="post" action="/admin/leads/#(lead.id)/review">
+                        <button type="submit">Mark reviewed</button>
+                    </form>
+                #endif
+            </div>
+        </section>
+    #endexport
+#endextend

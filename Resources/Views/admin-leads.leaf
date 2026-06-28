@@ -1,0 +1,30 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro compact-intro">
+            <p class="eyebrow">Admin</p>
+            <h1>New lead submissions</h1>
+            <p class="summary">Review incoming project requests, open the full detail, and mark each lead reviewed after triage.</p>
+        </section>
+
+        <section class="admin-list" aria-label="New lead submissions">
+            #if(hasLeads):
+                #for(lead in leads):
+                    <article class="admin-row">
+                        <div>
+                            <p class="card-kicker">#(lead.projectType)</p>
+                            <h2>#(lead.name)</h2>
+                            <p>#(lead.email)</p>
+                            <p>#(lead.timeline)</p>
+                        </div>
+                        <div class="listing-meta">
+                            <span>#(lead.status)</span>
+                            <a class="button" href="/admin/leads/#(lead.id)">Review</a>
+                        </div>
+                    </article>
+                #endfor
+            #else:
+                <p class="status-message">#(emptyMessage)</p>
+            #endif
+        </section>
+    #endexport
+#endextend

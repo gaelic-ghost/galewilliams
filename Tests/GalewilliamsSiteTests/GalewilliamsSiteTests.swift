@@ -1,9 +1,10 @@
 @testable import GalewilliamsSite
+import Foundation
 import Testing
 import Vapor
 import VaporTesting
 
-@Suite("GalewilliamsSite Tests")
+@Suite("GalewilliamsSite Tests", .serialized)
 struct GalewilliamsSiteTests {
     private func withApp(_ test: (Application) async throws -> Void) async throws {
         let app = try await Application.make(.testing)
@@ -93,6 +94,42 @@ struct GalewilliamsSiteTests {
         #expect(submission.status == "new")
     }
 
+    @Test("Admin auth reports missing configuration")
+    func adminAuthReportsMissingConfiguration() async throws {
+        try await withAdminCredentials(username: nil, password: nil) {
+            try await withApp { app in
+                app.grouped(AdminAuthMiddleware()).get("admin-test") { _ in
+                    "ok"
+                }
+
+                try await app.testing().test(.GET, "admin-test") { response async in
+                    #expect(response.status == .serviceUnavailable)
+                    #expect(response.body.string.contains("ADMIN_USERNAME"))
+                }
+            }
+        }
+    }
+
+    @Test("Admin auth accepts configured basic credentials")
+    func adminAuthAcceptsConfiguredBasicCredentials() async throws {
+        try await withAdminCredentials(username: "gale", password: "secret") {
+            try await withApp { app in
+                app.grouped(AdminAuthMiddleware()).get("admin-test") { _ in
+                    "ok"
+                }
+
+                var headers = HTTPHeaders()
+                let token = Data("gale:secret".utf8).base64EncodedString()
+                headers.add(name: .authorization, value: "Basic \(token)")
+
+                try await app.testing().test(.GET, "admin-test", headers: headers) { response async in
+                    #expect(response.status == .ok)
+                    #expect(response.body.string == "ok")
+                }
+            }
+        }
+    }
+
     @Test("Public routes render successfully")
     func publicRoutesRenderSuccessfully() async throws {
         try await withApp { app in
@@ -102,6 +139,32 @@ struct GalewilliamsSiteTests {
                     #expect(response.body.string.contains("Gale Williams"))
                 }
             }
+        }
+    }
+
+    private func withAdminCredentials(
+        username: String?,
+        password: String?,
+        _ test: () async throws -> Void
+    ) async throws {
+        let previousUsername = Environment.get("ADMIN_USERNAME")
+        let previousPassword = Environment.get("ADMIN_PASSWORD")
+
+        setEnvironmentValue(username, for: "ADMIN_USERNAME")
+        setEnvironmentValue(password, for: "ADMIN_PASSWORD")
+        defer {
+            setEnvironmentValue(previousUsername, for: "ADMIN_USERNAME")
+            setEnvironmentValue(previousPassword, for: "ADMIN_PASSWORD")
+        }
+
+        try await test()
+    }
+
+    private func setEnvironmentValue(_ value: String?, for name: String) {
+        if let value {
+            setenv(name, value, 1)
+        } else {
+            unsetenv(name)
         }
     }
 }

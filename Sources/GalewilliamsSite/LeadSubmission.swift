@@ -28,6 +28,9 @@ final class LeadSubmission: Model, Content, @unchecked Sendable {
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
 
+    @OptionalField(key: "reviewed_at")
+    var reviewedAt: Date?
+
     init() {}
 
     init(intake: ContactIntake) {
@@ -56,5 +59,19 @@ struct CreateLeadSubmissions: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(LeadSubmission.schema).delete()
+    }
+}
+
+struct AddLeadSubmissionReviewFields: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.schema(LeadSubmission.schema)
+            .field("reviewed_at", .datetime)
+            .update()
+    }
+
+    func revert(on database: Database) async throws {
+        try await database.schema(LeadSubmission.schema)
+            .deleteField("reviewed_at")
+            .update()
     }
 }

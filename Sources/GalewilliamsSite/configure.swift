@@ -10,6 +10,7 @@ func configure(_ app: Application) throws {
 
     try configureDatabase(app)
     app.migrations.add(CreateLeadSubmissions())
+    app.migrations.add(AddLeadSubmissionReviewFields())
     try routes(app)
 }
 
