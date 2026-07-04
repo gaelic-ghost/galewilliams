@@ -70,3 +70,7 @@ secrets in an uncommitted `.env` file or in host-managed secrets.
 - [Vapor Documentation](https://docs.vapor.codes)
 - [Vapor Docker Deployment](https://docs.vapor.codes/deploy/docker/)
 - [Vapor Environment](https://docs.vapor.codes/basics/environment/)
+
+## Deployment
+
+- [AWS Lightsail deployment plan](AWS_DEPLOYMENT.md)
