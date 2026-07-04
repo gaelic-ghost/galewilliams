@@ -10,8 +10,9 @@ Chosen foundation:
 - Leaf for server-rendered public pages.
 - Fluent with PostgreSQL for persistence.
 - Docker first for deploy portability across low-cost hosts.
-- Fly.io first for running Swift containers.
+- Amazon Lightsail first for a fixed-cost AWS deployment.
 - Cloudflare DNS, TLS, caching, R2 downloads, and possibly Cloudflare Containers when the container workflow is proven.
+- Amazon SES for app-generated notification email.
 - Stripe Checkout and webhooks for paid productized services once the offer is ready.
 
 ## Reusable Swift Web App Standard
@@ -21,7 +22,7 @@ Use this site to establish a small repeatable deployment and runtime shape for G
 Default production shape:
 
 - Build every app as a Docker container so the same artifact can run on Fly.io, Cloudflare Containers, Railway, Render, Koyeb, AWS, or a small VPS.
-- Use Fly.io as the first deploy target for normal Vapor and Hummingbird services because it runs standard containers and has official Vapor deployment guidance.
+- Use Lightsail as the first deploy target for this site because Gale wants a simple AWS-backed host with a predictable fixed monthly cost.
 - Put Cloudflare in front for DNS, TLS, cache rules, redirects, security rules, and static/download asset delivery through R2 where appropriate.
 - Keep PostgreSQL as the default relational database and use Fluent where it fits so Vapor and Hummingbird apps can share model and migration patterns.
 - Expose a lightweight `/api/health` endpoint in every service.
@@ -30,10 +31,19 @@ Default production shape:
 
 Provider ranking for Swift web apps:
 
-1. Fly.io for the default Swift container host.
-2. Cloudflare Containers as an experiment track after a proof of concept validates the Worker-to-container model, cost, cold starts, and operational complexity.
-3. Railway, Render, or Koyeb when a particular project benefits from their simpler managed app/database flow.
-4. AWS only when a client, product, or integration already benefits from AWS services enough to justify the extra operational surface.
+1. Amazon Lightsail for this site's first fixed-cost AWS deployment.
+2. Fly.io for future Swift apps where managed container deployment is more important than AWS practice or fixed-cost VPS control.
+3. Cloudflare Containers as an experiment track after a proof of concept validates the Worker-to-container model, cost, cold starts, and operational complexity.
+4. Railway, Render, or Koyeb when a particular project benefits from their simpler managed app/database flow.
+5. App Runner or ECS only when the project needs a more AWS-native managed container story than Lightsail.
+
+Lightsail first production shape:
+
+- Start with one Linux/Unix instance, Docker Compose, Vapor, and PostgreSQL on the same host.
+- Keep Cloudflare DNS/TLS/proxying in front of the Lightsail static IP.
+- Use Amazon SES for outbound notification email while iCloud continues to handle Gale's inbound domain mailbox.
+- Use Lightsail snapshots for the first backup layer.
+- Move PostgreSQL to managed Lightsail database, RDS, or another managed PostgreSQL service before storing paid orders, license state, or client portal data that needs stronger recovery guarantees.
 
 Standard Cloudflare pieces:
 
