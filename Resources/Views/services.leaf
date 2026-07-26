@@ -19,20 +19,13 @@
                 <p>Business workflows, web apps, mobile apps, and internal AI assistants with reviewed scope.</p>
                 <span class="panel-link">View business services</span>
             </a>
-            <a class="choice-panel" href="/apps">
-                <span class="card-kicker">Apps</span>
-                <h2>Installable products and plugins.</h2>
-                <p>The future shelf for apps, plugin installs, downloads, license keys, and release notes.</p>
-                <span class="panel-link">View apps</span>
-            </a>
         </section>
 
         <section class="text-band">
             <h2>Not sure where the idea fits?</h2>
-            <p>Start with the shortest useful description of the outcome. The intake flow can route a fixed product, a reviewed package, or a free consultation once the shape is clearer.</p>
+            <p>Start with the shortest useful description of the outcome. Include what exists now, what needs to change, and any timing or privacy constraints.</p>
             <div class="action-row compact">
                 <a class="button primary" href="/contact">Start intake</a>
-                <a class="button secondary" href="/contact">Schedule free consultation</a>
             </div>
         </section>
     #endexport

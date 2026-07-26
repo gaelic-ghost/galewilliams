@@ -4,32 +4,32 @@ struct SitePage: Encodable {
     static let home = SitePage(
         title: "Gale Williams | Agentic apps, plugins, and integrations",
         eyebrow: "Independent software studio",
-        heading: "Agentic software for people who need the work to move.",
-        summary: "I build practical apps, integrations, plugins, and agent workflows with a bias toward clear systems, humane tools, and shipping the first useful version.",
+        heading: "Software and automation that move work forward.",
+        summary: "I build practical apps, integrations, and agent workflows with clear boundaries and useful first releases.",
         path: "/"
     )
 
     static let services = SitePage(
         title: "Services | Gale Williams",
         eyebrow: "Services",
-        heading: "Clear ways to start, from tiny automations to full app builds.",
-        summary: "Pick the lane that matches your problem. Personal tools stay lightweight and direct. Business builds get the intake, review, and delivery structure they need.",
+        heading: "Practical software for people and small teams.",
+        summary: "Choose the path that fits the work, from a focused automation to a larger app build.",
         path: "/services"
     )
 
     static let apps = SitePage(
         title: "Apps | Gale Williams",
         eyebrow: "Apps",
-        heading: "Apps, plugins, and agents ready to install or buy.",
-        summary: "This will become the distribution shelf for downloadable apps, Codex and ChatGPT plugins, license-backed tools, and release notes. For now, it marks the product surface we are building toward.",
+        heading: "Apps and plugins.",
+        summary: "This is where released software will live. There are no public downloads or installable plugins available right now.",
         path: "/apps"
     )
 
     static let about = SitePage(
         title: "About | Gale Williams",
         eyebrow: "About",
-        heading: "A senior Apple-platform and systems-minded builder.",
-        summary: "I work best where product taste, local tooling, APIs, Swift, and AI systems meet. The goal is durable software that feels clear to operate after the first exciting demo.",
+        heading: "An Apple-platform and systems-minded builder.",
+        summary: "I work where product taste, local tooling, APIs, Swift, and AI systems meet—building software that stays clear after the first demo.",
         path: "/about"
     )
 
@@ -67,8 +67,8 @@ struct SitePage: Encodable {
         SitePage(
             title: "Contact | Gale Williams",
             eyebrow: "Contact",
-            heading: "Bring a real problem and enough detail to start.",
-            summary: "Use the intake form to describe the outcome, platform, constraints, and timeline. Your details are saved for owner review, with a private notification queued after the record is safely stored.",
+            heading: "Tell me what you need to make.",
+            summary: "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up.",
             path: "/contact",
             statusMessage: statusMessage
         )
@@ -86,15 +86,15 @@ struct ServiceTrackPage: Encodable {
     let page: SitePage
     let audience: String
     let offers: [ServiceOffer]
-    let consultationNote: String
+    let nextStepNote: String
 
-    init(page: SitePage, audience: String, offers: [ServiceOffer], consultationNote: String) {
+    init(page: SitePage, audience: String, offers: [ServiceOffer], nextStepNote: String) {
         title = page.title
         navItems = page.navItems
         self.page = page
         self.audience = audience
         self.offers = offers
-        self.consultationNote = consultationNote
+        self.nextStepNote = nextStepNote
     }
 }
 
@@ -103,15 +103,6 @@ struct ServiceOffer: Encodable {
     let title: String
     let summary: String
     let details: [String]
-    let actionLabel: String
-    let actionPath: String
-}
-
-struct AppListing: Encodable {
-    let status: String
-    let title: String
-    let summary: String
-    let platform: String
     let actionLabel: String
     let actionPath: String
 }

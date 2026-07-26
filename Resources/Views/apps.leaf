@@ -6,28 +6,11 @@
             <p class="summary">#(page.summary)</p>
         </section>
 
-        <section class="app-shelf" aria-label="Apps and plugins">
-            #for(listing in listings):
-                <article class="app-listing">
-                    <div>
-                        <span class="card-kicker">#(listing.status)</span>
-                        <h2>#(listing.title)</h2>
-                        <p>#(listing.summary)</p>
-                    </div>
-                    <div class="listing-meta">
-                        <span>#(listing.platform)</span>
-                        <a class="button secondary" href="#(listing.actionPath)">#(listing.actionLabel)</a>
-                    </div>
-                </article>
-            #endfor
-        </section>
-
         <section class="text-band">
-            <h2>Downloads, installs, and license keys come later.</h2>
-            <p>This page starts as a clear product shelf. Stripe checkout, release artifacts, Codex plugin install links, and signed license keys should arrive after the first catalog shape is stable.</p>
+            <h2>No public releases yet.</h2>
+            <p>When an app or plugin is ready, this page will include the real download, install, and support information. Until then, see the services page for custom work.</p>
             <div class="action-row compact">
-                <a class="button primary" href="/contact">Ask about an app</a>
-                <a class="button secondary" href="/services">View services</a>
+                <a class="button primary" href="/services">View services</a>
             </div>
         </section>
     #endexport

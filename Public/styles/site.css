@@ -136,23 +136,23 @@ p {
 h1 {
     max-width: 780px;
     margin-bottom: 20px;
-    font-size: clamp(2.6rem, 8vw, 5.6rem);
-    line-height: 0.92;
+    font-size: clamp(2.4rem, 5vw, 4.25rem);
+    line-height: 1;
     letter-spacing: 0;
     text-shadow: 0 0 24px rgba(199, 47, 255, 0.38);
 }
 
 h2 {
     margin-bottom: 12px;
-    font-size: 1.3rem;
-    line-height: 1.1;
+    font-size: clamp(1.3rem, 2vw, 1.7rem);
+    line-height: 1.18;
 }
 
 .summary {
     max-width: 760px;
     color: var(--muted);
-    font-size: 1.16rem;
-    line-height: 1.65;
+    font-size: 1.05rem;
+    line-height: 1.55;
 }
 
 .action-row {
@@ -185,7 +185,6 @@ button {
 
 .signal-grid,
 .service-list,
-.choice-grid,
 .offer-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -228,10 +227,17 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding-bottom: 64px;
+}
+
 .choice-panel {
     display: grid;
     align-content: start;
-    min-height: 260px;
+    min-height: 220px;
     color: var(--text);
     text-decoration: none;
 }
@@ -278,27 +284,6 @@ button {
     padding-left: 18px;
     color: var(--muted);
     line-height: 1.5;
-}
-
-.app-shelf {
-    display: grid;
-    gap: 14px;
-    padding-bottom: 64px;
-}
-
-.app-listing {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(210px, 0.32fr);
-    gap: 22px;
-    align-items: center;
-}
-
-.listing-meta {
-    display: grid;
-    gap: 12px;
-    justify-items: start;
-    color: var(--cyan);
-    font-weight: 800;
 }
 
 .action-row.compact {
@@ -462,7 +447,6 @@ button {
     .service-list,
     .choice-grid,
     .offer-grid,
-    .app-listing,
     .admin-row,
     .detail-grid,
     .intake-form {

@@ -53,6 +53,15 @@ Standard Cloudflare pieces:
 - Turnstile, WAF rules, or bot protections later if intake forms or license APIs attract abuse.
 - Cloudflare Containers only after it proves cheaper and smoother than Fly.io for at least one real Swift service.
 
+### Near-Term DNS And Edge Adjustments
+
+- Add a `www` DNS record and redirect it permanently to the canonical apex domain before sharing alternate URLs publicly.
+- Verify that the proxied site uses Cloudflare Full (strict) TLS with the Caddy origin certificate; do not enable HSTS until every intended hostname is confirmed over HTTPS.
+- Keep the apex website record proxied and all mail, SES DKIM, ACM-validation, and iCloud records DNS-only.
+- Add cache behavior only for immutable static assets. Keep public HTML, `/contact`, `/admin`, and `/api` dynamic and uncached.
+- Add a narrow abuse control for `POST /contact` before the form receives meaningful traffic: rate limiting first, then Turnstile or a honeypot if needed.
+- Set up an Amazon SES custom MAIL FROM subdomain, publish its provider-supplied MX and SPF records, review DMARC reports, and then move the existing DMARC policy from monitoring toward enforcement. Do not add a guessed global SES SPF include.
+
 ## Configuration Strategy
 
 Use the active web framework's native configuration path first. For this Vapor app, that means Vapor's `Environment` API and Fluent configuration in `configure.swift`.

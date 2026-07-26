@@ -29,7 +29,6 @@
                     <option value="website-webapp">Website or web app</option>
                     <option value="mobile-app">Mobile app</option>
                     <option value="web-mobile-bundle">Web plus mobile bundle</option>
-                    <option value="consultation">Free consultation</option>
                 </select>
             </label>
             <label>

@@ -22,7 +22,7 @@ func routes(_ app: Application) throws {
     }
 
     app.get("apps") { request async throws in
-        try await request.view.render("apps", AppsPage(page: .apps, listings: OfferCatalog.appListings)).encodeResponse(for: request)
+        try await request.view.render("apps", SitePage.apps).encodeResponse(for: request)
     }
 
     app.get("about") { request async throws in
@@ -48,19 +48,5 @@ private struct ServicesLanding: Encodable {
         title = page.title
         navItems = page.navItems
         self.page = page
-    }
-}
-
-private struct AppsPage: Encodable {
-    let title: String
-    let navItems: [NavigationItem]
-    let page: SitePage
-    let listings: [AppListing]
-
-    init(page: SitePage, listings: [AppListing]) {
-        title = page.title
-        navItems = page.navItems
-        self.page = page
-        self.listings = listings
     }
 }
