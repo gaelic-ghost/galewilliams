@@ -1,20 +1,6 @@
 import Vapor
 
 struct SitePage: Encodable {
-    let title: String
-    let eyebrow: String
-    let heading: String
-    let summary: String
-    let path: String
-    let statusMessage: String?
-    let navItems: [NavigationItem] = [
-        .init(label: "Home", path: "/"),
-        .init(label: "Services", path: "/services"),
-        .init(label: "Apps", path: "/apps"),
-        .init(label: "About", path: "/about"),
-        .init(label: "Contact", path: "/contact"),
-    ]
-
     static let home = SitePage(
         title: "Gale Williams | Agentic apps, plugins, and integrations",
         eyebrow: "Independent software studio",
@@ -47,16 +33,19 @@ struct SitePage: Encodable {
         path: "/about"
     )
 
-    static func contact(statusMessage: String? = nil) -> SitePage {
-        SitePage(
-            title: "Contact | Gale Williams",
-            eyebrow: "Contact",
-            heading: "Bring a real problem and enough detail to start.",
-            summary: "Use the intake form to describe the outcome, platform, constraints, and timeline. The next slice will turn this into a reviewed lead workflow backed by Postgres.",
-            path: "/contact",
-            statusMessage: statusMessage
-        )
-    }
+    let title: String
+    let eyebrow: String
+    let heading: String
+    let summary: String
+    let path: String
+    let statusMessage: String?
+    let navItems: [NavigationItem] = [
+        .init(label: "Home", path: "/"),
+        .init(label: "Services", path: "/services"),
+        .init(label: "Apps", path: "/apps"),
+        .init(label: "About", path: "/about"),
+        .init(label: "Contact", path: "/contact"),
+    ]
 
     init(
         title: String,
@@ -72,6 +61,17 @@ struct SitePage: Encodable {
         self.summary = summary
         self.path = path
         self.statusMessage = statusMessage
+    }
+
+    static func contact(statusMessage: String? = nil) -> SitePage {
+        SitePage(
+            title: "Contact | Gale Williams",
+            eyebrow: "Contact",
+            heading: "Bring a real problem and enough detail to start.",
+            summary: "Use the intake form to describe the outcome, platform, constraints, and timeline. Your details are saved for owner review, with a private notification queued after the record is safely stored.",
+            path: "/contact",
+            statusMessage: statusMessage
+        )
     }
 }
 
@@ -89,8 +89,8 @@ struct ServiceTrackPage: Encodable {
     let consultationNote: String
 
     init(page: SitePage, audience: String, offers: [ServiceOffer], consultationNote: String) {
-        self.title = page.title
-        self.navItems = page.navItems
+        title = page.title
+        navItems = page.navItems
         self.page = page
         self.audience = audience
         self.offers = offers

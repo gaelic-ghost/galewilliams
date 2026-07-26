@@ -114,8 +114,11 @@ Current status:
 
 - SwiftPM package initialized.
 - Vapor, Leaf, Fluent, and Postgres dependencies declared.
-- Public routes and `/api/health` scaffolded.
+- Public routes and `/api/health` render successfully.
 - Existing icon/banner assets copied into `Public/images`.
+- The contact form validates and persists lead submissions in PostgreSQL.
+- Owner-authenticated lead review can list, inspect, and mark new leads reviewed.
+- Redis-backed notifications queue a post-persistence Amazon SES email with retries and durable delivery state.
 
 ## Commercial Offer Architecture
 
@@ -195,11 +198,12 @@ Collect deeper detail only after one of these happens:
 
 ### Lead Notifications
 
-- Add a near-term notification path when a contact form submission or qualified lead arrives.
-- First practical version can send a concise email to Gale with the lead summary, selected offer/topic, timeline, and a private follow-up link.
+- Contact form submissions persist before any notification work is queued, so an unavailable Redis worker or SES delivery never discards a lead.
+- The Redis `notifications` worker sends Gale a concise Amazon SES email with the lead summary, selected offer/topic, timeline, and project details.
+- Each notification record tracks its queue state, retry count, most recent attempt, SES message ID when accepted, and the latest delivery failure reason when unavailable.
+- The worker retries failed SES submissions five times with bounded backoff. A deployment must run the dedicated `notifications` worker alongside the web process.
 - Keep a personal push-notification app as a soon-after experiment: a tiny iOS/macOS app that registers a device token, lets the Vapor server send APNS notifications for new leads, and becomes the seed for a future lightweight operator console.
 - Do not send sensitive project details in push notification bodies; use push to alert and link Gale back to the authenticated admin surface or email details.
-- Track delivery attempts and failures so missed notifications do not silently drop important leads.
 
 ### Lead And Checkout Agent
 
@@ -367,13 +371,13 @@ Open questions:
 - Does the first purchasable product need sales tax/VAT handling through Stripe Tax before launch, or can the first payment flow stay invite-only/test-mode until the tax posture is clear?
 - Which payment events should trigger human review instead of automatic fulfillment for custom service work?
 
-## Phase 2: Durable Intake
+## Phase 2: Durable Intake — Complete
 
-- Add a Fluent model and migration for contact/project intake.
-- Store submitted intake records in PostgreSQL.
-- Add validation that returns clear, human-readable form errors.
-- Add an admin-only route to review incoming leads locally.
-- Add email notification only after persistence is working.
+- Fluent models and migrations persist contact/project intake and its notification-delivery state.
+- PostgreSQL stores submitted intake records after clear, human-readable validation.
+- Owner-only routes review incoming leads and record their reviewed state.
+- A dedicated Redis worker sends post-persistence Amazon SES notifications with retries and durable attempt/failure records; a scheduled reconciler returns records stranded by temporary Redis or configuration outages to the queue.
+- The Compose-backed integration command verifies intake persistence, Redis dispatch, owner review, and reviewed-state persistence together.
 
 ## Phase 3: Productized Services And Stripe
 

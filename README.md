@@ -16,6 +16,16 @@ Run tests:
 swift test
 ```
 
+Run the Compose-backed intake integration test:
+
+```sh
+scripts/test-integration.sh
+```
+
+This starts local PostgreSQL and Redis if needed, then verifies that a contact
+submission persists, queues its notification, and completes the authenticated
+lead-review flow.
+
 Start the development server:
 
 ```sh
@@ -50,10 +60,10 @@ Build the app image:
 docker compose build
 ```
 
-Start PostgreSQL and the app:
+Start PostgreSQL, Redis, and the app:
 
 ```sh
-docker compose up db app
+docker compose up db redis app
 ```
 
 Run database migrations:
@@ -61,6 +71,25 @@ Run database migrations:
 ```sh
 docker compose run migrate
 ```
+
+Run the durable lead-notification worker in a second terminal:
+
+```sh
+docker compose up worker
+```
+
+Run the reconciler in a third terminal. It returns notification records that
+were saved while Redis or SES configuration was unavailable to the queue after
+the dependency recovers:
+
+```sh
+docker compose up scheduler
+```
+
+The worker requires `AWS_REGION`, `SES_FROM_EMAIL`, and
+`LEAD_NOTIFICATION_TO_EMAIL`. It obtains AWS credentials through the standard
+AWS SDK credential chain, so production should use an instance role or
+host-managed credentials rather than committed secrets.
 
 The Compose file uses safe development defaults from `.env.example`. Keep real
 secrets in an uncommitted `.env` file or in host-managed secrets.

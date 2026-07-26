@@ -45,8 +45,8 @@ private struct ServicesLanding: Encodable {
     let page: SitePage
 
     init(page: SitePage) {
-        self.title = page.title
-        self.navItems = page.navItems
+        title = page.title
+        navItems = page.navItems
         self.page = page
     }
 }
@@ -58,8 +58,8 @@ private struct AppsPage: Encodable {
     let listings: [AppListing]
 
     init(page: SitePage, listings: [AppListing]) {
-        self.title = page.title
-        self.navItems = page.navItems
+        title = page.title
+        navItems = page.navItems
         self.page = page
         self.listings = listings
     }

@@ -31,6 +31,33 @@
                 <p>#(lead.details)</p>
             </article>
 
+            #if(notification):
+                <article class="text-band admin-notes">
+                    <h2>Notification Delivery</h2>
+                    <dl class="detail-grid">
+                        <div>
+                            <dt>Status</dt>
+                            <dd>#(notification.status)</dd>
+                        </div>
+                        <div>
+                            <dt>Attempts</dt>
+                            <dd>#(notification.attemptCount)</dd>
+                        </div>
+                        <div>
+                            <dt>Recipient</dt>
+                            <dd>#(notification.recipient)</dd>
+                        </div>
+                        <div>
+                            <dt>SES accepted at</dt>
+                            <dd>#(notification.sentAt)</dd>
+                        </div>
+                    </dl>
+                    #if(notification.failureReason):
+                        <p>Latest delivery problem: #(notification.failureReason)</p>
+                    #endif
+                </article>
+            #endif
+
             <div class="action-row compact">
                 <a class="button" href="/admin/leads">Back to leads</a>
                 #if(lead.canMarkReviewed):

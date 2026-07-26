@@ -12,6 +12,8 @@ lead notification email.
 - Runtime: Docker Compose on the instance.
 - Database: PostgreSQL in the same Compose stack for the first production
   phase.
+- Queue: Redis and one dedicated Vapor notifications worker in the same
+  Compose stack.
 - DNS and TLS edge: Cloudflare.
 - Mailbox provider: iCloud can continue receiving `galewilliams.com` email.
 - Transactional email: Amazon SES sends app notifications to Gale.
@@ -47,7 +49,7 @@ Visitor
   -> Docker Compose PostgreSQL service
 
 Vapor app
-  -> Amazon SES for notification email
+  -> Redis notifications queue -> Vapor notifications worker -> Amazon SES
   -> Cloudflare/R2 later for downloadable release artifacts
 ```
 
@@ -83,6 +85,7 @@ DATABASE_PORT
 DATABASE_USERNAME
 DATABASE_PASSWORD
 DATABASE_NAME
+REDIS_URL
 ADMIN_USERNAME
 ADMIN_PASSWORD
 LOG_LEVEL
@@ -110,7 +113,7 @@ not commit production values.
 7. Build the image on the instance with `docker compose build`.
 8. Start PostgreSQL with `docker compose up -d db`.
 9. Run migrations with `docker compose run migrate`.
-10. Start the app with `docker compose up -d app`.
+10. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
 11. Verify `http://<static-ip>:8080/api/health`.
 12. Point Cloudflare DNS at the static IP.
 13. Enable Cloudflare TLS/proxy rules.
@@ -137,6 +140,8 @@ not commit production values.
 - `/api/health` returns `ok` through Cloudflare.
 - `/contact` saves a lead.
 - `/admin/leads` requires owner credentials.
+- The Redis notifications worker records a successful SES message ID or a
+  descriptive failed-delivery state for every queued lead notification.
 - SES test email reaches Gale's mailbox.
 
 ## References
