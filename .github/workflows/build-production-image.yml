@@ -1,14 +1,43 @@
 name: Build Production Image
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: galewilliams-production-deploy
+  cancel-in-progress: false
+
 jobs:
+  validate:
+    name: validate-tagged-release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Confirm release tag is on main
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          git fetch origin main --tags
+          tag_commit=$(git rev-list -n 1 "$GITHUB_REF")
+          git merge-base --is-ancestor "$tag_commit" origin/main
+      - name: Run repository validation
+        run: scripts/repo-maintenance/validate-all.sh
+      - name: Check Swift formatting
+        run: swiftformat Sources Tests --lint
+      - name: Run Swift tests
+        run: swift test
+
   build:
     name: build-linux-amd64-image
+    needs: validate
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6.0.2
@@ -19,12 +48,53 @@ jobs:
           context: .
           platforms: linux/amd64
           load: false
-          outputs: type=docker,dest=/tmp/galewilliams-site-v0.0.1.tar
-          tags: galewilliams-site:v0.0.1
+          outputs: type=docker,dest=/tmp/galewilliams-site.tar
+          tags: galewilliams-site:${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
       - name: Upload production image archive
         uses: actions/upload-artifact@v4
         with:
-          name: galewilliams-site-v0.0.1-linux-amd64
-          path: /tmp/galewilliams-site-v0.0.1.tar
+          name: galewilliams-site-linux-amd64
+          path: /tmp/galewilliams-site.tar
           if-no-files-found: error
           retention-days: 7
+
+  deploy:
+    name: deploy-tagged-release
+    needs: build
+    environment: production
+    runs-on: ubuntu-24.04
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download production image archive
+        uses: actions/download-artifact@v4
+        with:
+          name: galewilliams-site-linux-amd64
+          path: /tmp/galewilliams-release
+      - name: Configure restricted deployment key
+        env:
+          LIGHTSAIL_DEPLOY_KEY: ${{ secrets.LIGHTSAIL_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$LIGHTSAIL_DEPLOY_KEY"
+          umask 077
+          printf '%s\n' "$LIGHTSAIL_DEPLOY_KEY" > /tmp/lightsail-deploy-key
+      - name: Verify and transfer production image
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          LIGHTSAIL_HOST: ${{ vars.LIGHTSAIL_HOST }}
+        run: |
+          set -euo pipefail
+          test -n "$LIGHTSAIL_HOST"
+          archive=/tmp/galewilliams-release/galewilliams-site.tar
+          checksum=$(sha256sum "$archive" | awk '{print $1}')
+          ssh_options=(-i /tmp/lightsail-deploy-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
+          scp "${ssh_options[@]}" "$archive" "ubuntu@$LIGHTSAIL_HOST:/tmp/galewilliams-site-$RELEASE_TAG.tar.partial"
+          ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "set -euo pipefail; test \"\$(sha256sum /tmp/galewilliams-site-$RELEASE_TAG.tar.partial | awk '{print \$1}')\" = '$checksum'; mv /tmp/galewilliams-site-$RELEASE_TAG.tar.partial /tmp/galewilliams-site-$RELEASE_TAG.tar"
+      - name: Activate tagged production image
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          LIGHTSAIL_HOST: ${{ vars.LIGHTSAIL_HOST }}
+        run: |
+          set -euo pipefail
+          ssh_options=(-i /tmp/lightsail-deploy-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
+          ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "set -euo pipefail; cd /srv/galewilliams; sudo docker load -i /tmp/galewilliams-site-$RELEASE_TAG.tar; if sudo grep -q '^IMAGE_TAG=' .env; then sudo sed -i -E 's/^IMAGE_TAG=.*/IMAGE_TAG=$RELEASE_TAG/' .env; else printf '\\nIMAGE_TAG=%s\\n' '$RELEASE_TAG' | sudo tee -a .env >/dev/null; fi; sudo docker compose --env-file .env -f docker-compose.production.yml up -d --force-recreate app worker scheduler; curl --fail --silent --show-error http://127.0.0.1/api/health; unlink /tmp/galewilliams-site-$RELEASE_TAG.tar"
