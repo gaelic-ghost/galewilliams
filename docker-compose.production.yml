@@ -1,17 +1,5 @@
-# Docker Compose file for local Vapor validation and the first Lightsail runtime.
-#
-# This mirrors the official Vapor CLI template shape, adapted for the
-# GalewilliamsSite executable and PostgreSQL defaults. Caddy owns the public
-# production ports while the app, database, Redis, and queue processes stay in
-# the internal Compose network.
-#
-# Build images: docker compose build
-# Start app: docker compose up app
-# Start database: docker compose up db
-# Run migrations: docker compose run migrate
-# Revert migrations: docker compose run revert
-# Stop all: docker compose down
-# Wipe local database volume: docker compose down -v
+# Production runtime only: the server receives a prebuilt app image and never
+# needs the application source, Swift toolchain, or Docker build context.
 
 volumes:
   db_data:
@@ -20,12 +8,12 @@ volumes:
   caddy_config:
 
 x-shared_environment: &shared_environment
-  LOG_LEVEL: ${LOG_LEVEL:-debug}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
   DATABASE_HOST: db
   DATABASE_PORT: 5432
   DATABASE_NAME: &db_name ${DATABASE_NAME:-galewilliams_site}
   DATABASE_USERNAME: &db_username ${DATABASE_USERNAME:-galewilliams}
-  DATABASE_PASSWORD: &db_password ${DATABASE_PASSWORD:-development-password}
+  DATABASE_PASSWORD: &db_password ${DATABASE_PASSWORD:-}
   REDIS_URL: redis://redis:6379
   SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
   ADMIN_USERNAME: ${ADMIN_USERNAME:-}
@@ -38,16 +26,12 @@ x-shared_environment: &shared_environment
 
 services:
   app:
-    image: galewilliams-site:latest
-    build:
-      context: .
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
     environment:
       <<: *shared_environment
     depends_on:
       - db
       - redis
-    ports:
-      - '8080:8080'
     command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
 
   caddy:
@@ -65,9 +49,7 @@ services:
       - caddy_config:/config
 
   migrate:
-    image: galewilliams-site:latest
-    build:
-      context: .
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
     environment:
       <<: *shared_environment
     depends_on:
@@ -77,9 +59,7 @@ services:
       replicas: 0
 
   worker:
-    image: galewilliams-site:latest
-    build:
-      context: .
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
     environment:
       <<: *shared_environment
     depends_on:
@@ -88,27 +68,13 @@ services:
     command: ["queues", "--queue", "notifications"]
 
   scheduler:
-    image: galewilliams-site:latest
-    build:
-      context: .
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
     environment:
       <<: *shared_environment
     depends_on:
       - db
       - redis
     command: ["queues", "--scheduled"]
-
-  revert:
-    image: galewilliams-site:latest
-    build:
-      context: .
-    environment:
-      <<: *shared_environment
-    depends_on:
-      - db
-    command: ["migrate", "--revert", "--yes"]
-    deploy:
-      replicas: 0
 
   db:
     image: postgres:18-alpine
@@ -118,13 +84,9 @@ services:
       POSTGRES_USER: *db_username
       POSTGRES_PASSWORD: *db_password
       POSTGRES_DB: *db_name
-    ports:
-      - '5432:5432'
 
   redis:
     image: redis:8.0-alpine
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
-    ports:
-      - '6379:6379'

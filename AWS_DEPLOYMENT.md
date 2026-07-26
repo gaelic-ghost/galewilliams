@@ -14,6 +14,7 @@ lead notification email.
   phase.
 - Queue: Redis and one dedicated Vapor notifications worker in the same
   Compose stack.
+- Public web edge: Caddy receives HTTP/HTTPS and proxies internally to Vapor.
 - DNS and TLS edge: Cloudflare.
 - Mailbox provider: iCloud can continue receiving `galewilliams.com` email.
 - Transactional email: Amazon SES sends app notifications to Gale.
@@ -24,6 +25,32 @@ This is a conscious fixed-cost starting point, not the final scale shape. It is
 meant to keep the first public deployment easy to operate while preserving a
 clean migration path to managed PostgreSQL, App Runner, ECS, or another AWS
 service later.
+
+## Provisioned Foundation
+
+Provisioned on 2026-07-25 in `us-east-2`:
+
+- Lightsail instance: `galewilliams-prod` in `us-east-2a`.
+- Host image: Ubuntu 24.04 LTS.
+- Bundle: `small_3_0` — 2 GB RAM, 60 GB disk, and 3 TB monthly transfer at
+  $12/month.
+- Static IP: `galewilliams-prod-ip`, attached to the instance. Retrieve its
+  current address with `aws lightsail get-static-ip --region us-east-2 --static-ip-name galewilliams-prod-ip` instead of copying an address into configuration.
+- SES domain identity: `galewilliams.com`. It remains in the SES sandbox until
+  DNS verification completes and production access is requested if external
+  recipients are needed.
+
+The account has two purpose-specific IAM users, with no credentials stored in
+this repository:
+
+- `galewilliams-lightsail-deployer` can operate this site's Lightsail resources
+  in `us-east-2` and read SES status.
+- `galewilliams-ses-runtime` can only send SES email from the
+  `galewilliams.com` identity.
+
+Create a runtime access key only when it can be installed in the instance's
+root-owned deployment environment. Rotate it when access changes or a secret
+may have been exposed.
 
 ## Why Lightsail First
 
@@ -45,6 +72,7 @@ Use a managed Lightsail database later when one of these becomes true:
 Visitor
   -> Cloudflare DNS/proxy/TLS
   -> Lightsail static IPv4 address
+  -> Docker Compose Caddy service
   -> Docker Compose app service
   -> Docker Compose PostgreSQL service
 
@@ -67,7 +95,9 @@ Vapor app
 ## Required Cloudflare Pieces
 
 - DNS `A` or `AAAA` record pointing the app hostname to the Lightsail static IP.
-- Cloudflare proxy/TLS enabled after the origin is reachable.
+- Cloudflare proxy/TLS enabled after the origin is reachable. Set SSL/TLS mode
+  to Full (strict): Caddy automatically provisions and renews the public
+  origin certificate after DNS points at the instance and ports 80/443 are open.
 - SES DKIM records from AWS.
 - SPF record merged safely with existing mail provider records.
 - DMARC record if the domain does not already have one.
@@ -86,6 +116,7 @@ DATABASE_USERNAME
 DATABASE_PASSWORD
 DATABASE_NAME
 REDIS_URL
+SITE_DOMAIN
 ADMIN_USERNAME
 ADMIN_PASSWORD
 LOG_LEVEL
@@ -95,6 +126,8 @@ The SES notification slice will add:
 
 ```sh
 AWS_REGION
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
 SES_FROM_EMAIL
 LEAD_NOTIFICATION_TO_EMAIL
 ```
@@ -114,9 +147,9 @@ not commit production values.
 8. Start PostgreSQL with `docker compose up -d db`.
 9. Run migrations with `docker compose run migrate`.
 10. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
-11. Verify `http://<static-ip>:8080/api/health`.
-12. Point Cloudflare DNS at the static IP.
-13. Enable Cloudflare TLS/proxy rules.
+11. Start Caddy with `docker compose up -d caddy`.
+12. Verify `http://<static-ip>/api/health`.
+13. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
 14. Verify `https://galewilliams.com/api/health`.
 15. Create a first Lightsail snapshot after the deploy is verified.
 

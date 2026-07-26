@@ -16,6 +16,13 @@ Run tests:
 swift test
 ```
 
+Run the same release gate that checks tracked files for credential patterns and
+unapproved email addresses:
+
+```sh
+scripts/repo-maintenance/validations/40-pii-secrets.sh
+```
+
 Run the Compose-backed intake integration test:
 
 ```sh
@@ -88,8 +95,14 @@ docker compose up scheduler
 
 The worker requires `AWS_REGION`, `SES_FROM_EMAIL`, and
 `LEAD_NOTIFICATION_TO_EMAIL`. It obtains AWS credentials through the standard
-AWS SDK credential chain, so production should use an instance role or
-host-managed credentials rather than committed secrets.
+AWS SDK credential chain, so production should use root-owned host credentials
+rather than committed secrets. Lightsail does not support attaching a normal
+application service role to an instance.
+
+For the production web edge, Caddy owns ports 80 and 443 and proxies to Vapor
+over the internal Compose network. Set `SITE_DOMAIN` before starting the
+`caddy` service; see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the Lightsail,
+Cloudflare, and SES runbook.
 
 The Compose file uses safe development defaults from `.env.example`. Keep real
 secrets in an uncommitted `.env` file or in host-managed secrets.
@@ -99,6 +112,11 @@ secrets in an uncommitted `.env` file or in host-managed secrets.
 - [Vapor Documentation](https://docs.vapor.codes)
 - [Vapor Docker Deployment](https://docs.vapor.codes/deploy/docker/)
 - [Vapor Environment](https://docs.vapor.codes/basics/environment/)
+
+## Notice
+
+This repository is proprietary. See [NOTICE](NOTICE): all rights are reserved
+for its code and content.
 
 ## Deployment
 
