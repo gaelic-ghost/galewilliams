@@ -7,30 +7,26 @@
                 <p class="summary">#(summary)</p>
                 <div class="action-row">
                     <a class="button primary" href="/services">View services</a>
-                    <a class="button secondary" href="/apps">View apps</a>
                     <a class="button secondary" href="/contact">Start a project</a>
                 </div>
-            </div>
-            <div class="hero-art" aria-hidden="true">
-                <img src="/images/speak-swiftly-banner.png" alt="">
             </div>
         </section>
 
         <section class="signal-grid" aria-label="Core work">
             <article>
                 <span class="card-kicker">Agents</span>
-                <h2>Workflow agents that earn trust.</h2>
-                <p>Scoped agents with explicit inputs, review gates, durable reports, and practical handoff paths.</p>
+                <h2>Practical agents for real workflows.</h2>
+                <p>Clear inputs, approval points, and useful results.</p>
             </article>
             <article>
                 <span class="card-kicker">Apps</span>
-                <h2>Small apps with real product shape.</h2>
-                <p>Swift, web, and API-backed tools designed around the work people repeat every day.</p>
+                <h2>Purpose-built apps tailored to you.</h2>
+                <p>Software shaped around the job, platform, and people using it.</p>
             </article>
             <article>
                 <span class="card-kicker">Integrations</span>
-                <h2>Systems that talk cleanly.</h2>
-                <p>Stripe, OpenAI, GitHub, Cloudflare, Apple services, and the connective code between them.</p>
+                <h2>Tools that work together.</h2>
+                <p>Connect the systems you already rely on without unnecessary complexity.</p>
             </article>
         </section>
     #endexport
