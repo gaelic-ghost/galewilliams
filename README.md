@@ -16,6 +16,13 @@ Run tests:
 swift test
 ```
 
+Run the same release gate that checks tracked files for credential patterns and
+unapproved email addresses:
+
+```sh
+scripts/repo-maintenance/validations/40-pii-secrets.sh
+```
+
 Run the Compose-backed intake integration test:
 
 ```sh
@@ -105,6 +112,11 @@ secrets in an uncommitted `.env` file or in host-managed secrets.
 - [Vapor Documentation](https://docs.vapor.codes)
 - [Vapor Docker Deployment](https://docs.vapor.codes/deploy/docker/)
 - [Vapor Environment](https://docs.vapor.codes/basics/environment/)
+
+## Notice
+
+This repository is proprietary. See [NOTICE](NOTICE): all rights are reserved
+for its code and content.
 
 ## Deployment
 

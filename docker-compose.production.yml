@@ -1,0 +1,92 @@
+# Production runtime only: the server receives a prebuilt app image and never
+# needs the application source, Swift toolchain, or Docker build context.
+
+volumes:
+  db_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+x-shared_environment: &shared_environment
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  DATABASE_HOST: db
+  DATABASE_PORT: 5432
+  DATABASE_NAME: &db_name ${DATABASE_NAME:-galewilliams_site}
+  DATABASE_USERNAME: &db_username ${DATABASE_USERNAME:-galewilliams}
+  DATABASE_PASSWORD: &db_password ${DATABASE_PASSWORD:-}
+  REDIS_URL: redis://redis:6379
+  SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
+  ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+  AWS_REGION: ${AWS_REGION:-}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  SES_FROM_EMAIL: ${SES_FROM_EMAIL:-}
+  LEAD_NOTIFICATION_TO_EMAIL: ${LEAD_NOTIFICATION_TO_EMAIL:-}
+
+services:
+  app:
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - db
+      - redis
+    command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  migrate:
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - db
+    command: ["migrate", "--yes"]
+    deploy:
+      replicas: 0
+
+  worker:
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - db
+      - redis
+    command: ["queues", "--queue", "notifications"]
+
+  scheduler:
+    image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
+    environment:
+      <<: *shared_environment
+    depends_on:
+      - db
+      - redis
+    command: ["queues", "--scheduled"]
+
+  db:
+    image: postgres:18-alpine
+    volumes:
+      - db_data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: *db_username
+      POSTGRES_PASSWORD: *db_password
+      POSTGRES_DB: *db_name
+
+  redis:
+    image: redis:8.0-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
