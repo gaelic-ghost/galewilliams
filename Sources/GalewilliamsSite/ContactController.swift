@@ -1,4 +1,5 @@
 import Fluent
+import Queues
 import Vapor
 
 struct ContactController: RouteCollection {
@@ -17,9 +18,53 @@ struct ContactController: RouteCollection {
 
         try await submission.save(on: request.db)
         request.logger.info("Saved contact intake \(submission.id?.uuidString ?? "without-id") for \(intake.email) about \(intake.projectType).")
+        try await request.enqueueLeadNotification(for: submission)
 
         let message = "Thanks. Your project details are saved and ready for review."
         return try await request.view.render("contact", SitePage.contact(statusMessage: message)).encodeResponse(for: request)
+    }
+}
+
+private extension Request {
+    func enqueueLeadNotification(for submission: LeadSubmission) async throws {
+        guard let leadID = submission.id else {
+            throw Abort(.internalServerError, reason: "Contact intake was saved but did not receive a lead identifier, so its notification record could not be created.")
+        }
+
+        let configuration: LeadNotificationConfiguration
+        do {
+            configuration = try LeadNotificationConfiguration.load()
+        } catch {
+            let notification = LeadNotification(
+                leadID: leadID,
+                recipient: nil,
+                status: "configuration_missing",
+                failureReason: error.localizedDescription
+            )
+            try await notification.save(on: db)
+            logger.warning("Contact intake \(leadID.uuidString) was saved, but no notification job was queued because the Amazon SES settings are incomplete. Cause: \(error.localizedDescription)")
+            return
+        }
+
+        let notification = LeadNotification(leadID: leadID, recipient: configuration.recipient, status: "queued")
+        try await notification.save(on: db)
+
+        guard let notificationID = notification.id else {
+            throw Abort(.internalServerError, reason: "Contact intake \(leadID.uuidString) was saved but its notification record did not receive an identifier, so the Redis job could not be queued.")
+        }
+
+        do {
+            try await application.queues.queue(LeadNotificationJob.queue).dispatch(
+                LeadNotificationJob.self,
+                .init(notificationID: notificationID),
+                maxRetryCount: 4
+            )
+        } catch {
+            notification.status = "queue_failed"
+            notification.failureReason = error.localizedDescription
+            try? await notification.save(on: db)
+            logger.error("Contact intake \(leadID.uuidString) was saved, but its notification job was not queued in Redis. The lead can still be reviewed in admin. Cause: \(error.localizedDescription)")
+        }
     }
 }
 

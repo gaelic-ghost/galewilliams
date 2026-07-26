@@ -1,6 +1,7 @@
 import Fluent
 import FluentPostgresDriver
 import Leaf
+import QueuesRedisDriver
 import Vapor
 
 func configure(_ app: Application) throws {
@@ -9,8 +10,10 @@ func configure(_ app: Application) throws {
     app.leaf.cache.isEnabled = app.environment.isRelease
 
     try configureDatabase(app)
+    try configureLeadNotifications(app)
     app.migrations.add(CreateLeadSubmissions())
     app.migrations.add(AddLeadSubmissionReviewFields())
+    app.migrations.add(CreateLeadNotifications())
     try routes(app)
 }
 
@@ -28,4 +31,22 @@ private func configureDatabase(_ app: Application) throws {
         ),
         as: .psql
     )
+}
+
+private func configureLeadNotifications(_ app: Application) throws {
+    let redisURL = Environment.get("REDIS_URL") ?? "redis://localhost:6379"
+    try app.queues.use(.redis(url: redisURL))
+    app.queues.add(LeadNotificationJob())
+    app.queues
+        .schedule(LeadNotificationReconciliationJob())
+        .every(minutes: 5)
+    app.leadNotificationEmailSender = SESLeadNotificationEmailSender()
+
+    if app.environment.isRelease {
+        do {
+            _ = try LeadNotificationConfiguration.load()
+        } catch {
+            app.logger.warning("Lead notification delivery is configured with Redis, but the Amazon SES settings are incomplete. Contact submissions will still persist, while notification records remain undelivered until AWS_REGION, SES_FROM_EMAIL, and LEAD_NOTIFICATION_TO_EMAIL are configured. Cause: \(error.localizedDescription)")
+        }
+    }
 }

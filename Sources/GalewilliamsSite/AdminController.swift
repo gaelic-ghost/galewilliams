@@ -25,7 +25,14 @@ struct AdminController: RouteCollection {
 
     func showLead(request: Request) async throws -> Response {
         let lead = try await request.requireLeadSubmission()
-        let page = AdminLeadDetailPage(lead: AdminLeadDetail(lead: lead))
+        let notification = try await LeadNotification.query(on: request.db)
+            .filter(\LeadNotification.$lead.$id == lead.requireID())
+            .sort(\.$createdAt, .descending)
+            .first()
+        let page = AdminLeadDetailPage(
+            lead: AdminLeadDetail(lead: lead),
+            notification: notification.map(AdminLeadNotification.init(notification:))
+        )
 
         return try await request.view.render("admin-lead-detail", page).encodeResponse(for: request)
     }
@@ -81,6 +88,7 @@ struct AdminLeadDetailPage: Encodable {
     let title = "Lead Detail | Gale Williams"
     let navItems = SitePage.home.navItems
     let lead: AdminLeadDetail
+    let notification: AdminLeadNotification?
 }
 
 struct AdminLeadDetail: Encodable {
@@ -106,6 +114,22 @@ struct AdminLeadDetail: Encodable {
         createdAt = lead.createdAt
         reviewedAt = lead.reviewedAt
         canMarkReviewed = lead.status != "reviewed"
+    }
+}
+
+struct AdminLeadNotification: Encodable {
+    let recipient: String?
+    let status: String
+    let attemptCount: Int
+    let failureReason: String?
+    let sentAt: Date?
+
+    init(notification: LeadNotification) {
+        recipient = notification.recipient
+        status = notification.status
+        attemptCount = notification.attemptCount
+        failureReason = notification.failureReason
+        sentAt = notification.sentAt
     }
 }
 

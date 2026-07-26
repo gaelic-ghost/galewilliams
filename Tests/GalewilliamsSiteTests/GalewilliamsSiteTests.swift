@@ -1,25 +1,15 @@
-@testable import GalewilliamsSite
+import Fluent
 import Foundation
+@testable import GalewilliamsSite
+import Queues
 import Testing
 import Vapor
 import VaporTesting
 
-@Suite("GalewilliamsSite Tests", .serialized)
+@Suite(.serialized)
 struct GalewilliamsSiteTests {
-    private func withApp(_ test: (Application) async throws -> Void) async throws {
-        let app = try await Application.make(.testing)
-        do {
-            try configure(app)
-            try await test(app)
-            try await app.asyncShutdown()
-        } catch {
-            try? await app.asyncShutdown()
-            throw error
-        }
-    }
-
     @Test("Primary pages expose expected paths")
-    func primaryPagesExposeExpectedPaths() async throws {
+    func primaryPagesExposeExpectedPaths() {
         #expect(SitePage.home.path == "/")
         #expect(SitePage.services.path == "/services")
         #expect(SitePage.apps.path == "/apps")
@@ -28,14 +18,14 @@ struct GalewilliamsSiteTests {
     }
 
     @Test("Primary navigation includes Apps")
-    func primaryNavigationIncludesApps() async throws {
+    func primaryNavigationIncludesApps() {
         let labels = SitePage.home.navItems.map(\.label)
 
         #expect(labels == ["Home", "Services", "Apps", "About", "Contact"])
     }
 
     @Test("Contact page can carry a status message")
-    func contactPageCanCarryStatusMessage() async throws {
+    func contactPageCanCarryStatusMessage() {
         let page = SitePage.contact(statusMessage: "Captured.")
 
         #expect(page.statusMessage == "Captured.")
@@ -142,6 +132,132 @@ struct GalewilliamsSiteTests {
         }
     }
 
+    @Test(
+        "Database integration persists intake, queues notification, and reviews the lead",
+        .enabled(if: Environment.get("RUN_DATABASE_INTEGRATION_TESTS") == "true")
+    )
+    func databaseIntegrationPersistsIntakeQueuesNotificationAndReviewsLead() async throws {
+        try await withLeadNotificationEnvironment {
+            try await withAdminCredentials(username: "gale", password: "secret") {
+                try await withApp { app in
+                    try await app.autoMigrate()
+
+                    let intake = ContactIntake(
+                        name: "Integration Lead",
+                        email: "integration-lead-\(UUID().uuidString)@example.com",
+                        projectType: "plugin-integration",
+                        timeline: "prototype in 2 weeks",
+                        details: "Build a durable integration-test lead workflow with notification tracking."
+                    )
+                    var headers = HTTPHeaders()
+                    var body = ByteBufferAllocator().buffer(capacity: 256)
+                    try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+
+                    try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                        #expect(response.status == .ok)
+                        #expect(response.body.string.contains("saved and ready for review"))
+                    }
+
+                    guard let lead = try await LeadSubmission.query(on: app.db)
+                        .filter(\LeadSubmission.$email == intake.email)
+                        .first(), let leadID = lead.id
+                    else {
+                        Issue.record("Database integration contact submission did not persist a lead record for the submitted email address.")
+                        return
+                    }
+
+                    let notifications = try await LeadNotification.query(on: app.db)
+                        .filter(\LeadNotification.$lead.$id == leadID)
+                        .all()
+                    #expect(notifications.count == 1)
+                    #expect(notifications.first?.status == "queued")
+                    #expect(notifications.first?.recipient == "owner@example.com")
+
+                    guard let notificationID = notifications.first?.id else {
+                        Issue.record("Database integration contact submission persisted a notification without an identifier for the worker job.")
+                        return
+                    }
+
+                    let sender = RecordingLeadNotificationEmailSender()
+                    app.leadNotificationEmailSender = sender
+                    let context = QueueContext(
+                        queueName: LeadNotificationJob.queue,
+                        configuration: app.queues.configuration,
+                        application: app,
+                        logger: app.logger,
+                        on: app.eventLoopGroup.any()
+                    )
+                    try await LeadNotificationJob().dequeue(context, .init(notificationID: notificationID))
+                    try await LeadNotificationJob().dequeue(context, .init(notificationID: notificationID))
+
+                    let deliveredNotification = try await LeadNotification.find(notificationID, on: app.db)
+                    #expect(deliveredNotification?.status == "sent")
+                    #expect(deliveredNotification?.attemptCount == 1)
+                    #expect(deliveredNotification?.providerMessageID == "test-message-id")
+                    #expect(await sender.sentLeadIDs() == [leadID])
+
+                    var adminHeaders = HTTPHeaders()
+                    let token = Data("gale:secret".utf8).base64EncodedString()
+                    adminHeaders.add(name: .authorization, value: "Basic \(token)")
+
+                    try await app.testing().test(.GET, "admin/leads", headers: adminHeaders) { response async in
+                        #expect(response.status == .ok)
+                        #expect(response.body.string.contains(intake.email))
+                    }
+                    try await app.testing().test(.GET, "admin/leads/\(leadID.uuidString)", headers: adminHeaders) { response async in
+                        #expect(response.status == .ok)
+                        #expect(response.body.string.contains("Notification Delivery"))
+                        #expect(response.body.string.contains("test-message-id") == false)
+                        #expect(response.body.string.contains("sent"))
+                    }
+                    try await app.testing().test(.POST, "admin/leads/\(leadID.uuidString)/review", headers: adminHeaders) { response async in
+                        #expect(response.status == .seeOther)
+                    }
+
+                    let reviewedLead = try await LeadSubmission.find(leadID, on: app.db)
+                    #expect(reviewedLead?.status == "reviewed")
+                    #expect(reviewedLead?.reviewedAt != nil)
+
+                    let strandedNotification = LeadNotification(
+                        leadID: leadID,
+                        recipient: nil,
+                        status: "queue_failed",
+                        failureReason: "Redis was temporarily unavailable while this notification was first queued."
+                    )
+                    try await strandedNotification.save(on: app.db)
+                    guard let strandedNotificationID = strandedNotification.id else {
+                        Issue.record("Integration test persisted a stranded notification without an identifier for reconciliation.")
+                        return
+                    }
+
+                    try await LeadNotificationReconciliationJob().run(context: context)
+
+                    let requeuedNotification = try await LeadNotification.find(strandedNotificationID, on: app.db)
+                    #expect(requeuedNotification?.status == "queued")
+                    #expect(requeuedNotification?.recipient == "owner@example.com")
+                    #expect(requeuedNotification?.failureReason == nil)
+
+                    try await LeadNotificationJob().dequeue(context, .init(notificationID: strandedNotificationID))
+                    let reconciledNotification = try await LeadNotification.find(strandedNotificationID, on: app.db)
+                    #expect(reconciledNotification?.status == "sent")
+                    #expect(await sender.sentLeadIDs() == [leadID, leadID])
+                }
+            }
+        }
+    }
+
+    private func withApp(_ test: (Application) async throws -> Void) async throws {
+        let app = try await Application.make(.testing)
+        do {
+            try configure(app)
+            try await test(app)
+            try await app.asyncShutdown()
+        } catch {
+            try? await app.asyncShutdown()
+            throw error
+        }
+    }
+
     private func withAdminCredentials(
         username: String?,
         password: String?,
@@ -160,11 +276,50 @@ struct GalewilliamsSiteTests {
         try await test()
     }
 
+    private func withLeadNotificationEnvironment(_ test: () async throws -> Void) async throws {
+        let values = [
+            "AWS_REGION": "us-east-1",
+            "SES_FROM_EMAIL": "sender@example.com",
+            "LEAD_NOTIFICATION_TO_EMAIL": "owner@example.com",
+        ]
+        let previousValues = values.keys.reduce(into: [String: String?]()) { values, name in
+            values[name] = Environment.get(name)
+        }
+
+        for (name, value) in values {
+            setEnvironmentValue(value, for: name)
+        }
+        defer {
+            for (name, value) in previousValues {
+                setEnvironmentValue(value, for: name)
+            }
+        }
+
+        try await test()
+    }
+
     private func setEnvironmentValue(_ value: String?, for name: String) {
         if let value {
             setenv(name, value, 1)
         } else {
             unsetenv(name)
         }
+    }
+}
+
+private actor RecordingLeadNotificationEmailSender: LeadNotificationEmailSending {
+    private var ids: [UUID] = []
+
+    func send(lead: LeadSubmission) async throws -> String? {
+        guard let id = lead.id else {
+            throw Abort(.internalServerError, reason: "Integration-test email sender received a lead without a database identifier.")
+        }
+
+        ids.append(id)
+        return "test-message-id"
+    }
+
+    func sentLeadIDs() -> [UUID] {
+        ids
     }
 }
