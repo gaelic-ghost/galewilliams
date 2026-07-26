@@ -1,8 +1,9 @@
-# Docker Compose file for local Vapor validation.
+# Docker Compose file for local Vapor validation and the first Lightsail runtime.
 #
 # This mirrors the official Vapor CLI template shape, adapted for the
-# GalewilliamsSite executable and PostgreSQL defaults. It is not a production
-# deployment definition.
+# GalewilliamsSite executable and PostgreSQL defaults. Caddy owns the public
+# production ports while the app, database, Redis, and queue processes stay in
+# the internal Compose network.
 #
 # Build images: docker compose build
 # Start app: docker compose up app
@@ -15,6 +16,8 @@
 volumes:
   db_data:
   redis_data:
+  caddy_data:
+  caddy_config:
 
 x-shared_environment: &shared_environment
   LOG_LEVEL: ${LOG_LEVEL:-debug}
@@ -24,6 +27,7 @@ x-shared_environment: &shared_environment
   DATABASE_USERNAME: &db_username galewilliams
   DATABASE_PASSWORD: &db_password development-password
   REDIS_URL: redis://redis:6379
+  SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
   AWS_REGION: ${AWS_REGION:-}
   SES_FROM_EMAIL: ${SES_FROM_EMAIL:-}
   LEAD_NOTIFICATION_TO_EMAIL: ${LEAD_NOTIFICATION_TO_EMAIL:-}
@@ -41,6 +45,20 @@ services:
     ports:
       - '8080:8080'
     command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
   migrate:
     image: galewilliams-site:latest
