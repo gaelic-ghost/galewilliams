@@ -4,8 +4,8 @@ struct SitePage: Encodable {
     static let home = SitePage(
         title: "Gale Williams | Agentic apps, plugins, and integrations",
         eyebrow: "Independent software studio",
-        heading: "Software and automation that move work forward.",
-        summary: "I build practical apps, integrations, and agent workflows with clear boundaries and useful first releases.",
+        heading: "Software that makes work easier.",
+        summary: "Apps, automations, and integrations built around the way you actually work.",
         path: "/"
     )
 
