@@ -12,8 +12,8 @@ struct SitePage: Encodable {
     static let services = SitePage(
         title: "Services | Gale Williams",
         eyebrow: "Services",
-        heading: "Practical software for people and small teams.",
-        summary: "Choose the path that fits the work, from a focused automation to a larger app build.",
+        heading: "Software built around your work.",
+        summary: "From a focused automation to a new app, we start with the work you want to make easier.",
         path: "/services"
     )
 
@@ -28,8 +28,8 @@ struct SitePage: Encodable {
     static let about = SitePage(
         title: "About | Gale Williams",
         eyebrow: "About",
-        heading: "An Apple-platform and systems-minded builder.",
-        summary: "I work where product taste, local tooling, APIs, Swift, and AI systems meet—building software that stays clear after the first demo.",
+        heading: "Hi, I’m Gale.",
+        summary: "I build apps, automations, and integrations that make complicated work easier to handle.",
         path: "/about"
     )
 

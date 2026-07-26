@@ -110,6 +110,11 @@ button:hover {
     position: relative;
 }
 
+.page-intro,
+.text-band {
+    width: min(780px, 100%);
+}
+
 .eyebrow,
 .card-kicker {
     margin: 0 0 14px;
@@ -267,19 +272,6 @@ button {
     margin-top: 20px;
 }
 
-.about-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.62fr);
-    gap: 28px;
-    align-items: center;
-}
-
-.about-banner {
-    width: 100%;
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow);
-}
-
 .text-band {
     margin-bottom: 64px;
 }
@@ -400,18 +392,13 @@ button {
 
 @media (max-width: 820px) {
     .site-header,
-    .site-footer,
-    .about-intro {
+    .site-footer {
         display: block;
     }
 
     .site-nav {
         justify-content: flex-start;
         margin-top: 18px;
-    }
-
-    .about-banner {
-        margin-top: 32px;
     }
 
     .signal-grid,

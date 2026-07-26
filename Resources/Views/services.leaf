@@ -8,24 +8,24 @@
 
         <section class="choice-grid" aria-label="Service tracks">
             <a class="choice-panel" href="/services/personal">
-                <span class="card-kicker">Personal</span>
-                <h2>AI tools for your own workflow.</h2>
-                <p>Local agents, personal automations, and plugins for the tools you already use.</p>
-                <span class="panel-link">View personal services</span>
+                <span class="card-kicker">For you</span>
+                <h2>Tools for your own work.</h2>
+                <p>Automations, apps, and integrations for the systems you use every day.</p>
+                <span class="panel-link">Explore personal services</span>
             </a>
             <a class="choice-panel" href="/services/business">
-                <span class="card-kicker">SMB</span>
-                <h2>Flat-rate software starting points.</h2>
-                <p>Business workflows, web apps, mobile apps, and internal AI assistants with reviewed scope.</p>
-                <span class="panel-link">View business services</span>
+                <span class="card-kicker">For your team</span>
+                <h2>Software for a growing business.</h2>
+                <p>Workflows, internal tools, websites, and apps built around how your team works.</p>
+                <span class="panel-link">Explore business services</span>
             </a>
         </section>
 
         <section class="text-band">
             <h2>Not sure where the idea fits?</h2>
-            <p>Start with the shortest useful description of the outcome. Include what exists now, what needs to change, and any timing or privacy constraints.</p>
+            <p>Tell me what is getting in the way. We’ll work out the useful next step.</p>
             <div class="action-row compact">
-                <a class="button primary" href="/contact">Start intake</a>
+                <a class="button primary" href="/contact">Start a project</a>
             </div>
         </section>
     #endexport
