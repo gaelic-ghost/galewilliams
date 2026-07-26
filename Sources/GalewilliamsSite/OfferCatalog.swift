@@ -28,7 +28,7 @@ enum OfferCatalog {
                 details: [
                     "Good for recurring admin, content prep, reports, local files, and cross-app glue.",
                     "Requires the current manual process, desired output, and privacy constraints.",
-                    "Can become a buy-now package once the workflow type is repeatable.",
+                    "Ends with a clear handoff for the workflow we define together.",
                 ],
                 actionLabel: "Describe the workflow",
                 actionPath: "/contact"
@@ -40,13 +40,13 @@ enum OfferCatalog {
                 details: [
                     "Good for command surfaces, local project helpers, API bridges, and review flows.",
                     "Requires host app, desired actions, inputs, outputs, and install expectations.",
-                    "Distribution can start manual, then graduate to the Apps page.",
+                    "Includes a clear install and handoff path for the supported host app.",
                 ],
                 actionLabel: "Plan a plugin",
                 actionPath: "/contact"
             ),
         ],
-        consultationNote: "If the idea is fuzzy, start with a free consultation instead of forcing the form to know everything."
+        nextStepNote: "If the idea is still taking shape, send the useful parts first. We can clarify the rest together."
     )
 
     static let businessServices = ServiceTrackPage(
@@ -66,7 +66,7 @@ enum OfferCatalog {
                 details: [
                     "Good for intake, reporting, handoffs, data cleanup, and operator review queues.",
                     "Requires apps involved, current process, success criteria, and sensitive-data notes.",
-                    "Payment should reserve the work; final scope still gets reviewed.",
+                    "Ends with a reviewed scope and a practical handoff plan.",
                 ],
                 actionLabel: "Start business intake",
                 actionPath: "/contact"
@@ -78,7 +78,7 @@ enum OfferCatalog {
                 details: [
                     "Good for professional sites, portals, dashboards, forms, and small SaaS-style tools.",
                     "Requires pages or workflows, data needs, auth needs, and design references.",
-                    "Stripe checkout comes after the offer boundaries are explicit.",
+                    "Starts with the pages or workflows that matter most.",
                 ],
                 actionLabel: "Scope a web build",
                 actionPath: "/contact"
@@ -90,39 +90,12 @@ enum OfferCatalog {
                 details: [
                     "Good for MVPs, internal tools, customer apps, and guided intake experiences.",
                     "Requires target platforms, core screens, login needs, offline needs, and distribution plan.",
-                    "Bundle work should include a consultation or agent-assisted intake before checkout is final.",
+                    "Starts by agreeing on the core experience across each platform.",
                 ],
                 actionLabel: "Scope an app build",
                 actionPath: "/contact"
             ),
         ],
-        consultationNote: "For business-critical or sensitive work, the best first step is a short consultation and a reviewed scope."
+        nextStepNote: "For business-critical or sensitive work, start with the outcome, constraints, and people involved."
     )
-
-    static let appListings = [
-        AppListing(
-            status: "Planned",
-            title: "Codex And ChatGPT Plugins",
-            summary: "Installable agent and workflow plugins with clear setup paths, support notes, and eventually purchase or license actions.",
-            platform: "Codex, ChatGPT, Claude, Xcode, Zed",
-            actionLabel: "Ask about plugins",
-            actionPath: "/contact"
-        ),
-        AppListing(
-            status: "Planned",
-            title: "Mac And Local AI Utilities",
-            summary: "Downloadable tools for local agents, automation, review flows, and personal productivity.",
-            platform: "macOS first",
-            actionLabel: "Follow app releases",
-            actionPath: "/contact"
-        ),
-        AppListing(
-            status: "Future",
-            title: "Guided Intake App",
-            summary: "A mobile version of the site agent that helps customers shape an idea, complete missing details, and schedule a call.",
-            platform: "iOS and web API",
-            actionLabel: "Discuss the app",
-            actionPath: "/contact"
-        ),
-    ]
 }

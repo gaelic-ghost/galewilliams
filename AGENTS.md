@@ -20,6 +20,12 @@
 - Prefer real generated bitmap or existing brand assets over decorative SVG-only hero art.
 - Do not use machine-local asset paths in templates, CSS, docs intended for the repo, or runtime configuration.
 
+## Chrome Work
+
+- When Gale asks to use Chrome or inspect something in Chrome, use only Gale's existing Chrome instance and claim the relevant existing tab through the Chrome extension browser binding.
+- NEVER use the DevTools Chrome binding, an isolated browser context, a substitute browser session, or a newly opened tab for that request.
+- If the existing tab is not visible to the binding, stop Chrome work and report that binding problem. Do not work around it by opening or navigating another tab.
+
 ## Swift Package Workflow
 
 - Use Swift Package Manager as the source of truth for package structure and dependencies.

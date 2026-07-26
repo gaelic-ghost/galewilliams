@@ -8,7 +8,7 @@
 
         <section class="section-lede">
             <span class="card-kicker">#(audience)</span>
-            <p>Each offer starts with the minimum useful detail, then moves to checkout, review, or a consultation when the next step is obvious.</p>
+            <p>Each offer starts with the minimum useful detail: the outcome, the tools involved, and the constraints that matter.</p>
         </section>
 
         <section class="offer-grid" aria-label="Service offers">
@@ -28,10 +28,10 @@
         </section>
 
         <section class="text-band">
-            <h2>Consultation path</h2>
-            <p>#(consultationNote)</p>
+            <h2>Start with the useful details</h2>
+            <p>#(nextStepNote)</p>
             <div class="action-row compact">
-                <a class="button primary" href="/contact">Schedule free consultation</a>
+                <a class="button primary" href="/contact">Start intake</a>
                 <a class="button secondary" href="/services">Compare service tracks</a>
             </div>
         </section>
