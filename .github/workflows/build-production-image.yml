@@ -31,7 +31,13 @@ jobs:
       - name: Run repository validation
         run: scripts/repo-maintenance/validate-all.sh
       - name: Install SwiftFormat
-        run: brew install swiftformat
+        run: |
+          curl --fail --location --silent --show-error \
+            https://github.com/nicklockwood/SwiftFormat/releases/download/0.62.1/swiftformat_linux.zip \
+            --output /tmp/swiftformat_linux.zip
+          unzip -q -j /tmp/swiftformat_linux.zip -d /tmp/swiftformat
+          sudo install -m 0755 /tmp/swiftformat/swiftformat /usr/local/bin/swiftformat
+          swiftformat --version
       - name: Check Swift formatting
         run: swiftformat Sources Tests --lint
       - name: Run Swift tests
