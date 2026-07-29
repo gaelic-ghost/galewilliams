@@ -354,6 +354,13 @@ button {
     white-space: nowrap;
 }
 
+.form-error {
+    border: 1px solid var(--magenta);
+    background: rgba(133, 19, 101, 0.26);
+    color: var(--text);
+    padding: 14px 16px;
+}
+
 label {
     display: grid;
     gap: 8px;

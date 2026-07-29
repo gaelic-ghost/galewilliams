@@ -9,14 +9,19 @@ struct ContactController: RouteCollection {
     }
 
     func index(request: Request) async throws -> Response {
-        try await request.view.render("contact", SitePage.contact()).encodeResponse(for: request)
+        try await request.view.render("contact", ContactPage()).encodeResponse(for: request)
     }
 
     func submit(request: Request) async throws -> Response {
-        let submittedIntake = try request.content.decode(ContactIntake.self)
+        let submittedIntake: ContactIntake
+        do {
+            submittedIntake = try request.content.decode(ContactIntake.self)
+        } catch {
+            return try await request.view.render("contact", ContactPage(formError: "Please complete every required contact field before sending your intake.")).encodeResponse(for: request)
+        }
         if submittedIntake.isAutomatedSubmission {
             request.logger.warning("Discarded a contact submission that filled the hidden anti-automation field.")
-            return try await request.view.render("contact", SitePage.contact(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
+            return try await request.view.render("contact", ContactPage(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
         }
 
         do {
@@ -27,7 +32,12 @@ struct ContactController: RouteCollection {
             request.logger.warning("Contact rate limiting was unavailable, so the contact intake will still be persisted. Cause: \(error.localizedDescription)")
         }
 
-        let intake = try submittedIntake.validated()
+        let intake: ContactIntake
+        do {
+            intake = try submittedIntake.validated()
+        } catch let error as AbortError where error.status == .badRequest {
+            return try await request.view.render("contact", ContactPage(form: submittedIntake.formValues, formError: error.reason)).encodeResponse(for: request)
+        }
         let submission = LeadSubmission(intake: intake)
 
         try await submission.save(on: request.db)
@@ -35,7 +45,7 @@ struct ContactController: RouteCollection {
         try await request.enqueueLeadNotification(for: submission)
 
         let message = "Thanks. Your project details are saved and ready for review."
-        return try await request.view.render("contact", SitePage.contact(statusMessage: message)).encodeResponse(for: request)
+        return try await request.view.render("contact", ContactPage(statusMessage: message)).encodeResponse(for: request)
     }
 }
 
@@ -94,6 +104,10 @@ struct ContactIntake: Content {
         website?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
     }
 
+    var formValues: ContactFormValues {
+        .init(name: name, email: email, projectType: projectType, timeline: timeline, details: details)
+    }
+
     func validated() throws -> ContactIntake {
         let normalized = ContactIntake(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -130,5 +144,42 @@ struct ContactIntake: Content {
         }
 
         return normalized
+    }
+}
+
+struct ContactPage: Encodable {
+    let title = "Contact | Gale Williams"
+    let eyebrow = "Contact"
+    let heading = "Tell me what you need to make."
+    let summary = "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up."
+    let description = "Contact Gale Williams about an app, automation, or integration project."
+    let canonicalURL = SitePresentation.canonicalURL(for: "/contact")
+    let socialImageURL = SitePresentation.socialImageURL
+    let robotsDirective = "index, follow"
+    let navItems = SitePage.home.navItems
+    let statusMessage: String?
+    let formError: String?
+    let form: ContactFormValues
+
+    init(form: ContactFormValues = .init(), statusMessage: String? = nil, formError: String? = nil) {
+        self.form = form
+        self.statusMessage = statusMessage
+        self.formError = formError
+    }
+}
+
+struct ContactFormValues: Encodable {
+    let name: String
+    let email: String
+    let projectType: String
+    let timeline: String
+    let details: String
+
+    init(name: String = "", email: String = "", projectType: String = "personal-agent", timeline: String = "", details: String = "") {
+        self.name = name
+        self.email = email
+        self.projectType = projectType
+        self.timeline = timeline
+        self.details = details
     }
 }
