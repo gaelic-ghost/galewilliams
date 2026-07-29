@@ -18,8 +18,8 @@ lead notification email.
 - DNS and TLS edge: Cloudflare.
 - Mailbox provider: iCloud can continue receiving `galewilliams.com` email.
 - Transactional email: Amazon SES sends app notifications to Gale.
-- Backups: Lightsail instance snapshots first; move database backups out of the
-  instance before storing paid orders, licenses, or client portal data.
+- Backups: intentionally deferred while PostgreSQL backup and restore options
+  are researched. No automated backup system is selected or configured yet.
 
 This is a conscious fixed-cost starting point, not the final scale shape. It is
 meant to keep the first public deployment easy to operate while preserving a
@@ -147,7 +147,7 @@ not commit production values.
 6. Create a production `.env` on the instance with database and admin secrets.
 7. Build the image on the instance with `docker compose build`.
 8. Start PostgreSQL with `docker compose up -d db`.
-9. Create and verify a production database backup before any release that contains a new migration. Keep the backup reference with the release record; a Lightsail snapshot alone is not a tested database-restore procedure.
+9. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
 10. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
 11. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
 12. Start Caddy with `docker compose up -d caddy`.
@@ -188,18 +188,17 @@ Keep two separate public checks:
 - `/api/health` answers only whether the Vapor web process is running.
 - `/api/ready` also verifies PostgreSQL access, so it is the check that determines whether the site can durably accept contact intake.
 
-Configure an external uptime monitor to check both endpoints over the canonical
-HTTPS domain and notify Gale by email when either fails repeatedly. Do not
-expose queue, database, SES, credential, or lead-detail diagnostics through a
-public health response.
+External uptime monitoring is intentionally deferred. The two endpoints are
+available for an eventual independent monitor, but no monitor or alert provider
+is configured yet. Do not expose queue, database, SES, credential, or
+lead-detail diagnostics through a public health response.
 
 Before a release with a schema migration:
 
-1. Create a PostgreSQL dump and record where its off-host copy is stored.
-2. Verify the dump completes and retain the release tag beside the backup
-   record.
-3. Run the candidate migration before changing `IMAGE_TAG`.
-4. Confirm `/api/health` and `/api/ready` after activation.
+1. Select, implement, and verify the deferred PostgreSQL backup-and-restore
+   plan before the migration is eligible for production.
+2. Run the candidate migration before changing `IMAGE_TAG`.
+3. Confirm `/api/health` and `/api/ready` after activation.
 
 For a production incident:
 
@@ -211,9 +210,8 @@ For a production incident:
    reconciler return pending notification records to the queue.
 4. Restore runtime services to the prior image only when the migration remains
    forward-compatible. A destructive migration requires a tested database
-   restore rather than an image-tag rollback.
-5. Perform and record a non-production restore drill before relying on the
-   backup process for paid orders, licenses, or client accounts.
+   restore rather than an image-tag rollback; do not ship one before the
+   deferred backup-and-restore plan exists.
 
 ## References
 
