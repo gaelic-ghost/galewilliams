@@ -18,8 +18,8 @@ lead notification email.
 - DNS and TLS edge: Cloudflare.
 - Mailbox provider: iCloud can continue receiving `galewilliams.com` email.
 - Transactional email: Amazon SES sends app notifications to Gale.
-- Backups: Lightsail instance snapshots first; move database backups out of the
-  instance before storing paid orders, licenses, or client portal data.
+- Backups: intentionally deferred while PostgreSQL backup and restore options
+  are researched. No automated backup system is selected or configured yet.
 
 This is a conscious fixed-cost starting point, not the final scale shape. It is
 meant to keep the first public deployment easy to operate while preserving a
@@ -117,8 +117,10 @@ DATABASE_PASSWORD
 DATABASE_NAME
 REDIS_URL
 SITE_DOMAIN
+SITE_ORIGIN
 ADMIN_USERNAME
 ADMIN_PASSWORD
+ADMIN_CSRF_SECRET
 LOG_LEVEL
 ```
 
@@ -145,13 +147,14 @@ not commit production values.
 6. Create a production `.env` on the instance with database and admin secrets.
 7. Build the image on the instance with `docker compose build`.
 8. Start PostgreSQL with `docker compose up -d db`.
-9. Run migrations with `docker compose run migrate`.
-10. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
-11. Start Caddy with `docker compose up -d caddy`.
-12. Verify `http://<static-ip>/api/health`.
-13. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
-14. Verify `https://galewilliams.com/api/health`.
-15. Create a first Lightsail snapshot after the deploy is verified.
+9. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
+10. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
+11. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
+12. Start Caddy with `docker compose up -d caddy`.
+13. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
+14. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
+15. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
+16. Create a first Lightsail snapshot after the deploy is verified.
 
 ## Cost Guardrails
 
@@ -171,11 +174,44 @@ not commit production values.
 - Production instance can build or pull the image.
 - `docker compose run migrate` succeeds on production.
 - `/api/health` returns `ok` through Cloudflare.
+- `/api/ready` confirms that the deployed web process can reach PostgreSQL before the site is treated as ready for contact intake.
 - `/contact` saves a lead.
 - `/admin/leads` requires owner credentials.
 - The Redis notifications worker records a successful SES message ID or a
   descriptive failed-delivery state for every queued lead notification.
 - SES test email reaches Gale's mailbox.
+
+## Monitoring And Recovery
+
+Keep two separate public checks:
+
+- `/api/health` answers only whether the Vapor web process is running.
+- `/api/ready` also verifies PostgreSQL access, so it is the check that determines whether the site can durably accept contact intake.
+
+External uptime monitoring is intentionally deferred. The two endpoints are
+available for an eventual independent monitor, but no monitor or alert provider
+is configured yet. Do not expose queue, database, SES, credential, or
+lead-detail diagnostics through a public health response.
+
+Before a release with a schema migration:
+
+1. Select, implement, and verify the deferred PostgreSQL backup-and-restore
+   plan before the migration is eligible for production.
+2. Run the candidate migration before changing `IMAGE_TAG`.
+3. Confirm `/api/health` and `/api/ready` after activation.
+
+For a production incident:
+
+1. Check `/api/health`, `/api/ready`, and the Compose service status.
+2. If the web process is healthy but readiness fails, investigate PostgreSQL
+   before treating the contact form as available.
+3. If Redis or SES is unavailable, leads may still persist with a durable
+   notification failure state; restore those dependencies and let the
+   reconciler return pending notification records to the queue.
+4. Restore runtime services to the prior image only when the migration remains
+   forward-compatible. A destructive migration requires a tested database
+   restore rather than an image-tag rollback; do not ship one before the
+   deferred backup-and-restore plan exists.
 
 ## References
 

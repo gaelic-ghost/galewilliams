@@ -39,13 +39,26 @@ private extension Request {
         }
 
         let encoded = String(authorization.dropFirst("Basic ".count))
-        guard let data = Data(base64Encoded: encoded),
-              let decoded = String(data: data, encoding: .utf8)
-        else {
+        guard let data = Data(base64Encoded: encoded) else {
             return false
         }
 
-        return decoded == "\(expected.username):\(expected.password)"
+        return constantTimeEquals(data, Data("\(expected.username):\(expected.password)".utf8))
+    }
+
+    private func constantTimeEquals(_ left: Data, _ right: Data) -> Bool {
+        let leftBytes = Array(left)
+        let rightBytes = Array(right)
+        let longestLength = max(leftBytes.count, rightBytes.count)
+        var difference = leftBytes.count ^ rightBytes.count
+
+        for index in 0..<longestLength {
+            let leftByte = index < leftBytes.count ? leftBytes[index] : 0
+            let rightByte = index < rightBytes.count ? rightBytes[index] : 0
+            difference |= Int(leftByte ^ rightByte)
+        }
+
+        return difference == 0
     }
 }
 

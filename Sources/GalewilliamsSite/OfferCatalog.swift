@@ -5,6 +5,7 @@ enum OfferCatalog {
             eyebrow: "Personal services",
             heading: "Practical AI tools for your own workflow.",
             summary: "Small, bounded builds for people who want a local assistant, a useful automation, or a plugin that makes the tools they already use feel sharper.",
+            description: "Personal apps, local AI helpers, automations, and tool integrations from Gale Williams.",
             path: "/services/personal"
         ),
         audience: "Personal, creator, and solo-operator work",
@@ -55,6 +56,7 @@ enum OfferCatalog {
             eyebrow: "SMB services",
             heading: "Flat-rate starting points for business software.",
             summary: "Clear entry points for teams that need an internal agent, a workflow integration, a web app, a mobile app, or a combined product build.",
+            description: "Business automation, app, and integration services from Gale Williams.",
             path: "/services/business"
         ),
         audience: "Small-business and team workflows",

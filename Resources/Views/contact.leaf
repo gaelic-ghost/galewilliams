@@ -10,34 +10,44 @@
             <p class="status-message">#(statusMessage)</p>
         #endif
 
+        #if(formError):
+            <p class="form-error" role="alert">#(formError)</p>
+        #endif
+
         <form class="intake-form" method="post" action="/contact">
+            <div class="honeypot-field" aria-hidden="true">
+                <label>
+                    Website
+                    <input name="website" type="text" tabindex="-1" autocomplete="off">
+                </label>
+            </div>
             <label>
                 Name
-                <input name="name" type="text" autocomplete="name" required>
+                <input name="name" type="text" autocomplete="name" value="#(form.name)" required>
             </label>
             <label>
                 Email
-                <input name="email" type="email" autocomplete="email" required>
+                <input name="email" type="email" autocomplete="email" value="#(form.email)" required>
             </label>
             <label>
                 Project type
                 <select name="projectType" required>
-                    <option value="personal-agent">Personal local AI agent</option>
-                    <option value="personal-automation">Personal automation workflow</option>
-                    <option value="plugin-integration">Plugin or tool integration</option>
-                    <option value="business-automation">Business automation workflow</option>
-                    <option value="website-webapp">Website or web app</option>
-                    <option value="mobile-app">Mobile app</option>
-                    <option value="web-mobile-bundle">Web plus mobile bundle</option>
+                    <option value="personal-agent" #if(form.projectType == "personal-agent"):selected#endif>Personal local AI agent</option>
+                    <option value="personal-automation" #if(form.projectType == "personal-automation"):selected#endif>Personal automation workflow</option>
+                    <option value="plugin-integration" #if(form.projectType == "plugin-integration"):selected#endif>Plugin or tool integration</option>
+                    <option value="business-automation" #if(form.projectType == "business-automation"):selected#endif>Business automation workflow</option>
+                    <option value="website-webapp" #if(form.projectType == "website-webapp"):selected#endif>Website or web app</option>
+                    <option value="mobile-app" #if(form.projectType == "mobile-app"):selected#endif>Mobile app</option>
+                    <option value="web-mobile-bundle" #if(form.projectType == "web-mobile-bundle"):selected#endif>Web plus mobile bundle</option>
                 </select>
             </label>
             <label>
                 Timeline
-                <input name="timeline" type="text" placeholder="Example: prototype in 2 weeks" required>
+                <input name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required>
             </label>
             <label class="full-span">
                 Details
-                <textarea name="details" rows="7" placeholder="What should exist when this project is done?" required></textarea>
+                <textarea name="details" rows="7" placeholder="What should exist when this project is done?" required>#(form.details)</textarea>
             </label>
             <button type="submit">Send intake</button>
         </form>

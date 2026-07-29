@@ -9,19 +9,43 @@ struct ContactController: RouteCollection {
     }
 
     func index(request: Request) async throws -> Response {
-        try await request.view.render("contact", SitePage.contact()).encodeResponse(for: request)
+        try await request.view.render("contact", ContactPage()).encodeResponse(for: request)
     }
 
     func submit(request: Request) async throws -> Response {
-        let intake = try request.content.decode(ContactIntake.self).validated()
+        let submittedIntake: ContactIntake
+        do {
+            submittedIntake = try request.content.decode(ContactIntake.self)
+        } catch {
+            return try await request.view.render("contact", ContactPage(formError: "Please complete every required contact field before sending your intake.")).encodeResponse(for: request)
+        }
+        if submittedIntake.isAutomatedSubmission {
+            request.logger.warning("Discarded a contact submission that filled the hidden anti-automation field.")
+            return try await request.view.render("contact", ContactPage(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
+        }
+
+        do {
+            try await ContactRateLimiter().enforce(for: request)
+        } catch let error as AbortError where error.status == .tooManyRequests {
+            throw error
+        } catch {
+            request.logger.warning("Contact rate limiting was unavailable, so the contact intake will still be persisted. Cause: \(error.localizedDescription)")
+        }
+
+        let intake: ContactIntake
+        do {
+            intake = try submittedIntake.validated()
+        } catch let error as AbortError where error.status == .badRequest {
+            return try await request.view.render("contact", ContactPage(form: submittedIntake.formValues, formError: error.reason)).encodeResponse(for: request)
+        }
         let submission = LeadSubmission(intake: intake)
 
         try await submission.save(on: request.db)
-        request.logger.info("Saved contact intake \(submission.id?.uuidString ?? "without-id") for \(intake.email) about \(intake.projectType).")
+        request.logger.info("Saved contact intake \(submission.id?.uuidString ?? "without-id") with project type \(intake.projectType).")
         try await request.enqueueLeadNotification(for: submission)
 
         let message = "Thanks. Your project details are saved and ready for review."
-        return try await request.view.render("contact", SitePage.contact(statusMessage: message)).encodeResponse(for: request)
+        return try await request.view.render("contact", ContactPage(statusMessage: message)).encodeResponse(for: request)
     }
 }
 
@@ -74,6 +98,15 @@ struct ContactIntake: Content {
     let projectType: String
     let timeline: String
     let details: String
+    var website: String?
+
+    var isAutomatedSubmission: Bool {
+        website?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+    }
+
+    var formValues: ContactFormValues {
+        .init(name: name, email: email, projectType: projectType, timeline: timeline, details: details)
+    }
 
     func validated() throws -> ContactIntake {
         let normalized = ContactIntake(
@@ -81,11 +114,15 @@ struct ContactIntake: Content {
             email: email.trimmingCharacters(in: .whitespacesAndNewlines),
             projectType: projectType.trimmingCharacters(in: .whitespacesAndNewlines),
             timeline: timeline.trimmingCharacters(in: .whitespacesAndNewlines),
-            details: details.trimmingCharacters(in: .whitespacesAndNewlines)
+            details: details.trimmingCharacters(in: .whitespacesAndNewlines),
+            website: website
         )
 
         guard normalized.name.isEmpty == false else {
             throw Abort(.badRequest, reason: "Contact intake is missing a name.")
+        }
+        guard normalized.name.count <= 120 else {
+            throw Abort(.badRequest, reason: "Contact intake names must be 120 characters or fewer.")
         }
         guard normalized.email.contains("@") else {
             throw Abort(.badRequest, reason: "Contact intake needs a readable email address.")
@@ -96,10 +133,53 @@ struct ContactIntake: Content {
         guard normalized.timeline.isEmpty == false else {
             throw Abort(.badRequest, reason: "Contact intake is missing a timeline.")
         }
+        guard normalized.timeline.count <= 160 else {
+            throw Abort(.badRequest, reason: "Contact intake timelines must be 160 characters or fewer.")
+        }
         guard normalized.details.count >= 20 else {
             throw Abort(.badRequest, reason: "Contact intake details need at least 20 characters.")
         }
+        guard normalized.details.count <= 8000 else {
+            throw Abort(.badRequest, reason: "Contact intake details must be 8,000 characters or fewer.")
+        }
 
         return normalized
+    }
+}
+
+struct ContactPage: Encodable {
+    let title = "Contact | Gale Williams"
+    let eyebrow = "Contact"
+    let heading = "Tell me what you need to make."
+    let summary = "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up."
+    let description = "Contact Gale Williams about an app, automation, or integration project."
+    let canonicalURL = SitePresentation.canonicalURL(for: "/contact")
+    let socialImageURL = SitePresentation.socialImageURL
+    let robotsDirective = "index, follow"
+    let navItems = SitePage.home.navItems
+    let statusMessage: String?
+    let formError: String?
+    let form: ContactFormValues
+
+    init(form: ContactFormValues = .init(), statusMessage: String? = nil, formError: String? = nil) {
+        self.form = form
+        self.statusMessage = statusMessage
+        self.formError = formError
+    }
+}
+
+struct ContactFormValues: Encodable {
+    let name: String
+    let email: String
+    let projectType: String
+    let timeline: String
+    let details: String
+
+    init(name: String = "", email: String = "", projectType: String = "personal-agent", timeline: String = "", details: String = "") {
+        self.name = name
+        self.email = email
+        self.projectType = projectType
+        self.timeline = timeline
+        self.details = details
     }
 }
