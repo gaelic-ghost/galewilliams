@@ -84,7 +84,8 @@ services:
     environment:
       <<: *shared_environment
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: ["migrate", "--yes"]
     deploy:
       replicas: 0
@@ -124,7 +125,8 @@ services:
     environment:
       <<: *shared_environment
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: ["migrate", "--revert", "--yes"]
     deploy:
       replicas: 0
