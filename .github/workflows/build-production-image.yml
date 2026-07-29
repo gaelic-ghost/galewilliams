@@ -30,6 +30,8 @@ jobs:
           git merge-base --is-ancestor "$tag_commit" origin/main
       - name: Run repository validation
         run: scripts/repo-maintenance/validate-all.sh
+      - name: Install SwiftFormat
+        run: brew install swiftformat
       - name: Check Swift formatting
         run: swiftformat Sources Tests --lint
       - name: Run Swift tests
