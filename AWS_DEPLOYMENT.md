@@ -145,13 +145,14 @@ not commit production values.
 6. Create a production `.env` on the instance with database and admin secrets.
 7. Build the image on the instance with `docker compose build`.
 8. Start PostgreSQL with `docker compose up -d db`.
-9. Run migrations with `docker compose run migrate`.
-10. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
-11. Start Caddy with `docker compose up -d caddy`.
-12. Verify `http://<static-ip>/api/health`.
-13. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
-14. Verify `https://galewilliams.com/api/health`.
-15. Create a first Lightsail snapshot after the deploy is verified.
+9. Create and verify a production database backup before any release that contains a new migration. Keep the backup reference with the release record; a Lightsail snapshot alone is not a tested database-restore procedure.
+10. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
+11. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
+12. Start Caddy with `docker compose up -d caddy`.
+13. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
+14. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
+15. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
+16. Create a first Lightsail snapshot after the deploy is verified.
 
 ## Cost Guardrails
 
@@ -171,6 +172,7 @@ not commit production values.
 - Production instance can build or pull the image.
 - `docker compose run migrate` succeeds on production.
 - `/api/health` returns `ok` through Cloudflare.
+- `/api/ready` confirms that the deployed web process can reach PostgreSQL before the site is treated as ready for contact intake.
 - `/contact` saves a lead.
 - `/admin/leads` requires owner credentials.
 - The Redis notifications worker records a successful SES message ID or a

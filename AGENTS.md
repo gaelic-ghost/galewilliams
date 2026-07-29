@@ -69,6 +69,10 @@
 
 ## Future Architecture Notes
 
+- Complete the operational-foundation priorities before discussing or implementing an initial commercial offer: (1) migration-safe tagged releases, (2) contact/admin abuse and request hardening, (3) readiness, recovery, and monitoring foundations, and (4) sitemap, metadata, and dedicated social-card work. Do not pull Stripe, booking, commercial catalog, client portal, or other productization work into that implementation pass.
+- The canonical general privacy policy belongs to the separate PrivacyPolicy service at `pp.galewilliams.com`; this site should link to it once published rather than duplicate its policy text locally.
+- The future public booking surface is Fantastical. Do not add a booking link until Gale has set up the relevant Fantastical surface and supplied its public URL.
+- Use a dedicated Gale Williams social-preview card for Open Graph and social metadata; do not repurpose another product's banner artwork.
 - Stripe should start with hosted Checkout and webhooks, not direct card collection.
 - Prefer `vapor-community/stripe-kit` for Stripe API work; avoid the older `vapor-community/stripe` wrapper unless a fresh review finds a current concrete benefit.
 - Apple Pay should come through Stripe Checkout and Stripe payment method domain setup before considering direct Apple Pay JS integration.
