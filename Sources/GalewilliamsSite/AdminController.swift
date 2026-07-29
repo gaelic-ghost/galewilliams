@@ -31,13 +31,15 @@ struct AdminController: RouteCollection {
             .first()
         let page = AdminLeadDetailPage(
             lead: AdminLeadDetail(lead: lead),
-            notification: notification.map(AdminLeadNotification.init(notification:))
+            notification: notification.map(AdminLeadNotification.init(notification:)),
+            csrfToken: try AdminCSRFProtection().issueToken()
         )
 
         return try await request.view.render("admin-lead-detail", page).encodeResponse(for: request)
     }
 
     func reviewLead(request: Request) async throws -> Response {
+        try AdminCSRFProtection().verify(try request.content.decode(AdminReviewSubmission.self).csrfToken)
         let lead = try await request.requireLeadSubmission()
         lead.status = "reviewed"
         lead.reviewedAt = Date()
@@ -89,6 +91,11 @@ struct AdminLeadDetailPage: Encodable {
     let navItems = SitePage.home.navItems
     let lead: AdminLeadDetail
     let notification: AdminLeadNotification?
+    let csrfToken: String
+}
+
+private struct AdminReviewSubmission: Content {
+    let csrfToken: String
 }
 
 struct AdminLeadDetail: Encodable {

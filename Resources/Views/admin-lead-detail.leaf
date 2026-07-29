@@ -62,6 +62,7 @@
                 <a class="button" href="/admin/leads">Back to leads</a>
                 #if(lead.canMarkReviewed):
                     <form class="inline-action" method="post" action="/admin/leads/#(lead.id)/review">
+                        <input type="hidden" name="csrfToken" value="#(csrfToken)">
                         <button type="submit">Mark reviewed</button>
                     </form>
                 #endif

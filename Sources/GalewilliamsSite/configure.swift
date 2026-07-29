@@ -6,6 +6,7 @@ import Redis
 import Vapor
 
 func configure(_ app: Application) throws {
+    app.middleware.use(SecurityHeadersMiddleware())
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.views.use(.leaf)
     app.leaf.cache.isEnabled = app.environment.isRelease

@@ -11,6 +11,7 @@ let package = Package(
         .executable(name: "GalewilliamsSite", targets: ["GalewilliamsSite"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0"),
@@ -23,6 +24,7 @@ let package = Package(
         .executableTarget(
             name: "GalewilliamsSite",
             dependencies: [
+                .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "Leaf", package: "leaf"),
