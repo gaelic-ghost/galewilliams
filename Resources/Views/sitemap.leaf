@@ -1,0 +1,18 @@
+#extend("layout"):
+    #export("body"):
+        <section class="page-intro">
+            <p class="eyebrow">Sitemap</p>
+            <h1>Find the part you need.</h1>
+            <p class="summary">A simple index of the public Gale Williams site.</p>
+        </section>
+
+        <section class="sitemap-list" aria-label="Public site pages">
+            #for(entry in entries):
+                <a class="sitemap-entry" href="#(entry.path)">
+                    <h2>#(entry.label)</h2>
+                    <p>#(entry.summary)</p>
+                </a>
+            #endfor
+        </section>
+    #endexport
+#endextend

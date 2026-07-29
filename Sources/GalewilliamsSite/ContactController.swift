@@ -88,7 +88,7 @@ struct ContactIntake: Content {
     let projectType: String
     let timeline: String
     let details: String
-    let website: String? = nil
+    var website: String?
 
     var isAutomatedSubmission: Bool {
         website?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
@@ -125,7 +125,7 @@ struct ContactIntake: Content {
         guard normalized.details.count >= 20 else {
             throw Abort(.badRequest, reason: "Contact intake details need at least 20 characters.")
         }
-        guard normalized.details.count <= 8_000 else {
+        guard normalized.details.count <= 8000 else {
             throw Abort(.badRequest, reason: "Contact intake details must be 8,000 characters or fewer.")
         }
 

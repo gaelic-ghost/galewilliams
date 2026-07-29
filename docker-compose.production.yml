@@ -16,6 +16,7 @@ x-shared_environment: &shared_environment
   DATABASE_PASSWORD: &db_password ${DATABASE_PASSWORD:-}
   REDIS_URL: redis://redis:6379
   SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
+  SITE_ORIGIN: ${SITE_ORIGIN:-https://galewilliams.com}
   ADMIN_USERNAME: ${ADMIN_USERNAME:-}
   ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
   ADMIN_CSRF_SECRET: ${ADMIN_CSRF_SECRET:-}

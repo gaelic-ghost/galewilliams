@@ -33,15 +33,24 @@ func routes(_ app: Application) throws {
     try app.register(collection: AdminController())
 
     try app.register(collection: HealthController())
+    try app.register(collection: SitemapController())
 }
 
 private struct ServicesLanding: Encodable {
     let title: String
+    let description: String
+    let canonicalURL: String
+    let socialImageURL: String
+    let robotsDirective: String
     let navItems: [NavigationItem]
     let page: SitePage
 
     init(page: SitePage) {
         title = page.title
+        description = page.description
+        canonicalURL = page.canonicalURL
+        socialImageURL = page.socialImageURL
+        robotsDirective = page.robotsDirective
         navItems = page.navItems
         self.page = page
     }

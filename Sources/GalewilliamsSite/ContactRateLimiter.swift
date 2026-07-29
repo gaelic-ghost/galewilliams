@@ -13,7 +13,7 @@ struct ContactRateLimiter {
         let attempt = try await request.redis.increment(key).get()
 
         if attempt == 1 {
-            _ = try await request.redis.expire(key, after: .seconds(Self.windowSeconds))
+            _ = try await request.redis.expire(key, after: .seconds(Int64(Self.windowSeconds)))
         }
 
         guard attempt <= Self.maximumSubmissions else {

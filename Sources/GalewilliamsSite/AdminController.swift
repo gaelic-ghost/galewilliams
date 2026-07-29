@@ -29,17 +29,17 @@ struct AdminController: RouteCollection {
             .filter(\LeadNotification.$lead.$id == lead.requireID())
             .sort(\.$createdAt, .descending)
             .first()
-        let page = AdminLeadDetailPage(
+        let page = try AdminLeadDetailPage(
             lead: AdminLeadDetail(lead: lead),
             notification: notification.map(AdminLeadNotification.init(notification:)),
-            csrfToken: try AdminCSRFProtection().issueToken()
+            csrfToken: AdminCSRFProtection().issueToken()
         )
 
         return try await request.view.render("admin-lead-detail", page).encodeResponse(for: request)
     }
 
     func reviewLead(request: Request) async throws -> Response {
-        try AdminCSRFProtection().verify(try request.content.decode(AdminReviewSubmission.self).csrfToken)
+        try AdminCSRFProtection().verify(request.content.decode(AdminReviewSubmission.self).csrfToken)
         let lead = try await request.requireLeadSubmission()
         lead.status = "reviewed"
         lead.reviewedAt = Date()
@@ -55,6 +55,10 @@ struct AdminController: RouteCollection {
 
 struct AdminLeadListPage: Encodable {
     let title = "Lead Review | Gale Williams"
+    let description = "Owner-only lead review for Gale Williams."
+    let canonicalURL = SitePresentation.canonicalURL(for: "/admin/leads")
+    let socialImageURL = SitePresentation.socialImageURL
+    let robotsDirective = "noindex, nofollow"
     let navItems = SitePage.home.navItems
     let leads: [AdminLeadSummary]
     let hasLeads: Bool
@@ -88,10 +92,21 @@ struct AdminLeadSummary: Encodable {
 
 struct AdminLeadDetailPage: Encodable {
     let title = "Lead Detail | Gale Williams"
+    let description = "Owner-only lead review detail for Gale Williams."
+    let canonicalURL: String
+    let socialImageURL = SitePresentation.socialImageURL
+    let robotsDirective = "noindex, nofollow"
     let navItems = SitePage.home.navItems
     let lead: AdminLeadDetail
     let notification: AdminLeadNotification?
     let csrfToken: String
+
+    init(lead: AdminLeadDetail, notification: AdminLeadNotification?, csrfToken: String) {
+        self.lead = lead
+        self.notification = notification
+        self.csrfToken = csrfToken
+        canonicalURL = SitePresentation.canonicalURL(for: "/admin/leads/\(lead.id.uuidString)")
+    }
 }
 
 private struct AdminReviewSubmission: Content {
