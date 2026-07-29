@@ -181,6 +181,40 @@ not commit production values.
   descriptive failed-delivery state for every queued lead notification.
 - SES test email reaches Gale's mailbox.
 
+## Monitoring And Recovery
+
+Keep two separate public checks:
+
+- `/api/health` answers only whether the Vapor web process is running.
+- `/api/ready` also verifies PostgreSQL access, so it is the check that determines whether the site can durably accept contact intake.
+
+Configure an external uptime monitor to check both endpoints over the canonical
+HTTPS domain and notify Gale by email when either fails repeatedly. Do not
+expose queue, database, SES, credential, or lead-detail diagnostics through a
+public health response.
+
+Before a release with a schema migration:
+
+1. Create a PostgreSQL dump and record where its off-host copy is stored.
+2. Verify the dump completes and retain the release tag beside the backup
+   record.
+3. Run the candidate migration before changing `IMAGE_TAG`.
+4. Confirm `/api/health` and `/api/ready` after activation.
+
+For a production incident:
+
+1. Check `/api/health`, `/api/ready`, and the Compose service status.
+2. If the web process is healthy but readiness fails, investigate PostgreSQL
+   before treating the contact form as available.
+3. If Redis or SES is unavailable, leads may still persist with a durable
+   notification failure state; restore those dependencies and let the
+   reconciler return pending notification records to the queue.
+4. Restore runtime services to the prior image only when the migration remains
+   forward-compatible. A destructive migration requires a tested database
+   restore rather than an image-tag rollback.
+5. Perform and record a non-production restore drill before relying on the
+   backup process for paid orders, licenses, or client accounts.
+
 ## References
 
 - [Amazon Lightsail pricing](https://aws.amazon.com/lightsail/pricing/)

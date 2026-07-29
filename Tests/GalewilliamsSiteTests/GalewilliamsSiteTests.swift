@@ -123,6 +123,19 @@ struct GalewilliamsSiteTests {
         }
     }
 
+    @Test("Admin CSRF tokens reject tampering")
+    func adminCSRFTokenRejectsTampering() async throws {
+        try await withAdminCSRFSecret {
+            let protection = AdminCSRFProtection()
+            let validToken = try protection.issueToken()
+            try protection.verify(validToken)
+
+            #expect(throws: Abort.self) {
+                try protection.verify("\(validToken)tampered")
+            }
+        }
+    }
+
     @Test("Public routes render successfully")
     func publicRoutesRenderSuccessfully() async throws {
         try await withApp { app in
@@ -158,6 +171,11 @@ struct GalewilliamsSiteTests {
                 try await withAdminCredentials(username: "gale", password: "secret") {
                     try await withApp { app in
                         try await app.autoMigrate()
+
+                        try await app.testing().test(.GET, "api/ready") { response async in
+                            #expect(response.status == .ok)
+                            #expect(response.body.string.contains("ready"))
+                        }
 
                         let intake = ContactIntake(
                             name: "Integration Lead",
