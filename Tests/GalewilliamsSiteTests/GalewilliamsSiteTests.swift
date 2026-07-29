@@ -166,6 +166,16 @@ struct GalewilliamsSiteTests {
                 }
             }
 
+            try await app.testing().test(.GET, "/") { response async in
+                #expect(response.body.string.contains("<meta name=\"robots\" content=\"index, follow\">"))
+                #expect(response.body.string.contains("<link rel=\"canonical\" href=\"https://galewilliams.com\">"))
+                #expect(response.body.string.contains("https://galewilliams.com/images/galewilliams-social-card.png"))
+            }
+
+            try await app.testing().test(.GET, "apps") { response async in
+                #expect(response.body.string.contains("<meta name=\"robots\" content=\"noindex, nofollow\">"))
+            }
+
             try await app.testing().test(.GET, "sitemap.xml") { response async in
                 #expect(response.status == .ok)
                 #expect(response.headers.contentType?.description.contains("application/xml") == true)

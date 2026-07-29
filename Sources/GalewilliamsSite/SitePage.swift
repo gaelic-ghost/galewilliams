@@ -55,6 +55,9 @@ struct SitePage: Encodable {
     let path: String
     let statusMessage: String?
     let shouldIndex: Bool
+    let canonicalURL: String
+    let socialImageURL: String
+    let robotsDirective: String
     let navItems: [NavigationItem] = [
         .init(label: "Home", path: "/"),
         .init(label: "Services", path: "/services"),
@@ -62,10 +65,6 @@ struct SitePage: Encodable {
         .init(label: "About", path: "/about"),
         .init(label: "Contact", path: "/contact"),
     ]
-
-    var canonicalURL: String { SitePresentation.canonicalURL(for: path) }
-    var socialImageURL: String { SitePresentation.socialImageURL }
-    var robotsDirective: String { shouldIndex ? "index, follow" : "noindex, nofollow" }
 
     init(
         title: String,
@@ -85,6 +84,9 @@ struct SitePage: Encodable {
         self.path = path
         self.statusMessage = statusMessage
         self.shouldIndex = shouldIndex
+        canonicalURL = SitePresentation.canonicalURL(for: path)
+        socialImageURL = SitePresentation.socialImageURL
+        robotsDirective = shouldIndex ? "index, follow" : "noindex, nofollow"
     }
 
     static func contact(statusMessage: String? = nil) -> SitePage {
