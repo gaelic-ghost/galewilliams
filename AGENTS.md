@@ -55,6 +55,7 @@
 
 ## Local Runtime
 
+- Docker and Colima are always authorized for this repository. Agents may start, stop, inspect, and use the local container runtime as needed for development, Compose workflows, and integration validation without asking Gale for separate permission.
 - Use Vapor's `Environment` API as the default runtime configuration path for this app.
 - Prefer `Environment.detect()`, `app.environment`, `Environment.get(...)`, dotenv support, and Fluent configuration in `configure.swift` over adding a separate configuration package.
 - Add `apple/swift-configuration` only if Vapor's native environment API becomes a concrete source of duplication, weak typing, or unclear error handling.
