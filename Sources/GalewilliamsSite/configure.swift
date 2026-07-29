@@ -2,6 +2,7 @@ import Fluent
 import FluentPostgresDriver
 import Leaf
 import QueuesRedisDriver
+import Redis
 import Vapor
 
 func configure(_ app: Application) throws {
@@ -35,6 +36,7 @@ private func configureDatabase(_ app: Application) throws {
 
 private func configureLeadNotifications(_ app: Application) throws {
     let redisURL = Environment.get("REDIS_URL") ?? "redis://localhost:6379"
+    app.redis.configuration = try .init(url: redisURL)
     try app.queues.use(.redis(url: redisURL))
     app.queues.add(LeadNotificationJob())
     app.queues

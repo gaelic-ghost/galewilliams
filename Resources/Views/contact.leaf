@@ -11,6 +11,12 @@
         #endif
 
         <form class="intake-form" method="post" action="/contact">
+            <div class="honeypot-field" aria-hidden="true">
+                <label>
+                    Website
+                    <input name="website" type="text" tabindex="-1" autocomplete="off">
+                </label>
+            </div>
             <label>
                 Name
                 <input name="name" type="text" autocomplete="name" required>

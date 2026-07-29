@@ -13,11 +13,25 @@ struct ContactController: RouteCollection {
     }
 
     func submit(request: Request) async throws -> Response {
-        let intake = try request.content.decode(ContactIntake.self).validated()
+        let submittedIntake = try request.content.decode(ContactIntake.self)
+        if submittedIntake.isAutomatedSubmission {
+            request.logger.warning("Discarded a contact submission that filled the hidden anti-automation field.")
+            return try await request.view.render("contact", SitePage.contact(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
+        }
+
+        do {
+            try await ContactRateLimiter().enforce(for: request)
+        } catch let error as AbortError where error.status == .tooManyRequests {
+            throw error
+        } catch {
+            request.logger.warning("Contact rate limiting was unavailable, so the contact intake will still be persisted. Cause: \(error.localizedDescription)")
+        }
+
+        let intake = try submittedIntake.validated()
         let submission = LeadSubmission(intake: intake)
 
         try await submission.save(on: request.db)
-        request.logger.info("Saved contact intake \(submission.id?.uuidString ?? "without-id") for \(intake.email) about \(intake.projectType).")
+        request.logger.info("Saved contact intake \(submission.id?.uuidString ?? "without-id") with project type \(intake.projectType).")
         try await request.enqueueLeadNotification(for: submission)
 
         let message = "Thanks. Your project details are saved and ready for review."
@@ -74,6 +88,11 @@ struct ContactIntake: Content {
     let projectType: String
     let timeline: String
     let details: String
+    let website: String? = nil
+
+    var isAutomatedSubmission: Bool {
+        website?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+    }
 
     func validated() throws -> ContactIntake {
         let normalized = ContactIntake(
@@ -81,11 +100,15 @@ struct ContactIntake: Content {
             email: email.trimmingCharacters(in: .whitespacesAndNewlines),
             projectType: projectType.trimmingCharacters(in: .whitespacesAndNewlines),
             timeline: timeline.trimmingCharacters(in: .whitespacesAndNewlines),
-            details: details.trimmingCharacters(in: .whitespacesAndNewlines)
+            details: details.trimmingCharacters(in: .whitespacesAndNewlines),
+            website: website
         )
 
         guard normalized.name.isEmpty == false else {
             throw Abort(.badRequest, reason: "Contact intake is missing a name.")
+        }
+        guard normalized.name.count <= 120 else {
+            throw Abort(.badRequest, reason: "Contact intake names must be 120 characters or fewer.")
         }
         guard normalized.email.contains("@") else {
             throw Abort(.badRequest, reason: "Contact intake needs a readable email address.")
@@ -96,8 +119,14 @@ struct ContactIntake: Content {
         guard normalized.timeline.isEmpty == false else {
             throw Abort(.badRequest, reason: "Contact intake is missing a timeline.")
         }
+        guard normalized.timeline.count <= 160 else {
+            throw Abort(.badRequest, reason: "Contact intake timelines must be 160 characters or fewer.")
+        }
         guard normalized.details.count >= 20 else {
             throw Abort(.badRequest, reason: "Contact intake details need at least 20 characters.")
+        }
+        guard normalized.details.count <= 8_000 else {
+            throw Abort(.badRequest, reason: "Contact intake details must be 8,000 characters or fewer.")
         }
 
         return normalized
