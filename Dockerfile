@@ -46,6 +46,7 @@ RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
     && apt-get -q dist-upgrade -y \
     && apt-get -q install -y \
       libjemalloc2 \
+      curl \
       libcurl4 \
       libxml2 \
       ca-certificates \

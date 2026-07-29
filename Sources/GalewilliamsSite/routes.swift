@@ -32,11 +32,7 @@ func routes(_ app: Application) throws {
     try app.register(collection: ContactController())
     try app.register(collection: AdminController())
 
-    app.group("api") { api in
-        api.get("health") { _ in
-            HealthResponse(status: "ok", service: "GalewilliamsSite")
-        }
-    }
+    try app.register(collection: HealthController())
 }
 
 private struct ServicesLanding: Encodable {

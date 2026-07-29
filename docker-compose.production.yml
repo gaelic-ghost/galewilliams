@@ -30,16 +30,26 @@ services:
     environment:
       <<: *shared_environment
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    restart: unless-stopped
 
   caddy:
     image: caddy:2.10-alpine
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN:-galewilliams.com}
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     ports:
       - '80:80'
       - '443:443'
@@ -47,6 +57,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    restart: unless-stopped
 
   migrate:
     image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
@@ -63,18 +74,24 @@ services:
     environment:
       <<: *shared_environment
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ["queues", "--queue", "notifications"]
+    restart: unless-stopped
 
   scheduler:
     image: ${APP_IMAGE:-galewilliams-site}:${IMAGE_TAG:-v0.0.1}
     environment:
       <<: *shared_environment
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ["queues", "--scheduled"]
+    restart: unless-stopped
 
   db:
     image: postgres:18-alpine
@@ -84,9 +101,23 @@ services:
       POSTGRES_USER: *db_username
       POSTGRES_PASSWORD: *db_password
       POSTGRES_DB: *db_name
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    restart: unless-stopped
 
   redis:
     image: redis:8.0-alpine
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
