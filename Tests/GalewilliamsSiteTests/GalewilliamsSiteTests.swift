@@ -123,6 +123,25 @@ struct GalewilliamsSiteTests {
         }
     }
 
+    @Test("Admin auth rejects incorrect configured credentials")
+    func adminAuthRejectsIncorrectConfiguredCredentials() async throws {
+        try await withAdminCredentials(username: "gale", password: "secret") {
+            try await withApp { app in
+                app.grouped(AdminAuthMiddleware()).get("admin-test") { _ in
+                    "ok"
+                }
+
+                var headers = HTTPHeaders()
+                let token = Data("gale:not-secret".utf8).base64EncodedString()
+                headers.add(name: .authorization, value: "Basic \(token)")
+
+                try await app.testing().test(.GET, "admin-test", headers: headers) { response async in
+                    #expect(response.status == .unauthorized)
+                }
+            }
+        }
+    }
+
     @Test("Admin CSRF tokens reject tampering")
     func adminCSRFTokenRejectsTampering() async throws {
         try await withAdminCSRFSecret {
@@ -157,6 +176,29 @@ struct GalewilliamsSiteTests {
             try await app.testing().test(.GET, "robots.txt") { response async in
                 #expect(response.status == .ok)
                 #expect(response.body.string.contains("Sitemap: https://galewilliams.com/sitemap.xml"))
+            }
+        }
+    }
+
+    @Test("Invalid contact intake renders inline validation feedback")
+    func invalidContactIntakeRendersInlineValidationFeedback() async throws {
+        try await withApp { app in
+            let intake = ContactIntake(
+                name: "Gale",
+                email: "gale@example.com",
+                projectType: "plugin-integration",
+                timeline: "prototype in 2 weeks",
+                details: "Too short.",
+                website: nil
+            )
+            var headers = HTTPHeaders()
+            var body = ByteBufferAllocator().buffer(capacity: 256)
+            try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .ok)
+                #expect(response.body.string.contains("Contact intake details need at least 20 characters."))
+                #expect(response.body.string.contains("gale@example.com"))
             }
         }
     }
