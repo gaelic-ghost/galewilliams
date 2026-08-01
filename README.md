@@ -59,10 +59,16 @@ swift build
 swift test
 ```
 
-Start local dependencies and run the integration path:
+Start local dependencies, then apply migrations before starting the app:
 
 ```sh
 docker compose up -d db redis
+swift run GalewilliamsSite migrate
+```
+
+Run the integration path after the schema is ready:
+
+```sh
 scripts/test-integration.sh
 ```
 
@@ -71,12 +77,6 @@ Run the development server or the complete local Compose service set:
 ```sh
 swift run GalewilliamsSite serve --hostname 127.0.0.1 --port 8080
 docker compose up app worker scheduler
-```
-
-Run migrations against the local Compose database with:
-
-```sh
-swift run GalewilliamsSite migrate
 ```
 
 Use `scripts/repo-maintenance/validate-all.sh` for the repository maintainer
