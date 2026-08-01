@@ -76,7 +76,7 @@ docker compose up app worker scheduler
 Run migrations against the local Compose database with:
 
 ```sh
-swift run GalewilliamsSite migrate --yes
+swift run GalewilliamsSite migrate
 ```
 
 Use `scripts/repo-maintenance/validate-all.sh` for the repository maintainer
@@ -104,7 +104,8 @@ Versioned Git tags are the release record. The production workflow builds the
 tagged container image, runs the forward-only migration step before activation,
 and checks both health and readiness endpoints. See
 [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the operational runbook and the
-repository's GitHub Releases page for published release notes.
+[GitHub Releases page](https://github.com/gaelic-ghost/galewilliams/releases)
+for published release notes.
 
 ## License
 

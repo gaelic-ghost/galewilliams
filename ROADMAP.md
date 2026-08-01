@@ -89,9 +89,11 @@ In Progress
 
 ### Tickets
 
-- [x] Use tag-triggered production deployment with a candidate migration step,
-  runtime rollback to the previous image tag on activation failure, and health
-  plus readiness checks.
+- [x] Use tag-triggered production deployment with an expand/contract
+  compatibility check before a candidate migration, runtime rollback only when
+  that forward-compatible migration permits it, and a tested database restore
+  path before destructive schema removal. Check health and readiness after
+  activation.
 - [x] Render canonical URLs, robots directives, a root sitemap, and a dedicated
   Gale Williams social-preview card from encoded Leaf page contexts.
 - [x] Add rate limiting and a hidden anti-automation field to contact intake.
