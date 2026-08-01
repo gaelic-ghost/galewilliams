@@ -2,122 +2,111 @@
 
 A Vapor and Leaf site for `galewilliams.com`.
 
-## Local SwiftPM
+## Table of Contents
 
-Build the package:
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Development](#development)
+- [Repo Structure](#repo-structure)
+- [Release Notes](#release-notes)
+- [License](#license)
+
+## Overview
+
+### Status
+
+TBD
+
+### What This Project Is
+
+A server-rendered professional site built with Vapor, Leaf, Fluent, PostgreSQL,
+Redis, and Docker. It serves public pages, accepts project intake, keeps lead
+review behind owner authentication, and records notification delivery work
+durably before Redis and Amazon SES process it.
+
+### Motivation
+
+TBD
+
+## Quick Start
+
+The public site is available at [galewilliams.com](https://galewilliams.com).
+It is a web service rather than a locally installed end-user application; use
+the development commands below when working on the service itself.
+
+## Usage
+
+Public pages include the homepage, services, apps, about, and contact routes.
+The contact form persists a complete intake before notification delivery is
+queued, so temporary Redis or SES configuration problems do not discard a
+lead. Owner administration uses the credentials supplied through environment
+variables; it is not a public account system.
+
+Operational readiness is split deliberately:
+
+- `/api/health` reports whether the Vapor web process is running.
+- `/api/ready` additionally verifies PostgreSQL access before the service is
+  treated as ready to accept durable intake.
+
+## Development
+
+Copy `.env.example` to an uncommitted `.env` file and replace its local-only
+placeholders before running Compose-backed flows. Build and test the package:
 
 ```sh
 swift build
-```
-
-Run tests:
-
-```sh
 swift test
 ```
 
-Run the same release gate that checks tracked files for credential patterns and
-unapproved email addresses:
+Start local dependencies and run the integration path:
 
 ```sh
-scripts/repo-maintenance/validations/40-pii-secrets.sh
-```
-
-Run the Compose-backed intake integration test:
-
-```sh
+docker compose up -d db redis
 scripts/test-integration.sh
 ```
 
-This starts local PostgreSQL and Redis if needed, then verifies that a contact
-submission persists, queues its notification, and completes the authenticated
-lead-review flow.
-
-Start the development server:
+Run the development server or the complete local Compose service set:
 
 ```sh
 swift run GalewilliamsSite serve --hostname 127.0.0.1 --port 8080
+docker compose up app worker scheduler
 ```
 
-Run migrations against the local Compose database:
+Run migrations against the local Compose database with:
 
 ```sh
-docker compose up -d db
 swift run GalewilliamsSite migrate --yes
 ```
 
-Owner admin routes are protected with HTTP Basic credentials from:
+Use `scripts/repo-maintenance/validate-all.sh` for the repository maintainer
+validation gate. The production environment, deployment sequence, recovery
+checks, and host-managed secrets are documented in
+[AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
 
-```sh
-ADMIN_USERNAME
-ADMIN_PASSWORD
+## Repo Structure
+
+```text
+.
+├── Sources/GalewilliamsSite/       Vapor routes, controllers, models, workers
+├── Tests/GalewilliamsSiteTests/    Swift Testing coverage
+├── Resources/Views/                Leaf layouts and page templates
+├── Public/                         Runtime-served styles and images
+├── scripts/repo-maintenance/       Validation, sync, and release entrypoints
+├── docker-compose.yml              Local Compose services
+├── docker-compose.production.yml   Production Compose services
+└── AWS_DEPLOYMENT.md               Lightsail, Cloudflare, SES, and recovery runbook
 ```
 
-## Local Docker
+## Release Notes
 
-Validate the Compose file:
+Versioned Git tags are the release record. The production workflow builds the
+tagged container image, runs the forward-only migration step before activation,
+and checks both health and readiness endpoints. See
+[AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the operational runbook and the
+repository's GitHub Releases page for published release notes.
 
-```sh
-docker compose config
-```
+## License
 
-Build the app image:
-
-```sh
-docker compose build
-```
-
-Start PostgreSQL, Redis, and the app:
-
-```sh
-docker compose up db redis app
-```
-
-Run database migrations:
-
-```sh
-docker compose run migrate
-```
-
-Run the durable lead-notification worker in a second terminal:
-
-```sh
-docker compose up worker
-```
-
-Run the reconciler in a third terminal. It returns notification records that
-were saved while Redis or SES configuration was unavailable to the queue after
-the dependency recovers:
-
-```sh
-docker compose up scheduler
-```
-
-The worker requires `AWS_REGION`, `SES_FROM_EMAIL`, and
-`LEAD_NOTIFICATION_TO_EMAIL`. It obtains AWS credentials through the standard
-AWS SDK credential chain, so production should use root-owned host credentials
-rather than committed secrets. Lightsail does not support attaching a normal
-application service role to an instance.
-
-For the production web edge, Caddy owns ports 80 and 443 and proxies to Vapor
-over the internal Compose network. Set `SITE_DOMAIN` before starting the
-`caddy` service; see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md) for the Lightsail,
-Cloudflare, and SES runbook.
-
-The Compose file uses safe development defaults from `.env.example`. Keep real
-secrets in an uncommitted `.env` file or in host-managed secrets.
-
-## Vapor References
-
-- [Vapor Documentation](https://docs.vapor.codes)
-- [Vapor Docker Deployment](https://docs.vapor.codes/deploy/docker/)
-- [Vapor Environment](https://docs.vapor.codes/basics/environment/)
-
-## Notice
-
-This repository is proprietary. See [NOTICE](NOTICE): all rights are reserved
+This repository is proprietary. See [NOTICE](NOTICE); all rights are reserved
 for its code and content.
-
-## Deployment
-
-- [AWS Lightsail deployment plan](AWS_DEPLOYMENT.md)
