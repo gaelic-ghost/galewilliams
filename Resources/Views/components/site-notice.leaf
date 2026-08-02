@@ -1,0 +1,2 @@
+#comment("Requires a notice SiteNotice property in the rendering context.")
+<p class="#(notice.className)" role="#(notice.role)" aria-live="#(notice.liveMode)">#(notice.message)</p>

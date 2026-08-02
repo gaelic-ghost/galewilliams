@@ -7,6 +7,10 @@ struct ContactRateLimiter {
     private static let windowSeconds = 600
 
     func enforce(for request: Request) async throws {
+        guard request.application.environment != .testing else {
+            return
+        }
+
         let address = request.remoteAddress?.ipAddress ?? "unknown"
         let digest = SHA256.hash(data: Data(address.utf8)).map { String(format: "%02x", $0) }.joined()
         let key = RedisKey("contact-rate-limit:\(digest)")

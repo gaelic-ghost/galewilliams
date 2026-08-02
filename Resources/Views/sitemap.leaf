@@ -1,10 +1,6 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro">
-            <p class="eyebrow">Sitemap</p>
-            <h1>Find the part you need.</h1>
-            <p class="summary">A simple index of the public Gale Williams site.</p>
-        </section>
+        #extend("components/page-intro")
 
         <section class="sitemap-list" aria-label="Public site pages">
             #for(entry in entries):

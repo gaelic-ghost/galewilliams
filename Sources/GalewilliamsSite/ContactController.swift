@@ -13,12 +13,13 @@ struct ContactController: RouteCollection {
     }
 
     func submit(request: Request) async throws -> Response {
-        let submittedIntake: ContactIntake
+        let submittedForm: ContactIntakeForm
         do {
-            submittedIntake = try request.content.decode(ContactIntake.self)
+            submittedForm = try request.content.decode(ContactIntakeForm.self)
         } catch {
             return try await request.view.render("contact", ContactPage(formError: "Please complete every required contact field before sending your intake.")).encodeResponse(for: request)
         }
+        let submittedIntake = submittedForm.intake
         if submittedIntake.isAutomatedSubmission {
             request.logger.warning("Discarded a contact submission that filled the hidden anti-automation field.")
             return try await request.view.render("contact", ContactPage(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
@@ -35,8 +36,8 @@ struct ContactController: RouteCollection {
         let intake: ContactIntake
         do {
             intake = try submittedIntake.validated()
-        } catch let error as AbortError where error.status == .badRequest {
-            return try await request.view.render("contact", ContactPage(form: submittedIntake.formValues, formError: error.reason)).encodeResponse(for: request)
+        } catch let error as ContactIntakeValidationError {
+            return try await request.view.render("contact", ContactPage(form: submittedIntake.formValues, fieldErrors: .init(error: error))).encodeResponse(for: request)
         }
         let submission = LeadSubmission(intake: intake)
 
@@ -119,52 +120,72 @@ struct ContactIntake: Content {
         )
 
         guard normalized.name.isEmpty == false else {
-            throw Abort(.badRequest, reason: "Contact intake is missing a name.")
+            throw ContactIntakeValidationError(field: .name, message: "Enter your name so I know how to address your request.")
         }
         guard normalized.name.count <= 120 else {
-            throw Abort(.badRequest, reason: "Contact intake names must be 120 characters or fewer.")
+            throw ContactIntakeValidationError(field: .name, message: "Use 120 characters or fewer for your name.")
         }
         guard normalized.email.contains("@") else {
-            throw Abort(.badRequest, reason: "Contact intake needs a readable email address.")
+            throw ContactIntakeValidationError(field: .email, message: "Enter a readable email address so I can reply.")
         }
-        guard normalized.projectType.isEmpty == false else {
-            throw Abort(.badRequest, reason: "Contact intake is missing a project type.")
+        guard ProjectType(rawValue: normalized.projectType) != nil else {
+            throw ContactIntakeValidationError(field: .projectType, message: "Choose the project type that best fits your request.")
         }
         guard normalized.timeline.isEmpty == false else {
-            throw Abort(.badRequest, reason: "Contact intake is missing a timeline.")
+            throw ContactIntakeValidationError(field: .timeline, message: "Share the timeline you are working toward.")
         }
         guard normalized.timeline.count <= 160 else {
-            throw Abort(.badRequest, reason: "Contact intake timelines must be 160 characters or fewer.")
+            throw ContactIntakeValidationError(field: .timeline, message: "Use 160 characters or fewer for the timeline.")
         }
         guard normalized.details.count >= 20 else {
-            throw Abort(.badRequest, reason: "Contact intake details need at least 20 characters.")
+            throw ContactIntakeValidationError(field: .details, message: "Share at least 20 characters about what you need built.")
         }
         guard normalized.details.count <= 8000 else {
-            throw Abort(.badRequest, reason: "Contact intake details must be 8,000 characters or fewer.")
+            throw ContactIntakeValidationError(field: .details, message: "Use 8,000 characters or fewer for the project details.")
         }
 
         return normalized
     }
 }
 
-struct ContactPage: Encodable {
-    let title = "Contact | Gale Williams"
-    let eyebrow = "Contact"
-    let heading = "Tell me what you need to make."
-    let summary = "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up."
-    let description = "Contact Gale Williams about an app, automation, or integration project."
-    let canonicalURL = SitePresentation.canonicalURL(for: "/contact")
-    let socialImageURL = SitePresentation.socialImageURL
-    let robotsDirective = "index, follow"
-    let navItems = SitePage.home.navItems
-    let statusMessage: String?
-    let formError: String?
-    let form: ContactFormValues
+struct ContactIntakeForm: Content {
+    let name: String?
+    let email: String?
+    let projectType: String?
+    let timeline: String?
+    let details: String?
+    let website: String?
 
-    init(form: ContactFormValues = .init(), statusMessage: String? = nil, formError: String? = nil) {
+    var intake: ContactIntake {
+        .init(
+            name: name ?? "",
+            email: email ?? "",
+            projectType: projectType ?? "",
+            timeline: timeline ?? "",
+            details: details ?? "",
+            website: website
+        )
+    }
+}
+
+struct ContactPage: Encodable {
+    let chrome = SitePage.contact.chrome
+    let intro = SitePage.contact.intro
+    let notice: SiteNotice?
+    let fieldErrors: ContactFormFieldErrors
+    let form: ContactFormValues
+    let projectTypes: [ProjectTypeOption]
+
+    init(
+        form: ContactFormValues = .init(),
+        statusMessage: String? = nil,
+        formError: String? = nil,
+        fieldErrors: ContactFormFieldErrors = .init()
+    ) {
         self.form = form
-        self.statusMessage = statusMessage
-        self.formError = formError
+        notice = statusMessage.map(SiteNotice.status) ?? formError.map(SiteNotice.error)
+        self.fieldErrors = fieldErrors
+        projectTypes = ProjectType.options(selectedValue: form.projectType)
     }
 }
 
@@ -175,11 +196,84 @@ struct ContactFormValues: Encodable {
     let timeline: String
     let details: String
 
-    init(name: String = "", email: String = "", projectType: String = "personal-agent", timeline: String = "", details: String = "") {
+    init(name: String = "", email: String = "", projectType: String = "", timeline: String = "", details: String = "") {
         self.name = name
         self.email = email
         self.projectType = projectType
         self.timeline = timeline
         self.details = details
+    }
+}
+
+enum ProjectType: String, CaseIterable {
+    case personalAgent = "personal-agent"
+    case personalAutomation = "personal-automation"
+    case pluginIntegration = "plugin-integration"
+    case businessAutomation = "business-automation"
+    case websiteWebApp = "website-webapp"
+    case mobileApp = "mobile-app"
+    case webMobileBundle = "web-mobile-bundle"
+
+    var label: String {
+        switch self {
+            case .personalAgent:
+                "Personal local AI agent"
+            case .personalAutomation:
+                "Personal automation workflow"
+            case .pluginIntegration:
+                "Plugin or tool integration"
+            case .businessAutomation:
+                "Business automation workflow"
+            case .websiteWebApp:
+                "Website or web app"
+            case .mobileApp:
+                "Mobile app"
+            case .webMobileBundle:
+                "Web plus mobile bundle"
+        }
+    }
+
+    static func options(selectedValue: String) -> [ProjectTypeOption] {
+        [
+            .init(value: "", label: "Select a project type", isSelected: selectedValue.isEmpty, isPlaceholder: true),
+        ] + allCases.map { type in
+            .init(value: type.rawValue, label: type.label, isSelected: selectedValue == type.rawValue, isPlaceholder: false)
+        }
+    }
+}
+
+struct ProjectTypeOption: Encodable {
+    let value: String
+    let label: String
+    let isSelected: Bool
+    let isPlaceholder: Bool
+}
+
+enum ContactFormField: String {
+    case name
+    case email
+    case projectType
+    case timeline
+    case details
+}
+
+struct ContactIntakeValidationError: Error {
+    let field: ContactFormField
+    let message: String
+}
+
+struct ContactFormFieldErrors: Encodable {
+    let name: String?
+    let email: String?
+    let projectType: String?
+    let timeline: String?
+    let details: String?
+
+    init(error: ContactIntakeValidationError? = nil) {
+        name = error?.field == .name ? error?.message : nil
+        email = error?.field == .email ? error?.message : nil
+        projectType = error?.field == .projectType ? error?.message : nil
+        timeline = error?.field == .timeline ? error?.message : nil
+        details = error?.field == .details ? error?.message : nil
     }
 }

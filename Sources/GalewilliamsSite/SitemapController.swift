@@ -59,11 +59,15 @@ struct SitemapEntry: Encodable {
 }
 
 struct SitemapPage: Encodable {
-    let title = "Sitemap | Gale Williams"
-    let description = "Browse the public pages on the Gale Williams site."
-    let canonicalURL = SitePresentation.canonicalURL(for: "/sitemap")
-    let socialImageURL = SitePresentation.socialImageURL
-    let robotsDirective = "index, follow"
-    let navItems = SitePage.home.navItems
+    let chrome = SiteChrome(
+        title: "Sitemap | Gale Williams",
+        description: "Browse the public pages on the Gale Williams site.",
+        path: "/sitemap"
+    )
+    let intro = PageIntro(
+        eyebrow: "Sitemap",
+        heading: "Find the part you need.",
+        summary: "A simple index of the public Gale Williams site."
+    )
     let entries = PublicSiteMap.entries
 }

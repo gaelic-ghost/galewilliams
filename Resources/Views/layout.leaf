@@ -3,23 +3,24 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>#(title)</title>
-    <meta name="description" content="#(description)">
-    <meta name="robots" content="#(robotsDirective)">
-    <link rel="canonical" href="#(canonicalURL)">
+    <title>#(chrome.title)</title>
+    <meta name="description" content="#(chrome.description)">
+    <meta name="robots" content="#(chrome.robotsDirective)">
+    <link rel="canonical" href="#(chrome.canonicalURL)">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="#(title)">
-    <meta property="og:description" content="#(description)">
-    <meta property="og:url" content="#(canonicalURL)">
-    <meta property="og:image" content="#(socialImageURL)">
+    <meta property="og:title" content="#(chrome.title)">
+    <meta property="og:description" content="#(chrome.description)">
+    <meta property="og:url" content="#(chrome.canonicalURL)">
+    <meta property="og:image" content="#(chrome.socialImageURL)">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="#(title)">
-    <meta name="twitter:description" content="#(description)">
-    <meta name="twitter:image" content="#(socialImageURL)">
+    <meta name="twitter:title" content="#(chrome.title)">
+    <meta name="twitter:description" content="#(chrome.description)">
+    <meta name="twitter:image" content="#(chrome.socialImageURL)">
     <link rel="icon" href="/images/sharp-icon.png" type="image/png">
     <link rel="stylesheet" href="/styles/site.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="scanline-shell">
         <header class="site-header">
             <a class="brand" href="/" aria-label="Gale Williams home">
@@ -27,13 +28,13 @@
                 <span class="brand-name">Gale Williams</span>
             </a>
             <nav class="site-nav" aria-label="Primary navigation">
-                #for(item in navItems):
-                    <a href="#(item.path)">#(item.label)</a>
+                #for(item in chrome.navItems):
+                    <a href="#(item.path)" #if(item.isCurrent):aria-current="page"#endif>#(item.label)</a>
                 #endfor
             </nav>
         </header>
 
-        <main>
+        <main id="main-content" tabindex="-1">
             #import("body")
         </main>
 

@@ -31,6 +31,24 @@ a {
     color: inherit;
 }
 
+.skip-link {
+    position: fixed;
+    z-index: 1;
+    top: 12px;
+    left: 12px;
+    transform: translateY(-160%);
+    border: 1px solid var(--cyan);
+    background: var(--bg);
+    color: var(--text);
+    padding: 10px 14px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
 .scanline-shell {
     min-height: 100vh;
     background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
@@ -98,6 +116,15 @@ button:hover {
     border-color: var(--violet-hot);
     box-shadow: var(--shadow);
     transform: translateY(-1px);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 3px;
 }
 
 .hero {
@@ -359,6 +386,18 @@ button {
     background: rgba(133, 19, 101, 0.26);
     color: var(--text);
     padding: 14px 16px;
+}
+
+.form-field {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+}
+
+.field-error {
+    margin: 0;
+    color: var(--violet-hot);
+    font-weight: 700;
 }
 
 label {

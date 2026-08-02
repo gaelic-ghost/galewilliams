@@ -54,12 +54,18 @@ struct AdminController: RouteCollection {
 }
 
 struct AdminLeadListPage: Encodable {
-    let title = "Lead Review | Gale Williams"
-    let description = "Owner-only lead review for Gale Williams."
-    let canonicalURL = SitePresentation.canonicalURL(for: "/admin/leads")
-    let socialImageURL = SitePresentation.socialImageURL
-    let robotsDirective = "noindex, nofollow"
-    let navItems = SitePage.home.navItems
+    let chrome = SiteChrome(
+        title: "Lead Review | Gale Williams",
+        description: "Owner-only lead review for Gale Williams.",
+        path: "/admin/leads",
+        shouldIndex: false
+    )
+    let intro = PageIntro(
+        eyebrow: "Admin",
+        heading: "New lead submissions",
+        summary: "Review incoming project requests, open the full detail, and mark each lead reviewed after triage.",
+        isCompact: true
+    )
     let leads: [AdminLeadSummary]
     let hasLeads: Bool
     let emptyMessage = "No new leads are waiting for review."
@@ -91,21 +97,28 @@ struct AdminLeadSummary: Encodable {
 }
 
 struct AdminLeadDetailPage: Encodable {
-    let title = "Lead Detail | Gale Williams"
-    let description = "Owner-only lead review detail for Gale Williams."
-    let canonicalURL: String
-    let socialImageURL = SitePresentation.socialImageURL
-    let robotsDirective = "noindex, nofollow"
-    let navItems = SitePage.home.navItems
+    let chrome: SiteChrome
+    let intro: PageIntro
     let lead: AdminLeadDetail
     let notification: AdminLeadNotification?
     let csrfToken: String
 
     init(lead: AdminLeadDetail, notification: AdminLeadNotification?, csrfToken: String) {
+        chrome = SiteChrome(
+            title: "Lead Detail | Gale Williams",
+            description: "Owner-only lead review detail for Gale Williams.",
+            path: "/admin/leads/\(lead.id.uuidString)",
+            shouldIndex: false
+        )
+        intro = PageIntro(
+            eyebrow: "Admin",
+            heading: lead.name,
+            summary: "\(lead.projectType) request from \(lead.email)",
+            isCompact: true
+        )
         self.lead = lead
         self.notification = notification
         self.csrfToken = csrfToken
-        canonicalURL = SitePresentation.canonicalURL(for: "/admin/leads/\(lead.id.uuidString)")
     }
 }
 

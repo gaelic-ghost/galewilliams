@@ -51,38 +51,9 @@ Operational readiness is split deliberately:
 
 ## Development
 
-Copy `.env.example` to an uncommitted `.env` file and replace its local-only
-placeholders before running Compose-backed flows. Build and test the package:
-
-```sh
-swift build
-swift test
-```
-
-Start local dependencies, then apply migrations before starting the app:
-
-```sh
-docker compose up -d db redis
-swift run GalewilliamsSite migrate
-```
-
-Run the integration path after the schema is ready:
-
-```sh
-scripts/test-integration.sh
-```
-
-Run the development server or the complete local Compose service set:
-
-```sh
-swift run GalewilliamsSite serve --hostname 127.0.0.1 --port 8080
-docker compose up app worker scheduler
-```
-
-Use `scripts/repo-maintenance/validate-all.sh` for the repository maintainer
-validation gate. The production environment, deployment sequence, recovery
-checks, and host-managed secrets are documented in
-[AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
+For local setup, the native Homebrew and Docker/Colima paths, verification,
+and contributor workflow, see [CONTRIBUTING.md](CONTRIBUTING.md). Production
+deployment and recovery are documented in [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
 
 ## Repo Structure
 

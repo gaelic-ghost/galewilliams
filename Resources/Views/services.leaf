@@ -1,10 +1,6 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro">
-            <p class="eyebrow">#(page.eyebrow)</p>
-            <h1>#(page.heading)</h1>
-            <p class="summary">#(page.summary)</p>
-        </section>
+        #extend("components/page-intro")
 
         <section class="choice-grid" aria-label="Service tracks">
             <a class="choice-panel" href="/services/personal">
@@ -24,9 +20,7 @@
         <section class="text-band">
             <h2>Not sure where the idea fits?</h2>
             <p>Tell me what is getting in the way. We’ll work out the useful next step.</p>
-            <div class="action-row compact">
-                <a class="button primary" href="/contact">Start a project</a>
-            </div>
+            #extend("components/action-row")
         </section>
     #endexport
 #endextend

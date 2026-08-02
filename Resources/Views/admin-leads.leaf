@@ -1,10 +1,6 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro compact-intro">
-            <p class="eyebrow">Admin</p>
-            <h1>New lead submissions</h1>
-            <p class="summary">Review incoming project requests, open the full detail, and mark each lead reviewed after triage.</p>
-        </section>
+        #extend("components/page-intro")
 
         <section class="admin-list" aria-label="New lead submissions">
             #if(hasLeads):
