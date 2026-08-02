@@ -1,0 +1,6 @@
+#comment("Requires actions and actionRowClass properties in the rendering context.")
+<div class="#(actionRowClass)">
+    #for(action in actions):
+        <a class="#(action.className)" href="#(action.path)">#(action.label)</a>
+    #endfor
+</div>

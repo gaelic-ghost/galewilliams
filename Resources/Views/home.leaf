@@ -2,13 +2,10 @@
     #export("body"):
         <section class="hero">
             <div class="hero-copy">
-                <p class="eyebrow">#(eyebrow)</p>
-                <h1>#(heading)</h1>
-                <p class="summary">#(summary)</p>
-                <div class="action-row">
-                    <a class="button primary" href="/services">View services</a>
-                    <a class="button secondary" href="/contact">Start a project</a>
-                </div>
+                <p class="eyebrow">#(intro.eyebrow)</p>
+                <h1>#(intro.heading)</h1>
+                <p class="summary">#(intro.summary)</p>
+                #extend("components/action-row")
             </div>
         </section>
 

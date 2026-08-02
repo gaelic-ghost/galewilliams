@@ -1,17 +1,9 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro">
-            <p class="eyebrow">#(eyebrow)</p>
-            <h1>#(heading)</h1>
-            <p class="summary">#(summary)</p>
-        </section>
+        #extend("components/page-intro")
 
-        #if(statusMessage):
-            <p class="status-message">#(statusMessage)</p>
-        #endif
-
-        #if(formError):
-            <p class="form-error" role="alert">#(formError)</p>
+        #if(notice):
+            #extend("components/site-notice")
         #endif
 
         <form class="intake-form" method="post" action="/contact">
@@ -21,34 +13,45 @@
                     <input name="website" type="text" tabindex="-1" autocomplete="off">
                 </label>
             </div>
-            <label>
+            <label for="name">
                 Name
-                <input name="name" type="text" autocomplete="name" value="#(form.name)" required>
+                <input id="name" name="name" type="text" autocomplete="name" value="#(form.name)" required#if(fieldErrors.name): aria-invalid="true" aria-describedby="name-error"#endif>
             </label>
-            <label>
+            #if(fieldErrors.name):
+                <p id="name-error" class="field-error">#(fieldErrors.name)</p>
+            #endif
+            <label for="email">
                 Email
-                <input name="email" type="email" autocomplete="email" value="#(form.email)" required>
+                <input id="email" name="email" type="email" autocomplete="email" value="#(form.email)" required#if(fieldErrors.email): aria-invalid="true" aria-describedby="email-error"#endif>
             </label>
-            <label>
+            #if(fieldErrors.email):
+                <p id="email-error" class="field-error">#(fieldErrors.email)</p>
+            #endif
+            <label for="project-type">
                 Project type
-                <select name="projectType" required>
-                    <option value="personal-agent" #if(form.projectType == "personal-agent"):selected#endif>Personal local AI agent</option>
-                    <option value="personal-automation" #if(form.projectType == "personal-automation"):selected#endif>Personal automation workflow</option>
-                    <option value="plugin-integration" #if(form.projectType == "plugin-integration"):selected#endif>Plugin or tool integration</option>
-                    <option value="business-automation" #if(form.projectType == "business-automation"):selected#endif>Business automation workflow</option>
-                    <option value="website-webapp" #if(form.projectType == "website-webapp"):selected#endif>Website or web app</option>
-                    <option value="mobile-app" #if(form.projectType == "mobile-app"):selected#endif>Mobile app</option>
-                    <option value="web-mobile-bundle" #if(form.projectType == "web-mobile-bundle"):selected#endif>Web plus mobile bundle</option>
+                <select id="project-type" name="projectType" required#if(fieldErrors.projectType): aria-invalid="true" aria-describedby="project-type-error"#endif>
+                    #for(projectType in projectTypes):
+                        <option value="#(projectType.value)"#if(projectType.isSelected): selected#endif#if(projectType.isPlaceholder): disabled#endif>#(projectType.label)</option>
+                    #endfor
                 </select>
             </label>
-            <label>
+            #if(fieldErrors.projectType):
+                <p id="project-type-error" class="field-error">#(fieldErrors.projectType)</p>
+            #endif
+            <label for="timeline">
                 Timeline
-                <input name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required>
+                <input id="timeline" name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required#if(fieldErrors.timeline): aria-invalid="true" aria-describedby="timeline-error"#endif>
             </label>
-            <label class="full-span">
+            #if(fieldErrors.timeline):
+                <p id="timeline-error" class="field-error">#(fieldErrors.timeline)</p>
+            #endif
+            <label class="full-span" for="details">
                 Details
-                <textarea name="details" rows="7" placeholder="What should exist when this project is done?" required>#(form.details)</textarea>
+                <textarea id="details" name="details" rows="7" placeholder="What should exist when this project is done?" required#if(fieldErrors.details): aria-invalid="true" aria-describedby="details-error"#endif>#(form.details)</textarea>
             </label>
+            #if(fieldErrors.details):
+                <p id="details-error" class="field-error full-span">#(fieldErrors.details)</p>
+            #endif
             <button type="submit">Send intake</button>
         </form>
     #endexport

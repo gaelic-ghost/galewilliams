@@ -1,0 +1,6 @@
+#comment("Requires an intro PageIntro property in the rendering context.")
+<section class="#(intro.className)">
+    <p class="eyebrow">#(intro.eyebrow)</p>
+    <h1>#(intro.heading)</h1>
+    <p class="summary">#(intro.summary)</p>
+</section>

@@ -1,10 +1,6 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro">
-            <p class="eyebrow">#(eyebrow)</p>
-            <h1>#(heading)</h1>
-            <p class="summary">#(summary)</p>
-        </section>
+        #extend("components/page-intro")
 
         <section class="text-band">
             <h2>How I work</h2>

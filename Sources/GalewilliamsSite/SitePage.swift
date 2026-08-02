@@ -9,6 +9,86 @@ enum SitePresentation {
     }
 }
 
+struct SiteChrome: Encodable {
+    let title: String
+    let description: String
+    let canonicalURL: String
+    let socialImageURL: String
+    let robotsDirective: String
+    let navItems: [NavigationItem]
+
+    init(title: String, description: String, path: String, shouldIndex: Bool = true) {
+        self.title = title
+        self.description = description
+        canonicalURL = SitePresentation.canonicalURL(for: path)
+        socialImageURL = SitePresentation.socialImageURL
+        robotsDirective = shouldIndex ? "index, follow" : "noindex, nofollow"
+        navItems = Self.navigationItems(currentPath: path)
+    }
+
+    private static func navigationItems(currentPath: String) -> [NavigationItem] {
+        [
+            .init(label: "Home", path: "/", isCurrent: currentPath == "/"),
+            .init(label: "Services", path: "/services", isCurrent: currentPath == "/services"),
+            .init(label: "Apps", path: "/apps", isCurrent: currentPath == "/apps"),
+            .init(label: "About", path: "/about", isCurrent: currentPath == "/about"),
+            .init(label: "Contact", path: "/contact", isCurrent: currentPath == "/contact"),
+        ]
+    }
+}
+
+struct NavigationItem: Encodable {
+    let label: String
+    let path: String
+    let isCurrent: Bool
+}
+
+struct PageIntro: Encodable {
+    let eyebrow: String
+    let heading: String
+    let summary: String
+    let className: String
+
+    init(eyebrow: String, heading: String, summary: String, isCompact: Bool = false) {
+        self.eyebrow = eyebrow
+        self.heading = heading
+        self.summary = summary
+        className = isCompact ? "page-intro compact-intro" : "page-intro"
+    }
+}
+
+struct SiteAction: Encodable {
+    let label: String
+    let path: String
+    let className: String
+
+    init(label: String, path: String, style: Style = .secondary) {
+        self.label = label
+        self.path = path
+        className = "button \(style.rawValue)"
+    }
+
+    enum Style: String {
+        case primary
+        case secondary
+    }
+}
+
+struct SiteNotice: Encodable {
+    let message: String
+    let className: String
+    let role: String
+    let liveMode: String
+
+    static func status(_ message: String) -> SiteNotice {
+        .init(message: message, className: "status-message", role: "status", liveMode: "polite")
+    }
+
+    static func error(_ message: String) -> SiteNotice {
+        .init(message: message, className: "form-error", role: "alert", liveMode: "assertive")
+    }
+}
+
 struct SitePage: Encodable {
     static let home = SitePage(
         title: "Gale Williams | Agentic apps, plugins, and integrations",
@@ -16,7 +96,12 @@ struct SitePage: Encodable {
         heading: "Software that makes work easier.",
         summary: "Apps, automations, and integrations built around the way you actually work.",
         description: "Gale Williams builds apps, automations, and integrations around the way you actually work.",
-        path: "/"
+        path: "/",
+        actions: [
+            .init(label: "View services", path: "/services", style: .primary),
+            .init(label: "Start a project", path: "/contact"),
+        ],
+        actionRowClass: "action-row"
     )
 
     static let services = SitePage(
@@ -25,7 +110,8 @@ struct SitePage: Encodable {
         heading: "Software built around your work.",
         summary: "From a focused automation to a new app, we start with the work you want to make easier.",
         description: "Services from Gale Williams for focused apps, automations, and integrations.",
-        path: "/services"
+        path: "/services",
+        actions: [.init(label: "Start a project", path: "/contact", style: .primary)]
     )
 
     static let apps = SitePage(
@@ -35,7 +121,8 @@ struct SitePage: Encodable {
         summary: "This is where released software will live. There are no public downloads or installable plugins available right now.",
         description: "Released Gale Williams apps and plugins will appear here when they are publicly available.",
         path: "/apps",
-        shouldIndex: false
+        shouldIndex: false,
+        actions: [.init(label: "View services", path: "/services", style: .primary)]
     )
 
     static let about = SitePage(
@@ -47,24 +134,19 @@ struct SitePage: Encodable {
         path: "/about"
     )
 
-    let title: String
-    let eyebrow: String
-    let heading: String
-    let summary: String
-    let description: String
-    let path: String
-    let statusMessage: String?
-    let shouldIndex: Bool
-    let canonicalURL: String
-    let socialImageURL: String
-    let robotsDirective: String
-    let navItems: [NavigationItem] = [
-        .init(label: "Home", path: "/"),
-        .init(label: "Services", path: "/services"),
-        .init(label: "Apps", path: "/apps"),
-        .init(label: "About", path: "/about"),
-        .init(label: "Contact", path: "/contact"),
-    ]
+    static let contact = SitePage(
+        title: "Contact | Gale Williams",
+        eyebrow: "Contact",
+        heading: "Tell me what you need to make.",
+        summary: "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up.",
+        description: "Contact Gale Williams about an app, automation, or integration project.",
+        path: "/contact"
+    )
+
+    let chrome: SiteChrome
+    let intro: PageIntro
+    let actions: [SiteAction]
+    let actionRowClass: String
 
     init(
         title: String,
@@ -73,63 +155,36 @@ struct SitePage: Encodable {
         summary: String,
         description: String,
         path: String,
-        statusMessage: String? = nil,
-        shouldIndex: Bool = true
+        shouldIndex: Bool = true,
+        actions: [SiteAction] = [],
+        actionRowClass: String = "action-row compact"
     ) {
-        self.title = title
-        self.eyebrow = eyebrow
-        self.heading = heading
-        self.summary = summary
-        self.description = description
-        self.path = path
-        self.statusMessage = statusMessage
-        self.shouldIndex = shouldIndex
-        canonicalURL = SitePresentation.canonicalURL(for: path)
-        socialImageURL = SitePresentation.socialImageURL
-        robotsDirective = shouldIndex ? "index, follow" : "noindex, nofollow"
+        chrome = SiteChrome(title: title, description: description, path: path, shouldIndex: shouldIndex)
+        intro = PageIntro(eyebrow: eyebrow, heading: heading, summary: summary)
+        self.actions = actions
+        self.actionRowClass = actionRowClass
     }
-
-    static func contact(statusMessage: String? = nil) -> SitePage {
-        SitePage(
-            title: "Contact | Gale Williams",
-            eyebrow: "Contact",
-            heading: "Tell me what you need to make.",
-            summary: "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up.",
-            description: "Contact Gale Williams about an app, automation, or integration project.",
-            path: "/contact",
-            statusMessage: statusMessage
-        )
-    }
-}
-
-struct NavigationItem: Encodable {
-    let label: String
-    let path: String
 }
 
 struct ServiceTrackPage: Encodable {
-    let title: String
-    let description: String
-    let canonicalURL: String
-    let socialImageURL: String
-    let robotsDirective: String
-    let navItems: [NavigationItem]
-    let page: SitePage
+    let chrome: SiteChrome
+    let intro: PageIntro
     let audience: String
     let offers: [ServiceOffer]
     let nextStepNote: String
+    let actions: [SiteAction]
+    let actionRowClass = "action-row compact"
 
     init(page: SitePage, audience: String, offers: [ServiceOffer], nextStepNote: String) {
-        title = page.title
-        description = page.description
-        canonicalURL = page.canonicalURL
-        socialImageURL = page.socialImageURL
-        robotsDirective = page.robotsDirective
-        navItems = page.navItems
-        self.page = page
+        chrome = page.chrome
+        intro = page.intro
         self.audience = audience
         self.offers = offers
         self.nextStepNote = nextStepNote
+        actions = [
+            .init(label: "Start intake", path: "/contact", style: .primary),
+            .init(label: "Compare service tracks", path: "/services"),
+        ]
     }
 }
 

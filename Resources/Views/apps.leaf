@@ -1,17 +1,11 @@
 #extend("layout"):
     #export("body"):
-        <section class="page-intro">
-            <p class="eyebrow">#(page.eyebrow)</p>
-            <h1>#(page.heading)</h1>
-            <p class="summary">#(page.summary)</p>
-        </section>
+        #extend("components/page-intro")
 
         <section class="text-band">
             <h2>No public releases yet.</h2>
             <p>When an app or plugin is ready, this page will include the real download, install, and support information. Until then, see the services page for custom work.</p>
-            <div class="action-row compact">
-                <a class="button primary" href="/services">View services</a>
-            </div>
+            #extend("components/action-row")
         </section>
     #endexport
 #endextend

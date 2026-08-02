@@ -10,26 +10,30 @@ import VaporTesting
 struct GalewilliamsSiteTests {
     @Test("Primary pages expose expected paths")
     func primaryPagesExposeExpectedPaths() {
-        #expect(SitePage.home.path == "/")
-        #expect(SitePage.services.path == "/services")
-        #expect(SitePage.apps.path == "/apps")
-        #expect(SitePage.about.path == "/about")
-        #expect(SitePage.contact().path == "/contact")
+        #expect(SitePage.home.chrome.canonicalURL == "https://galewilliams.com")
+        #expect(SitePage.services.chrome.canonicalURL == "https://galewilliams.com/services")
+        #expect(SitePage.apps.chrome.robotsDirective == "noindex, nofollow")
+        #expect(SitePage.about.intro.heading == "Hi, I’m Gale.")
+        #expect(SitePage.contact.chrome.canonicalURL == "https://galewilliams.com/contact")
     }
 
     @Test("Primary navigation includes Apps")
     func primaryNavigationIncludesApps() {
-        let labels = SitePage.home.navItems.map(\.label)
+        let items = SitePage.home.chrome.navItems
+        let labels = items.map(\.label)
 
         #expect(labels == ["Home", "Services", "Apps", "About", "Contact"])
+        #expect(items.first?.isCurrent == true)
+        #expect(SitePage.contact.chrome.navItems.last?.isCurrent == true)
     }
 
     @Test("Contact page can carry a status message")
     func contactPageCanCarryStatusMessage() {
-        let page = SitePage.contact(statusMessage: "Captured.")
+        let page = ContactPage(statusMessage: "Captured.")
 
-        #expect(page.statusMessage == "Captured.")
-        #expect(page.title.contains("Contact"))
+        #expect(page.notice?.message == "Captured.")
+        #expect(page.notice?.role == "status")
+        #expect(page.chrome.title.contains("Contact"))
     }
 
     @Test("Contact intake validation trims values")
@@ -63,7 +67,29 @@ struct GalewilliamsSiteTests {
             website: nil
         )
 
-        #expect(throws: Abort.self) {
+        #expect(throws: ContactIntakeValidationError.self) {
+            try intake.validated()
+        }
+    }
+
+    @Test("Contact project types begin unselected and reject unknown values")
+    func contactProjectTypesBeginUnselectedAndRejectUnknownValues() throws {
+        let page = ContactPage()
+        #expect(page.projectTypes.first?.value == "")
+        #expect(page.projectTypes.first?.isSelected == true)
+        #expect(page.projectTypes.first?.isPlaceholder == true)
+        #expect(page.projectTypes.dropFirst().contains(where: \.isSelected) == false)
+
+        let intake = ContactIntake(
+            name: "Gale",
+            email: "gale@example.com",
+            projectType: "not-a-real-project-type",
+            timeline: "prototype in 2 weeks",
+            details: "Build a Codex plugin intake flow with enough detail.",
+            website: nil
+        )
+
+        #expect(throws: ContactIntakeValidationError.self) {
             try intake.validated()
         }
     }
@@ -170,10 +196,17 @@ struct GalewilliamsSiteTests {
                 #expect(response.body.string.contains("<meta name=\"robots\" content=\"index, follow\">"))
                 #expect(response.body.string.contains("<link rel=\"canonical\" href=\"https://galewilliams.com\">"))
                 #expect(response.body.string.contains("https://galewilliams.com/images/galewilliams-social-card.png"))
+                #expect(response.body.string.contains("href=\"#main-content\""))
+                #expect(response.body.string.contains("aria-current=\"page\">Home"))
             }
 
             try await app.testing().test(.GET, "apps") { response async in
                 #expect(response.body.string.contains("<meta name=\"robots\" content=\"noindex, nofollow\">"))
+            }
+
+            try await app.testing().test(.GET, "contact") { response async in
+                #expect(response.body.string.contains("<option value=\"\" selected disabled>Select a project type</option>"))
+                #expect(response.body.string.contains("aria-current=\"page\">Contact"))
             }
 
             try await app.testing().test(.GET, "sitemap.xml") { response async in
@@ -207,8 +240,60 @@ struct GalewilliamsSiteTests {
 
             try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
                 #expect(response.status == .ok)
-                #expect(response.body.string.contains("Contact intake details need at least 20 characters."))
+                #expect(response.body.string.contains("Share at least 20 characters about what you need built."))
                 #expect(response.body.string.contains("gale@example.com"))
+                #expect(response.body.string.contains("aria-invalid=\"true\" aria-describedby=\"details-error\""))
+                #expect(response.body.string.contains("id=\"details-error\""))
+                #expect(response.body.string.contains("<option value=\"plugin-integration\" selected>Plugin or tool integration</option>"))
+            }
+        }
+    }
+
+    @Test("Missing or forged project types render an accessible select error")
+    func invalidProjectTypeRendersAccessibleSelectError() async throws {
+        try await withApp { app in
+            for projectType in ["", "forged-project-type"] {
+                let intake = ContactIntake(
+                    name: "Gale",
+                    email: "gale@example.com",
+                    projectType: projectType,
+                    timeline: "prototype in 2 weeks",
+                    details: "Build a Codex plugin intake flow with enough detail.",
+                    website: nil
+                )
+                var headers = HTTPHeaders()
+                var body = ByteBufferAllocator().buffer(capacity: 256)
+                try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+
+                try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                    #expect(response.status == .ok)
+                    #expect(response.body.string.contains("Choose the project type that best fits your request."))
+                    #expect(response.body.string.contains("aria-invalid=\"true\" aria-describedby=\"project-type-error\""))
+                    #expect(response.body.string.contains("id=\"project-type-error\""))
+                }
+            }
+        }
+    }
+
+    @Test("Contact form values remain escaped after validation")
+    func contactFormValuesRemainEscapedAfterValidation() async throws {
+        try await withApp { app in
+            let intake = ContactIntake(
+                name: "<script>alert(1)</script>",
+                email: "gale@example.com",
+                projectType: "plugin-integration",
+                timeline: "prototype in 2 weeks",
+                details: "Too short.",
+                website: nil
+            )
+            var headers = HTTPHeaders()
+            var body = ByteBufferAllocator().buffer(capacity: 256)
+            try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .ok)
+                #expect(response.body.string.contains("&lt;script&gt;alert(1)&lt;/script&gt;"))
+                #expect(response.body.string.contains("<script>alert(1)</script>") == false)
             }
         }
     }
