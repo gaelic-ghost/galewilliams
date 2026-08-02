@@ -25,6 +25,7 @@ struct GalewilliamsSiteTests {
         #expect(labels == ["Home", "Services", "Apps", "About", "Contact"])
         #expect(items.first?.isCurrent == true)
         #expect(SitePage.contact.chrome.navItems.last?.isCurrent == true)
+        #expect(OfferCatalog.personalServices.chrome.navItems.first(where: { $0.label == "Services" })?.isCurrent == true)
     }
 
     @Test("Contact page can carry a status message")
@@ -270,6 +271,35 @@ struct GalewilliamsSiteTests {
                     #expect(response.body.string.contains("Choose the project type that best fits your request."))
                     #expect(response.body.string.contains("aria-invalid=\"true\" aria-describedby=\"project-type-error\""))
                     #expect(response.body.string.contains("id=\"project-type-error\""))
+                }
+            }
+        }
+    }
+
+    @Test("Omitted contact controls render field errors and retain submitted values")
+    func omittedContactControlsRenderFieldErrorsAndRetainSubmittedValues() async throws {
+        let submissions: [(field: String, form: ContactIntakeForm, message: String)] = [
+            ("name", .init(name: nil, email: "gale@example.com", projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Enter your name so I know how to address your request."),
+            ("email", .init(name: "Gale", email: nil, projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Enter a readable email address so I can reply."),
+            ("project type", .init(name: "Gale", email: "gale@example.com", projectType: nil, timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Choose the project type that best fits your request."),
+            ("timeline", .init(name: "Gale", email: "gale@example.com", projectType: "plugin-integration", timeline: nil, details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Share the timeline you are working toward."),
+            ("details", .init(name: "Gale", email: "gale@example.com", projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: nil, website: nil), "Share at least 20 characters about what you need built."),
+        ]
+
+        try await withApp { app in
+            for submission in submissions {
+                var headers = HTTPHeaders()
+                var body = ByteBufferAllocator().buffer(capacity: 256)
+                try URLEncodedFormEncoder().encode(submission.form, to: &body, headers: &headers)
+
+                try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                    #expect(response.status == .ok, "The omitted \(submission.field) field should return inline validation feedback.")
+                    #expect(response.body.string.contains(submission.message))
+                    #expect(response.body.string.contains("Gale") || submission.field == "name")
+                    #expect(response.body.string.contains("gale@example.com") || submission.field == "email")
+                    #expect(response.body.string.contains("<option value=\"plugin-integration\" selected>") || submission.field == "project type")
+                    #expect(response.body.string.contains("prototype in 2 weeks") || submission.field == "timeline")
+                    #expect(response.body.string.contains("Build a Codex plugin intake flow with enough detail.") || submission.field == "details")
                 }
             }
         }

@@ -13,12 +13,13 @@ struct ContactController: RouteCollection {
     }
 
     func submit(request: Request) async throws -> Response {
-        let submittedIntake: ContactIntake
+        let submittedForm: ContactIntakeForm
         do {
-            submittedIntake = try request.content.decode(ContactIntake.self)
+            submittedForm = try request.content.decode(ContactIntakeForm.self)
         } catch {
             return try await request.view.render("contact", ContactPage(formError: "Please complete every required contact field before sending your intake.")).encodeResponse(for: request)
         }
+        let submittedIntake = submittedForm.intake
         if submittedIntake.isAutomatedSubmission {
             request.logger.warning("Discarded a contact submission that filled the hidden anti-automation field.")
             return try await request.view.render("contact", ContactPage(statusMessage: "Thanks. Your project details are saved and ready for review.")).encodeResponse(for: request)
@@ -144,6 +145,26 @@ struct ContactIntake: Content {
         }
 
         return normalized
+    }
+}
+
+struct ContactIntakeForm: Content {
+    let name: String?
+    let email: String?
+    let projectType: String?
+    let timeline: String?
+    let details: String?
+    let website: String?
+
+    var intake: ContactIntake {
+        .init(
+            name: name ?? "",
+            email: email ?? "",
+            projectType: projectType ?? "",
+            timeline: timeline ?? "",
+            details: details ?? "",
+            website: website
+        )
     }
 }
 

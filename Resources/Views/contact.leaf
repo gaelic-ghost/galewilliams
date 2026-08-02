@@ -13,45 +13,55 @@
                     <input name="website" type="text" tabindex="-1" autocomplete="off">
                 </label>
             </div>
-            <label for="name">
-                Name
-                <input id="name" name="name" type="text" autocomplete="name" value="#(form.name)" required#if(fieldErrors.name): aria-invalid="true" aria-describedby="name-error"#endif>
-            </label>
-            #if(fieldErrors.name):
-                <p id="name-error" class="field-error">#(fieldErrors.name)</p>
-            #endif
-            <label for="email">
-                Email
-                <input id="email" name="email" type="email" autocomplete="email" value="#(form.email)" required#if(fieldErrors.email): aria-invalid="true" aria-describedby="email-error"#endif>
-            </label>
-            #if(fieldErrors.email):
-                <p id="email-error" class="field-error">#(fieldErrors.email)</p>
-            #endif
-            <label for="project-type">
-                Project type
-                <select id="project-type" name="projectType" required#if(fieldErrors.projectType): aria-invalid="true" aria-describedby="project-type-error"#endif>
-                    #for(projectType in projectTypes):
-                        <option value="#(projectType.value)"#if(projectType.isSelected): selected#endif#if(projectType.isPlaceholder): disabled#endif>#(projectType.label)</option>
-                    #endfor
-                </select>
-            </label>
-            #if(fieldErrors.projectType):
-                <p id="project-type-error" class="field-error">#(fieldErrors.projectType)</p>
-            #endif
-            <label for="timeline">
-                Timeline
-                <input id="timeline" name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required#if(fieldErrors.timeline): aria-invalid="true" aria-describedby="timeline-error"#endif>
-            </label>
-            #if(fieldErrors.timeline):
-                <p id="timeline-error" class="field-error">#(fieldErrors.timeline)</p>
-            #endif
-            <label class="full-span" for="details">
-                Details
-                <textarea id="details" name="details" rows="7" placeholder="What should exist when this project is done?" required#if(fieldErrors.details): aria-invalid="true" aria-describedby="details-error"#endif>#(form.details)</textarea>
-            </label>
-            #if(fieldErrors.details):
-                <p id="details-error" class="field-error full-span">#(fieldErrors.details)</p>
-            #endif
+            <div class="form-field">
+                <label for="name">
+                    Name
+                    <input id="name" name="name" type="text" autocomplete="name" value="#(form.name)" required#if(fieldErrors.name): aria-invalid="true" aria-describedby="name-error"#endif>
+                </label>
+                #if(fieldErrors.name):
+                    <p id="name-error" class="field-error">#(fieldErrors.name)</p>
+                #endif
+            </div>
+            <div class="form-field">
+                <label for="email">
+                    Email
+                    <input id="email" name="email" type="email" autocomplete="email" value="#(form.email)" required#if(fieldErrors.email): aria-invalid="true" aria-describedby="email-error"#endif>
+                </label>
+                #if(fieldErrors.email):
+                    <p id="email-error" class="field-error">#(fieldErrors.email)</p>
+                #endif
+            </div>
+            <div class="form-field">
+                <label for="project-type">
+                    Project type
+                    <select id="project-type" name="projectType" required#if(fieldErrors.projectType): aria-invalid="true" aria-describedby="project-type-error"#endif>
+                        #for(projectType in projectTypes):
+                            <option value="#(projectType.value)"#if(projectType.isSelected): selected#endif#if(projectType.isPlaceholder): disabled#endif>#(projectType.label)</option>
+                        #endfor
+                    </select>
+                </label>
+                #if(fieldErrors.projectType):
+                    <p id="project-type-error" class="field-error">#(fieldErrors.projectType)</p>
+                #endif
+            </div>
+            <div class="form-field">
+                <label for="timeline">
+                    Timeline
+                    <input id="timeline" name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required#if(fieldErrors.timeline): aria-invalid="true" aria-describedby="timeline-error"#endif>
+                </label>
+                #if(fieldErrors.timeline):
+                    <p id="timeline-error" class="field-error">#(fieldErrors.timeline)</p>
+                #endif
+            </div>
+            <div class="form-field full-span">
+                <label for="details">
+                    Details
+                    <textarea id="details" name="details" rows="7" placeholder="What should exist when this project is done?" required#if(fieldErrors.details): aria-invalid="true" aria-describedby="details-error"#endif>#(form.details)</textarea>
+                </label>
+                #if(fieldErrors.details):
+                    <p id="details-error" class="field-error">#(fieldErrors.details)</p>
+                #endif
+            </div>
             <button type="submit">Send intake</button>
         </form>
     #endexport

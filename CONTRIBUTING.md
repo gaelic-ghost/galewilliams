@@ -79,7 +79,16 @@ claim the production site. Use a distinct local admin password and a
 
 Leave AWS and SES variables empty unless intentionally testing email delivery.
 Docker Compose remains the parity and integration path; it owns its own
-PostgreSQL and Redis containers.
+PostgreSQL and Redis containers. Install [Colima](https://github.com/abiosoft/colima)
+and Docker, then start the container runtime before using Compose:
+
+```zsh
+colima start
+docker compose up -d
+```
+
+Stop the parity stack with `docker compose down`; this does not affect the
+native Homebrew services.
 
 ### Runtime Behavior
 

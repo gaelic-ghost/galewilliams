@@ -29,7 +29,7 @@ struct SiteChrome: Encodable {
     private static func navigationItems(currentPath: String) -> [NavigationItem] {
         [
             .init(label: "Home", path: "/", isCurrent: currentPath == "/"),
-            .init(label: "Services", path: "/services", isCurrent: currentPath == "/services"),
+            .init(label: "Services", path: "/services", isCurrent: currentPath == "/services" || currentPath.hasPrefix("/services/")),
             .init(label: "Apps", path: "/apps", isCurrent: currentPath == "/apps"),
             .init(label: "About", path: "/about", isCurrent: currentPath == "/about"),
             .init(label: "Contact", path: "/contact", isCurrent: currentPath == "/contact"),
