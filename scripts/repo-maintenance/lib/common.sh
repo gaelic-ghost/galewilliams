@@ -100,18 +100,18 @@ verify_github_release_prerelease_metadata() {
 }
 
 remote_branch_is_visible() {
-  branch_name="$1"
-  git -C "$REPO_ROOT" ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1
+  _repo_maintenance_visible_branch="$1"
+  git -C "$REPO_ROOT" ls-remote --exit-code --heads origin "$_repo_maintenance_visible_branch" >/dev/null 2>&1
 }
 
 remote_tag_is_visible() {
-  tag_name="$1"
-  git -C "$REPO_ROOT" ls-remote --exit-code --tags origin "refs/tags/$tag_name" >/dev/null 2>&1
+  _repo_maintenance_visible_tag="$1"
+  git -C "$REPO_ROOT" ls-remote --exit-code --tags origin "refs/tags/$_repo_maintenance_visible_tag" >/dev/null 2>&1
 }
 
 github_release_is_visible() {
-  tag_name="$1"
-  gh release view "$tag_name" >/dev/null 2>&1
+  _repo_maintenance_visible_release_tag="$1"
+  gh release view "$_repo_maintenance_visible_release_tag" >/dev/null 2>&1
 }
 
 ensure_git_repo() {

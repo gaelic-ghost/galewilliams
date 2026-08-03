@@ -64,7 +64,7 @@ while [ "$#" -gt 0 ]; do
     -h|--help)
       cat <<'USAGE'
 Usage:
-  release.sh --mode standard --version <vX.Y.Z> --operation prepare|inspect|advance [--base-branch main] [--skip-validate] [--skip-version-bump] [--skip-gh-release] [--review-comments-addressed] [--skip-branch-cleanup] [--dry-run]
+  release.sh --mode standard --version <vX.Y.Z> --operation prepare|inspect|advance|publish [--base-branch main] [--skip-validate] [--skip-version-bump] [--skip-gh-release] [--review-comments-addressed] [--skip-branch-cleanup] [--dry-run]
   release.sh --mode submodule --version <vX.Y.Z> [--skip-validate] [--skip-gh-release] [--dry-run]
 USAGE
       exit 0
@@ -104,10 +104,10 @@ ensure_semver_tag() {
 
 ensure_operation() {
   case "$REPO_MAINTENANCE_RELEASE_OPERATION" in
-    prepare|inspect|advance)
+    prepare|inspect|advance|publish)
       ;;
     *)
-      die "Release operation must be prepare, inspect, or advance. Long-running remote checks must be resumed by a host-native scheduled continuation, never watched from this script."
+      die "Release operation must be prepare, inspect, advance, or publish. Long-running remote checks must be resumed by a host-native scheduled continuation, never watched from this script."
       ;;
   esac
 }
@@ -270,9 +270,11 @@ inspect_pr_gate() {
   fi
   REVIEW_DECISION="$(gh pr view "$pr_number" --json reviewDecision --jq '.reviewDecision // ""' 2>/dev/null || printf 'UNREADABLE')"
   COMMENT_COUNT="$(gh pr view "$pr_number" --json comments,reviews --jq '([.comments[]?, (.reviews[]? | select(.state == "COMMENTED"))] | length)' 2>/dev/null || printf '1')"
-  if [ "$check_readable" != "true" ] || [ "$REVIEW_DECISION" = "UNREADABLE" ]; then
+  if [ "$REVIEW_DECISION" = "UNREADABLE" ]; then
     GATE_PHASE="awaiting-github-state"
-  elif [ "$check_count" -lt "$minimum_check_count" ]; then
+  elif [ "$check_readable" != "true" ] && [ "$minimum_check_count" -ne 0 ]; then
+    GATE_PHASE="awaiting-github-state"
+  elif [ "${check_count:-0}" -lt "$minimum_check_count" ]; then
     GATE_PHASE="awaiting-github-state"
   elif case ",$CHECK_BUCKETS," in *,fail,*|*,cancel,*) true ;; *) false ;; esac; then
     GATE_PHASE="failed-checks"
@@ -295,10 +297,21 @@ emit_continuation_packet() {
     not-started|awaiting-branch-visibility)
       resume_operation="prepare"
       ;;
+    awaiting-tag-visibility|awaiting-github-release-visibility)
+      resume_operation="publish"
+      ;;
   esac
   repo_name="$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || printf 'unknown')"
-  head_sha="$(git -C "$REPO_ROOT" rev-parse HEAD)"
-  printf '%s\n' "{\"schema\":\"repo-maintenance-continuation/v1\",\"operation\":\"standard-release\",\"repository\":\"$repo_name\",\"release_tag\":\"$RELEASE_TAG\",\"branch\":\"$branch_name\",\"head_commit\":\"$head_sha\",\"pr_number\":\"$pr_number\",\"phase\":\"$phase\",\"minimum_delay_minutes\":5,\"resume_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\",\"advance_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation advance\"}"
+  case "$phase" in
+    awaiting-tag-visibility|awaiting-github-release-visibility)
+      head_sha="$(git -C "$REPO_ROOT" rev-list -n 1 "$RELEASE_TAG" 2>/dev/null || true)"
+      [ -n "$head_sha" ] || die "Continuation phase $phase requires local tag $RELEASE_TAG so the release commit can be verified."
+      ;;
+    *)
+      head_sha="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+      ;;
+  esac
+  printf '%s\n' "{\"schema\":\"repo-maintenance-continuation/v1\",\"operation\":\"standard-release\",\"repository\":\"$repo_name\",\"release_tag\":\"$RELEASE_TAG\",\"branch\":\"$branch_name\",\"head_commit\":\"$head_sha\",\"pr_number\":\"$pr_number\",\"phase\":\"$phase\",\"minimum_delay_minutes\":5,\"resume_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\",\"advance_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\"}"
   log "Before scheduling, reuse a live matching host-native continuation while this gate is pending and healthy; do not delete/recreate it after an unchanged snapshot. Create or update one only after it fires or becomes stale, no sooner than five minutes. On wakeup run inspect first; run advance only if this branch, commit, PR, and tag still match."
 }
 
@@ -408,11 +421,39 @@ cleanup_merged_branches() {
   log "Cleaned up local branches already merged into $base_branch where safe."
 }
 
+run_publish_release() {
+  ensure_clean_worktree
+  tag_commit_sha="$(git -C "$REPO_ROOT" rev-list -n 1 "$RELEASE_TAG" 2>/dev/null || true)"
+  [ -n "$tag_commit_sha" ] || die "Publish operation requires local tag $RELEASE_TAG from a completed advance operation. Run --operation advance before --operation publish."
+
+  if [ "$REPO_MAINTENANCE_DRY_RUN" != "true" ]; then
+    git -C "$REPO_ROOT" fetch origin "$base_branch"
+    base_commit_sha="$(git -C "$REPO_ROOT" rev-parse "origin/$base_branch")"
+    git -C "$REPO_ROOT" merge-base --is-ancestor "$tag_commit_sha" "$base_commit_sha" || die "Publish operation refused because tag $RELEASE_TAG at $tag_commit_sha is not reachable from origin/$base_branch at $base_commit_sha. Confirm the merged release commit before publishing."
+  fi
+
+  if ! push_release_tag; then
+    emit_continuation_packet "merged" "$(current_branch)" "awaiting-tag-visibility"
+    return 0
+  fi
+  if ! create_github_release; then
+    emit_continuation_packet "merged" "$(current_branch)" "awaiting-github-release-visibility"
+    return 0
+  fi
+  cleanup_merged_branches "$(current_branch)"
+  log "Release publication completed successfully for $RELEASE_TAG."
+}
+
 run_standard_release() {
   ensure_git_repo
   ensure_gh_cli
   ensure_semver_tag
   ensure_operation
+
+  if [ "$REPO_MAINTENANCE_RELEASE_OPERATION" = "publish" ]; then
+    run_publish_release
+    return 0
+  fi
 
   if [ "$REPO_MAINTENANCE_RELEASE_OPERATION" = "inspect" ]; then
     branch_name="$(current_branch)"
