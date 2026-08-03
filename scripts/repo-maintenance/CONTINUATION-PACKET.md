@@ -22,8 +22,9 @@ release action.
 - `resume_command` is the only command consumers should run after the delay.
   It is `prepare` before a PR exists, `inspect` while PR gates settle, and
   `publish` after a merged release needs tag or GitHub-release visibility.
-- `advance_command` mirrors `resume_command` for compatibility with consumers
-  that use the earlier field name.
+- `advance_command` is the command allowed after a fresh successful
+  `resume_command` inspection: `advance` for a release PR, `prepare` before a
+  PR exists, and `publish` after merge.
 
 For post-merge phases, `head_commit` is the commit peeled from `release_tag`,
 not the currently checked-out branch. The `publish` operation verifies that the

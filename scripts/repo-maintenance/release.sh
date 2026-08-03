@@ -293,12 +293,15 @@ emit_continuation_packet() {
   branch_name="$2"
   phase="$3"
   resume_operation="inspect"
+  advance_operation="advance"
   case "$phase" in
     not-started|awaiting-branch-visibility)
       resume_operation="prepare"
+      advance_operation="prepare"
       ;;
     awaiting-tag-visibility|awaiting-github-release-visibility)
       resume_operation="publish"
+      advance_operation="publish"
       ;;
   esac
   repo_name="$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || printf 'unknown')"
@@ -311,7 +314,7 @@ emit_continuation_packet() {
       head_sha="$(git -C "$REPO_ROOT" rev-parse HEAD)"
       ;;
   esac
-  printf '%s\n' "{\"schema\":\"repo-maintenance-continuation/v1\",\"operation\":\"standard-release\",\"repository\":\"$repo_name\",\"release_tag\":\"$RELEASE_TAG\",\"branch\":\"$branch_name\",\"head_commit\":\"$head_sha\",\"pr_number\":\"$pr_number\",\"phase\":\"$phase\",\"minimum_delay_minutes\":5,\"resume_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\",\"advance_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\"}"
+  printf '%s\n' "{\"schema\":\"repo-maintenance-continuation/v1\",\"operation\":\"standard-release\",\"repository\":\"$repo_name\",\"release_tag\":\"$RELEASE_TAG\",\"branch\":\"$branch_name\",\"head_commit\":\"$head_sha\",\"pr_number\":\"$pr_number\",\"phase\":\"$phase\",\"minimum_delay_minutes\":5,\"resume_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $resume_operation\",\"advance_command\":\"scripts/repo-maintenance/release.sh --mode standard --version $RELEASE_TAG --operation $advance_operation\"}"
   log "Before scheduling, reuse a live matching host-native continuation while this gate is pending and healthy; do not delete/recreate it after an unchanged snapshot. Create or update one only after it fires or becomes stale, no sooner than five minutes. On wakeup run inspect first; run advance only if this branch, commit, PR, and tag still match."
 }
 
