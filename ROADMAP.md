@@ -100,11 +100,13 @@ In Progress
   inquiry form with Turnstile validation, a signed form-age token, a hidden
   anti-automation field, fail-closed Redis rate limiting, and outcome telemetry.
 - [ ] Activate and verify the secondary inquiry form in production:
-  - [ ] Create a managed Cloudflare Turnstile widget restricted to
-    `galewilliams.com`.
-  - [ ] Configure `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`,
-    `TURNSTILE_EXPECTED_HOSTNAME`, and a distinct `CONTACT_FORM_SECRET` in the
-    production environment.
+  - [x] Create a managed Cloudflare Turnstile widget and record its public site
+    key in the production Compose configuration.
+  - [ ] Confirm the widget hostname allowlist includes `galewilliams.com`.
+  - [ ] Configure the widget's `TURNSTILE_SECRET_KEY` and a distinct
+    `CONTACT_FORM_SECRET` in the production host environment. Production
+    Compose already supplies the public site key and expects
+    `TURNSTILE_EXPECTED_HOSTNAME=galewilliams.com`.
   - [ ] Add the strongest safe Cloudflare edge rate limit supported by the
     active plan for `POST /contact` without limiting ordinary page views.
   - [ ] Keep `CONTACT_CLIENT_IP_HEADER` unset until direct-origin access is

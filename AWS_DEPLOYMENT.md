@@ -150,7 +150,9 @@ LEAD_NOTIFICATION_TO_EMAIL
 ```
 
 Use host-managed secrets or a root-owned `.env` on the Lightsail instance. Do
-not commit production values.
+not commit production secrets. The public Turnstile site key is recorded in
+`.env.example` and is the production Compose default; the corresponding
+`TURNSTILE_SECRET_KEY` must remain only in the host environment.
 
 ## First Deployment Runbook
 
@@ -160,10 +162,11 @@ not commit production values.
 4. Install Docker and the Docker Compose plugin.
 5. Clone the repository or copy a release artifact to the instance.
 6. Create a production `.env` on the instance with database and admin secrets.
-7. Create the managed Turnstile widget for `galewilliams.com`, place its site
-   key and secret in the production environment, and generate a distinct
-   `CONTACT_FORM_SECRET`. The secondary form stays unavailable when any of
-   these values are missing; the Upwork contact path remains usable.
+7. Confirm that the managed Turnstile widget containing site key
+   `0x4AAAAAAEkHuCcDfzybZSUB` allows `galewilliams.com`. Place its corresponding
+   secret in the production environment as `TURNSTILE_SECRET_KEY`, and generate
+   a distinct `CONTACT_FORM_SECRET`. The secondary form stays unavailable when
+   either secret is missing; the Upwork contact path remains usable.
 8. Build the image on the instance with `docker compose build`.
 9. Start PostgreSQL with `docker compose up -d db`.
 10. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
