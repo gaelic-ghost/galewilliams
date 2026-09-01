@@ -36,8 +36,8 @@ final class LeadSubmission: Model, Content, @unchecked Sendable {
     init(intake: ContactIntake) {
         name = intake.name
         email = intake.email
-        projectType = intake.projectType
-        timeline = intake.timeline
+        projectType = ContactIntake.inquiryType
+        timeline = ContactIntake.unspecifiedTimeline
         details = intake.details
         status = "new"
     }

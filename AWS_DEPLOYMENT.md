@@ -98,6 +98,10 @@ Vapor app
 - Cloudflare proxy/TLS enabled after the origin is reachable. Set SSL/TLS mode
   to Full (strict): Caddy automatically provisions and renews the public
   origin certificate after DNS points at the instance and ports 80/443 are open.
+- A managed Turnstile widget restricted to `galewilliams.com`, with its public
+  site key and private secret provided to the app separately.
+- An edge rate-limit rule for the contact POST when the active Cloudflare plan
+  supports method matching.
 - SES DKIM records from AWS.
 - SPF record merged safely with existing mail provider records.
 - DMARC record if the domain does not already have one.
@@ -121,8 +125,19 @@ SITE_ORIGIN
 ADMIN_USERNAME
 ADMIN_PASSWORD
 ADMIN_CSRF_SECRET
+TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+TURNSTILE_EXPECTED_HOSTNAME
+CONTACT_FORM_SECRET
 LOG_LEVEL
 ```
+
+`CONTACT_FORM_SECRET` must be a separate random value containing at least 32
+characters. Do not reuse `ADMIN_CSRF_SECRET`. Keep
+`CONTACT_CLIENT_IP_HEADER` unset until the origin has been restricted to trusted
+Cloudflare traffic; accepting a client-IP header from an origin reachable by
+arbitrary clients would let callers choose their own rate-limit identity. Once
+that boundary is verified, set it to `CF-Connecting-IP`.
 
 The SES notification slice will add:
 
@@ -145,16 +160,28 @@ not commit production values.
 4. Install Docker and the Docker Compose plugin.
 5. Clone the repository or copy a release artifact to the instance.
 6. Create a production `.env` on the instance with database and admin secrets.
-7. Build the image on the instance with `docker compose build`.
-8. Start PostgreSQL with `docker compose up -d db`.
-9. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
-10. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
-11. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
-12. Start Caddy with `docker compose up -d caddy`.
-13. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
-14. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
-15. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
-16. Create a first Lightsail snapshot after the deploy is verified.
+7. Create the managed Turnstile widget for `galewilliams.com`, place its site
+   key and secret in the production environment, and generate a distinct
+   `CONTACT_FORM_SECRET`. The secondary form stays unavailable when any of
+   these values are missing; the Upwork contact path remains usable.
+8. Build the image on the instance with `docker compose build`.
+9. Start PostgreSQL with `docker compose up -d db`.
+10. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
+11. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
+12. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
+13. Start Caddy with `docker compose up -d caddy`.
+14. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
+15. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
+16. Configure the contact endpoint edge rate limit supported by the active
+    Cloudflare plan. Prefer matching `POST /contact`, counting by source IP,
+    and challenging or blocking after five attempts in ten minutes. Plans that
+    cannot match the HTTP method or use a ten-minute counting period must rely
+    on Turnstile and the application limiter rather than applying an unsafe
+    path-wide rule that could impede ordinary contact-page views.
+17. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
+18. Submit one secondary inquiry through the production widget and confirm its
+    persisted record and SES notification.
+19. Create a first Lightsail snapshot after the deploy is verified.
 
 ## Cost Guardrails
 
@@ -175,7 +202,12 @@ not commit production values.
 - `docker compose run migrate` succeeds on production.
 - `/api/health` returns `ok` through Cloudflare.
 - `/api/ready` confirms that the deployed web process can reach PostgreSQL before the site is treated as ready for contact intake.
-- `/contact` saves a lead.
+- `/contact` presents Upwork as the primary project path and loads Turnstile
+  from `https://challenges.cloudflare.com` without a CSP error.
+- A valid secondary inquiry saves one lead; invalid, replayed, expired, and
+  unavailable Turnstile checks save and email nothing.
+- The edge rate-limit rule is verified against `POST /contact` without
+  limiting ordinary `GET /contact` page views.
 - `/admin/leads` requires owner credentials.
 - The Redis notifications worker records a successful SES message ID or a
   descriptive failed-delivery state for every queued lead notification.
@@ -205,7 +237,9 @@ For a production incident:
 1. Check `/api/health`, `/api/ready`, and the Compose service status.
 2. If the web process is healthy but readiness fails, investigate PostgreSQL
    before treating the contact form as available.
-3. If Redis or SES is unavailable, leads may still persist with a durable
+3. If Redis is unavailable before submission, the secondary form rejects the
+   inquiry without persisting it because rate limiting is fail-closed. If Redis
+   queueing or SES fails after persistence, the lead retains a durable
    notification failure state; restore those dependencies and let the
    reconciler return pending notification records to the queue.
 4. Restore runtime services to the prior image only when the migration remains
@@ -218,4 +252,7 @@ For a production incident:
 - [Amazon Lightsail pricing](https://aws.amazon.com/lightsail/pricing/)
 - [Amazon SES domain identities](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html)
 - [Amazon SES production access](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html)
+- [Cloudflare Turnstile setup](https://developers.cloudflare.com/turnstile/get-started/)
+- [Cloudflare Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
+- [Cloudflare rate-limiting rules](https://developers.cloudflare.com/waf/rate-limiting-rules/)
 - [Vapor Docker deployment](https://docs.vapor.codes/deploy/docker/)

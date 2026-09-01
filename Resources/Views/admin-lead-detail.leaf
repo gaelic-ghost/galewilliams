@@ -23,7 +23,7 @@
             </dl>
 
             <article class="text-band admin-notes">
-                <h2>Project Details</h2>
+                <h2>Message</h2>
                 <p>#(lead.details)</p>
             </article>
 

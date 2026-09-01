@@ -141,7 +141,7 @@ struct SESLeadNotificationEmailSender: LeadNotificationEmailSending {
                 destination: .init(toAddresses: [configuration.recipient]),
                 message: .init(
                     body: .init(text: .init(charset: "UTF-8", data: body(for: lead))),
-                    subject: .init(charset: "UTF-8", data: "New galewilliams.com lead: \(lead.projectType)")
+                    subject: .init(charset: "UTF-8", data: "New galewilliams.com inquiry")
                 ),
                 source: configuration.sender
             )
@@ -151,14 +151,12 @@ struct SESLeadNotificationEmailSender: LeadNotificationEmailSending {
 
     private func body(for lead: LeadSubmission) -> String {
         """
-        A new galewilliams.com lead is ready for review.
+        A new galewilliams.com inquiry is ready for review.
 
         Name: \(lead.name)
         Email: \(lead.email)
-        Project type: \(lead.projectType)
-        Timeline: \(lead.timeline)
 
-        Details:
+        Message:
         \(lead.details)
         """
     }

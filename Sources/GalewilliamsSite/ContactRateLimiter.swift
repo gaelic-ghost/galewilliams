@@ -6,13 +6,14 @@ struct ContactRateLimiter {
     private static let maximumSubmissions = 5
     private static let windowSeconds = 600
 
-    func enforce(for request: Request) async throws {
+    func enforce(for request: Request, email: String, clientAddress: String?) async throws {
         guard request.application.environment != .testing else {
             return
         }
 
-        let address = request.remoteAddress?.ipAddress ?? "unknown"
-        let digest = SHA256.hash(data: Data(address.utf8)).map { String(format: "%02x", $0) }.joined()
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let identity = "\(clientAddress ?? "unknown")|\(normalizedEmail)"
+        let digest = SHA256.hash(data: Data(identity.utf8)).map { String(format: "%02x", $0) }.joined()
         let key = RedisKey("contact-rate-limit:\(digest)")
         let attempt = try await request.redis.increment(key).get()
 
@@ -21,7 +22,7 @@ struct ContactRateLimiter {
         }
 
         guard attempt <= Self.maximumSubmissions else {
-            throw Abort(.tooManyRequests, reason: "Contact intake is temporarily limited to protect this form from automated abuse. Please wait a few minutes before trying again.")
+            throw Abort(.tooManyRequests, reason: "Secondary contact inquiries are temporarily limited to protect this form from automated abuse. Please wait a few minutes before trying again.")
         }
     }
 }

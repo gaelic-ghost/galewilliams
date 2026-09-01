@@ -96,7 +96,28 @@ In Progress
   schema removal.
 - [x] Render canonical URLs, robots directives, a root sitemap, and a dedicated
   Gale Williams social-preview card from encoded Leaf page contexts.
-- [x] Add rate limiting and a hidden anti-automation field to contact intake.
+- [x] Implement the Upwork-primary contact page and the simplified secondary
+  inquiry form with Turnstile validation, a signed form-age token, a hidden
+  anti-automation field, fail-closed Redis rate limiting, and outcome telemetry.
+- [ ] Activate and verify the secondary inquiry form in production:
+  - [ ] Create a managed Cloudflare Turnstile widget restricted to
+    `galewilliams.com`.
+  - [ ] Configure `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`,
+    `TURNSTILE_EXPECTED_HOSTNAME`, and a distinct `CONTACT_FORM_SECRET` in the
+    production environment.
+  - [ ] Add the strongest safe Cloudflare edge rate limit supported by the
+    active plan for `POST /contact` without limiting ordinary page views.
+  - [ ] Keep `CONTACT_CLIENT_IP_HEADER` unset until direct-origin access is
+    restricted to trusted Cloudflare traffic; then verify `CF-Connecting-IP`
+    before using it for application-level rate-limit identity.
+  - [ ] Submit a real production inquiry, confirm its stored lead and SES
+    notification, and verify rejected Turnstile attempts persist and email
+    nothing.
+- [ ] If Turnstile activation remains blocked, release the Upwork-primary page
+  with the secondary form disabled; its fail-closed unavailable state is the
+  intended interim configuration and removes the current spam submission path.
+- [ ] Review and approve the site and Upwork messaging direction in
+  `docs/MESSAGING_REVIEW.md` before changing the remaining public copy.
 - [ ] Select, implement, and verify a PostgreSQL backup-and-restore procedure;
   a Lightsail snapshot alone is not a tested database recovery plan.
 - [ ] Select and verify uptime/readiness monitoring with a clear operator
