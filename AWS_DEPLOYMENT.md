@@ -152,7 +152,55 @@ LEAD_NOTIFICATION_TO_EMAIL
 Use host-managed secrets or a root-owned `.env` on the Lightsail instance. Do
 not commit production secrets. The public Turnstile site key is recorded in
 `.env.example` and is the production Compose default; the corresponding
-`TURNSTILE_SECRET_KEY` must remain only in the host environment.
+`TURNSTILE_SECRET_KEY` must never be committed or put into browser code.
+
+### Contact Secrets In Tagged Deployments
+
+GitHub Actions is the source of truth for `TURNSTILE_SECRET_KEY` and
+`CONTACT_FORM_SECRET`. Both names were confirmed present as **repository-level**
+Actions secrets on 2026-09-03; their values were not read or verified. The deploy
+job references the `production` environment and can consume these repository
+secrets. Environment-scoped secrets are preferable for production-only access,
+but moving to that scope requires the owner to enter the values there again;
+GitHub does not expose saved values for copying. See
+[GitHub's secret configuration instructions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+
+For a tagged release, the deployment workflow:
+
+1. Checks out the same tag used to build the image and transfers its production
+   Compose file and contact-secret installer over SSH.
+2. Validates both secrets in the runner, then streams them through encrypted SSH
+   standard input. It never puts secret values in command arguments, artifacts,
+   or a transferred temporary file.
+3. Replaces only those two assignments in `/srv/galewilliams/.env`, preserving
+   the other settings. The replacement is atomic, root-owned, and mode `0600`.
+   Temporary replacement files are created in the same protected destination
+   and removed on failure. Existing multiline dotenv values are rejected without
+   modification rather than risking corruption.
+4. Validates and installs the tag's Compose file before the existing migration
+   and runtime activation steps. This is necessary for new environment variables
+   to reach the app, worker, and scheduler containers.
+
+Both secrets are required by this deployment path. Blank values, surrounding
+whitespace, control characters, or a signing secret shorter than 32 bytes stop
+the deployment before runtime activation. Use a distinct, cryptographically
+random signing secret; do not reuse an admin or Turnstile secret. Quote and dollar
+characters are escaped for [Compose interpolation](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/).
+Never run `contact-secrets.py emit` on its own: its output is exclusively for
+the SSH pipe. Do not print production `.env` or expanded Compose configuration.
+
+Changing a GitHub secret does not update running containers immediately. It is
+applied on the next tagged deployment. Configuration installation precedes the
+migration: if later deployment steps fail, the running containers retain their
+old environment, while the host `.env` contains the newly installed secrets.
+Image rollback does not roll secrets back. See the recovery gate below before
+making any credential rotation that invalidates an old credential immediately.
+
+The application's missing-configuration behavior still disables the form safely,
+but this workflow will not silently turn a missing GitHub secret into a disabled
+form deployment. An intentional Upwork-only deployment requires an explicitly
+reviewed configuration change. No AWS Secrets Manager integration or Mac SSH
+access is required for the GitHub-driven path.
 
 ## First Deployment Runbook
 
@@ -164,9 +212,10 @@ not commit production secrets. The public Turnstile site key is recorded in
 6. Create a production `.env` on the instance with database and admin secrets.
 7. Confirm that the managed Turnstile widget containing site key
    `0x4AAAAAAEkHuCcDfzybZSUB` allows `galewilliams.com`. Place its corresponding
-   secret in the production environment as `TURNSTILE_SECRET_KEY`, and generate
-   a distinct `CONTACT_FORM_SECRET`. The secondary form stays unavailable when
-   either secret is missing; the Upwork contact path remains usable.
+   secret in GitHub Actions as `TURNSTILE_SECRET_KEY`, and store a distinct
+   random `CONTACT_FORM_SECRET` alongside it. Tagged deployments install both
+   into the host environment as described above. For manual host provisioning,
+   the app leaves the form unavailable when either secret is missing.
 8. Build the image on the instance with `docker compose build`.
 9. Start PostgreSQL with `docker compose up -d db`.
 10. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.

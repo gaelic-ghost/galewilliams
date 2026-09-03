@@ -103,10 +103,16 @@ In Progress
   - [x] Create a managed Cloudflare Turnstile widget and record its public site
     key in the production Compose configuration.
   - [ ] Confirm the widget hostname allowlist includes `galewilliams.com`.
-  - [ ] Configure the widget's `TURNSTILE_SECRET_KEY` and a distinct
-    `CONTACT_FORM_SECRET` in the production host environment. Production
+  - [x] Store `TURNSTILE_SECRET_KEY` and `CONTACT_FORM_SECRET` as GitHub Actions
+    repository secrets (names verified on 2026-09-03; values remain private).
+  - [x] Wire tagged deployment to stream both secrets over SSH into the host's
+    root-owned environment and install the tag's production Compose file.
+  - [ ] Deploy and verify that both secrets reach the production containers.
     Compose already supplies the public site key and expects
     `TURNSTILE_EXPECTED_HOSTNAME=galewilliams.com`.
+  - [ ] Narrow the two repository secrets to the `production` environment when
+    the owner can re-enter them there; saved GitHub secret values cannot be read
+    back or automatically moved.
   - [ ] Add the strongest safe Cloudflare edge rate limit supported by the
     active plan for `POST /contact` without limiting ordinary page views.
   - [ ] Keep `CONTACT_CLIENT_IP_HEADER` unset until direct-origin access is
@@ -118,6 +124,8 @@ In Progress
 - [ ] If Turnstile activation remains blocked, release the Upwork-primary page
   with the secondary form disabled; its fail-closed unavailable state is the
   intended interim configuration and removes the current spam submission path.
+  The GitHub-secret deployment now requires both secrets, so an intentional
+  disabled-form release needs an explicitly reviewed configuration change.
 - [ ] Review and approve the site and Upwork messaging direction in
   `docs/MESSAGING_REVIEW.md` before changing the remaining public copy.
 - [ ] Select, implement, and verify a PostgreSQL backup-and-restore procedure;

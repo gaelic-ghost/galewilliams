@@ -73,6 +73,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - uses: actions/checkout@v6.0.2
       - name: Download production image archive
         uses: actions/download-artifact@v4
         with:
@@ -98,6 +99,30 @@ jobs:
           ssh_options=(-i /tmp/lightsail-deploy-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
           scp "${ssh_options[@]}" "$archive" "ubuntu@$LIGHTSAIL_HOST:/tmp/galewilliams-site-$RELEASE_TAG.tar.partial"
           ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "set -euo pipefail; test \"\$(sha256sum /tmp/galewilliams-site-$RELEASE_TAG.tar.partial | awk '{print \$1}')\" = '$checksum'; mv /tmp/galewilliams-site-$RELEASE_TAG.tar.partial /tmp/galewilliams-site-$RELEASE_TAG.tar"
+      - name: Install contact secrets and tagged Compose configuration
+        env:
+          LIGHTSAIL_HOST: ${{ vars.LIGHTSAIL_HOST }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          CONTACT_FORM_SECRET: ${{ secrets.CONTACT_FORM_SECRET }}
+        run: |
+          set +x
+          set -euo pipefail
+          test -n "$LIGHTSAIL_HOST"
+          # Validate without logging values or modifying the host.
+          python3 scripts/deployment/contact-secrets.py emit > /dev/null
+          ssh_options=(-i /tmp/lightsail-deploy-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
+          remote_dir=$(ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" 'umask 077; mktemp -d /tmp/galewilliams-config.XXXXXXXX')
+          [[ "$remote_dir" =~ ^/tmp/galewilliams-config\.[A-Za-z0-9]+$ ]]
+          cleanup() {
+            ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "rm -f '$remote_dir/contact-secrets.py' '$remote_dir/docker-compose.production.yml'; rmdir '$remote_dir'" || true
+          }
+          trap cleanup EXIT
+          scp "${ssh_options[@]}" scripts/deployment/contact-secrets.py docker-compose.production.yml "ubuntu@$LIGHTSAIL_HOST:$remote_dir/"
+          # Secret values travel only in SSH stdin, never in command arguments
+          # or a transferred temporary file. The host replaces .env atomically.
+          python3 scripts/deployment/contact-secrets.py emit |
+            ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "sudo -n python3 '$remote_dir/contact-secrets.py' install /srv/galewilliams/.env"
+          ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "set -eu; cd /srv/galewilliams; sudo docker compose --project-directory /srv/galewilliams --env-file .env -f '$remote_dir/docker-compose.production.yml' config --quiet; sudo install -o root -g root -m 0644 '$remote_dir/docker-compose.production.yml' docker-compose.production.yml"
       - name: Activate tagged production image
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -106,3 +131,6 @@ jobs:
           set -euo pipefail
           ssh_options=(-i /tmp/lightsail-deploy-key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new)
           ssh "${ssh_options[@]}" "ubuntu@$LIGHTSAIL_HOST" "set -euo pipefail; cd /srv/galewilliams; sudo docker load -i /tmp/galewilliams-site-$RELEASE_TAG.tar; previous_tag=\$(sudo sed -n 's/^IMAGE_TAG=//p' .env | tail -n 1); : \${previous_tag:=v0.0.1}; if ! sudo IMAGE_TAG='$RELEASE_TAG' docker compose --env-file .env -f docker-compose.production.yml run --rm migrate; then echo 'Candidate migration failed. The running service tag was not changed.' >&2; exit 1; fi; if sudo grep -q '^IMAGE_TAG=' .env; then sudo sed -i -E 's/^IMAGE_TAG=.*/IMAGE_TAG=$RELEASE_TAG/' .env; else printf '\\nIMAGE_TAG=%s\\n' '$RELEASE_TAG' | sudo tee -a .env >/dev/null; fi; if ! sudo docker compose --env-file .env -f docker-compose.production.yml up -d --force-recreate app worker scheduler; then echo \"Runtime activation failed after migration. Restoring runtime services to \$previous_tag; schema changes are forward-only and require the release recovery runbook.\" >&2; sudo sed -i -E \"s/^IMAGE_TAG=.*/IMAGE_TAG=\$previous_tag/\" .env; sudo docker compose --env-file .env -f docker-compose.production.yml up -d --force-recreate app worker scheduler; exit 1; fi; curl --fail --silent --show-error http://127.0.0.1/api/health; curl --fail --silent --show-error http://127.0.0.1/api/ready; unlink /tmp/galewilliams-site-$RELEASE_TAG.tar"
+      - name: Remove runner deployment key
+        if: always()
+        run: rm -f /tmp/lightsail-deploy-key
