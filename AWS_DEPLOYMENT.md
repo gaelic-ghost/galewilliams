@@ -157,12 +157,10 @@ not commit production secrets. The public Turnstile site key is recorded in
 ### Contact Secrets In Tagged Deployments
 
 GitHub Actions is the source of truth for `TURNSTILE_SECRET_KEY` and
-`CONTACT_FORM_SECRET`. Both names were confirmed present as **repository-level**
-Actions secrets on 2026-09-03; their values were not read or verified. The deploy
-job references the `production` environment and can consume these repository
-secrets. Environment-scoped secrets are preferable for production-only access,
-but moving to that scope requires the owner to enter the values there again;
-GitHub does not expose saved values for copying. See
+`CONTACT_FORM_SECRET`. Both names were confirmed present in the **production
+environment** on 2026-09-03, with no repository-level copies remaining; their
+values were not read or verified. The deploy job already references that
+environment, so no workflow change is needed to consume them at this scope. See
 [GitHub's secret configuration instructions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
 
 For a tagged release, the deployment workflow:

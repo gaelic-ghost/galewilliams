@@ -104,15 +104,15 @@ In Progress
     key in the production Compose configuration.
   - [ ] Confirm the widget hostname allowlist includes `galewilliams.com`.
   - [x] Store `TURNSTILE_SECRET_KEY` and `CONTACT_FORM_SECRET` as GitHub Actions
-    repository secrets (names verified on 2026-09-03; values remain private).
+    production-environment secrets (names verified on 2026-09-03; values remain
+    private).
   - [x] Wire tagged deployment to stream both secrets over SSH into the host's
     root-owned environment and install the tag's production Compose file.
   - [ ] Deploy and verify that both secrets reach the production containers.
     Compose already supplies the public site key and expects
     `TURNSTILE_EXPECTED_HOSTNAME=galewilliams.com`.
-  - [ ] Narrow the two repository secrets to the `production` environment when
-    the owner can re-enter them there; saved GitHub secret values cannot be read
-    back or automatically moved.
+  - [x] Narrow the two secrets to the `production` environment and remove their
+    repository-level copies (scope verified on 2026-09-03).
   - [ ] Add the strongest safe Cloudflare edge rate limit supported by the
     active plan for `POST /contact` without limiting ordinary page views.
   - [ ] Keep `CONTACT_CLIENT_IP_HEADER` unset until direct-origin access is
