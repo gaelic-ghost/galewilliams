@@ -256,6 +256,14 @@ access is required for the GitHub-driven path.
   from `https://challenges.cloudflare.com` without a CSP error.
 - A valid secondary inquiry saves one lead; invalid, replayed, expired, and
   unavailable Turnstile checks save and email nothing.
+- Application rate limits apply independently to source IP and normalized
+  email (five attempts per ten minutes for each). Rotating one must not reset
+  the other's quota. Until the trusted client-IP boundary is configured,
+  visitors behind the same proxy address may share the IP quota.
+- Both `/contact` and `/contact/` allow the widget script and frame. Siteverify
+  configuration/provider failures use the unavailable response and error
+  telemetry, distinct from rejected visitor tokens; see
+  [Cloudflare's error code reference](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/#error-codes-reference).
 - The edge rate-limit rule is verified against `POST /contact` without
   limiting ordinary `GET /contact` page views.
 - `/admin/leads` requires owner credentials.

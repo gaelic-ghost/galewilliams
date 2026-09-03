@@ -201,6 +201,14 @@ struct GalewilliamsSiteTests {
                 #expect(response.headers.first(name: "Content-Security-Policy")?.contains("https://challenges.cloudflare.com") == true)
             }
 
+            try await app.testing().test(.GET, "/contact/") { response async in
+                #expect(response.status == .ok)
+                #expect(response.body.string.contains("data-action=\"contact\""))
+                let policy = response.headers.first(name: "Content-Security-Policy") ?? ""
+                #expect(policy.contains("script-src 'self' https://challenges.cloudflare.com"))
+                #expect(policy.contains("frame-src https://challenges.cloudflare.com"))
+            }
+
             try await app.testing().test(.GET, "sitemap.xml") { response async in
                 #expect(response.status == .ok)
                 #expect(response.headers.contentType?.description.contains("application/xml") == true)

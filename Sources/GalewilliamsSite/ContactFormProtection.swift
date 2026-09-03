@@ -122,12 +122,7 @@ struct CloudflareTurnstileVerifier: ContactChallengeVerifying {
             throw ContactFormProtectionError.challengeUnavailable(cause: "Siteverify returned an unreadable response: \(error.localizedDescription)")
         }
 
-        guard result.success,
-              result.action == ContactFormSecurityConfiguration.action,
-              result.hostname == configuration.expectedHostname
-        else {
-            throw ContactFormProtectionError.challengeRejected(codes: result.errorCodes ?? ["action-or-hostname-mismatch"])
-        }
+        try result.validate(expectedHostname: configuration.expectedHostname)
     }
 }
 
@@ -149,11 +144,23 @@ private struct TurnstileVerificationRequest: Content {
     }
 }
 
-private struct TurnstileVerificationResponse: Content {
+struct TurnstileVerificationResponse: Content {
     let success: Bool
     let hostname: String?
     let action: String?
     let errorCodes: [String]?
+
+    func validate(expectedHostname: String) throws {
+        let serviceErrors: Set = ["missing-input-secret", "invalid-input-secret", "bad-request", "internal-error"]
+        let codes = errorCodes ?? []
+        if !success, codes.contains(where: serviceErrors.contains) {
+            let knownErrors = codes.filter(serviceErrors.contains).joined(separator: ", ")
+            throw ContactFormProtectionError.challengeUnavailable(cause: "Siteverify configuration or service failure: \(knownErrors).")
+        }
+        guard success, action == ContactFormSecurityConfiguration.action, hostname == expectedHostname else {
+            throw ContactFormProtectionError.challengeRejected(codes: codes.isEmpty ? ["action-or-hostname-mismatch"] : codes)
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case success

@@ -99,6 +99,9 @@ In Progress
 - [x] Implement the Upwork-primary contact page and the simplified secondary
   inquiry form with Turnstile validation, a signed form-age token, a hidden
   anti-automation field, fail-closed Redis rate limiting, and outcome telemetry.
+- [x] Address contact release-review findings: independent IP/email quotas,
+  operational error classification for Siteverify failures, and Turnstile CSP
+  coverage for `/contact/`, with regression tests for each behavior.
 - [ ] Activate and verify the secondary inquiry form in production:
   - [x] Create a managed Cloudflare Turnstile widget and record its public site
     key in the production Compose configuration.
