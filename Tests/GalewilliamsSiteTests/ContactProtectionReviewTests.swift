@@ -28,7 +28,7 @@ struct ContactProtectionReviewTests {
             try await limiter.enforce(email: "person@example.com", clientAddress: "203.0.113.\(index)") { await counter.increment($0) }
         }
         do {
-            try await limiter.enforce(email: " PERSON@EXAMPLE.COM ", clientAddress: "203.0.113.9") { await counter.increment($0) }
+            try await limiter.enforce(email: " Person@example.com ", clientAddress: "203.0.113.9") { await counter.increment($0) }
             Issue.record("Changing IP or email capitalization bypassed the email quota.")
         } catch let error as Abort {
             #expect(error.status == .tooManyRequests)
