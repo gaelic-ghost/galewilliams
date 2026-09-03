@@ -13,10 +13,20 @@ func configure(_ app: Application) throws {
 
     try configureDatabase(app)
     try configureLeadNotifications(app)
+    configureContactFormSecurity(app)
     app.migrations.add(CreateLeadSubmissions())
     app.migrations.add(AddLeadSubmissionReviewFields())
     app.migrations.add(CreateLeadNotifications())
     try routes(app)
+}
+
+private func configureContactFormSecurity(_ app: Application) {
+    do {
+        app.contactFormSecurityConfiguration = try ContactFormSecurityConfiguration.load()
+    } catch {
+        app.contactFormSecurityConfiguration = nil
+        app.logger.warning("Secondary contact intake is unavailable until Turnstile and contact-form secrets are configured. Upwork contact remains available. Cause: \(error.localizedDescription)")
+    }
 }
 
 private func configureDatabase(_ app: Application) throws {

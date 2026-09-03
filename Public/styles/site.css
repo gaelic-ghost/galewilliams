@@ -372,6 +372,38 @@ button {
     margin-bottom: 64px;
 }
 
+.contact-primary {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    margin-bottom: 42px;
+}
+
+.contact-primary h2,
+.contact-primary p,
+.contact-secondary h2,
+.contact-secondary p {
+    margin: 0;
+}
+
+.contact-primary .button {
+    margin-top: 6px;
+}
+
+.contact-secondary {
+    margin-bottom: 64px;
+}
+
+.contact-secondary .section-heading {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.turnstile-field {
+    min-height: 65px;
+}
+
 .honeypot-field {
     position: absolute;
     width: 1px;

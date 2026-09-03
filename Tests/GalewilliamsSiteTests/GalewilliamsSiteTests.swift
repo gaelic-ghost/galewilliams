@@ -42,19 +42,14 @@ struct GalewilliamsSiteTests {
         let intake = ContactIntake(
             name: "  Gale  ",
             email: "  gale@example.com  ",
-            projectType: "  plugin-integration  ",
-            timeline: "  prototype in 2 weeks  ",
-            details: "  Build a Codex plugin intake flow with enough detail.  ",
-            website: nil
+            details: "  I would like to discuss an open-source collaboration.  "
         )
 
         let validated = try intake.validated()
 
         #expect(validated.name == "Gale")
         #expect(validated.email == "gale@example.com")
-        #expect(validated.projectType == "plugin-integration")
-        #expect(validated.timeline == "prototype in 2 weeks")
-        #expect(validated.details == "Build a Codex plugin intake flow with enough detail.")
+        #expect(validated.details == "I would like to discuss an open-source collaboration.")
     }
 
     @Test("Contact intake validation rejects incomplete details")
@@ -62,10 +57,7 @@ struct GalewilliamsSiteTests {
         let intake = ContactIntake(
             name: "Gale",
             email: "gale@example.com",
-            projectType: "plugin-integration",
-            timeline: "prototype in 2 weeks",
-            details: "Too short.",
-            website: nil
+            details: "Too short."
         )
 
         #expect(throws: ContactIntakeValidationError.self) {
@@ -73,25 +65,21 @@ struct GalewilliamsSiteTests {
         }
     }
 
-    @Test("Contact project types begin unselected and reject unknown values")
-    func contactProjectTypesBeginUnselectedAndRejectUnknownValues() throws {
-        let page = ContactPage()
-        #expect(page.projectTypes.first?.value == "")
-        #expect(page.projectTypes.first?.isSelected == true)
-        #expect(page.projectTypes.first?.isPlaceholder == true)
-        #expect(page.projectTypes.dropFirst().contains(where: \.isSelected) == false)
+    @Test("Contact timing tokens reject tampering and implausible form ages")
+    func contactTimingTokensRejectTamperingAndImplausibleFormAges() throws {
+        let protection = ContactFormTimingProtection(secret: "0123456789abcdef0123456789abcdef")
+        let issuedAt = Date(timeIntervalSince1970: 1000)
+        let token = protection.issueToken(now: issuedAt)
 
-        let intake = ContactIntake(
-            name: "Gale",
-            email: "gale@example.com",
-            projectType: "not-a-real-project-type",
-            timeline: "prototype in 2 weeks",
-            details: "Build a Codex plugin intake flow with enough detail.",
-            website: nil
-        )
-
-        #expect(throws: ContactIntakeValidationError.self) {
-            try intake.validated()
+        try protection.verify(token, now: issuedAt.addingTimeInterval(10))
+        #expect(throws: ContactFormProtectionError.self) {
+            try protection.verify("\(token)tampered", now: issuedAt.addingTimeInterval(10))
+        }
+        #expect(throws: ContactFormProtectionError.self) {
+            try protection.verify(token, now: issuedAt.addingTimeInterval(1))
+        }
+        #expect(throws: ContactFormProtectionError.self) {
+            try protection.verify(token, now: issuedAt.addingTimeInterval(2 * 60 * 60 + 1))
         }
     }
 
@@ -100,17 +88,15 @@ struct GalewilliamsSiteTests {
         let intake = try ContactIntake(
             name: "Gale",
             email: "gale@example.com",
-            projectType: "plugin-integration",
-            timeline: "prototype in 2 weeks",
-            details: "Build a Codex plugin intake flow with enough detail.",
-            website: nil
+            details: "I would like to discuss an open-source collaboration."
         ).validated()
 
         let submission = LeadSubmission(intake: intake)
 
         #expect(submission.name == "Gale")
         #expect(submission.email == "gale@example.com")
-        #expect(submission.projectType == "plugin-integration")
+        #expect(submission.projectType == "other-inquiry")
+        #expect(submission.timeline == "Not provided")
         #expect(submission.status == "new")
     }
 
@@ -206,8 +192,21 @@ struct GalewilliamsSiteTests {
             }
 
             try await app.testing().test(.GET, "contact") { response async in
-                #expect(response.body.string.contains("<option value=\"\" selected disabled>Select a project type</option>"))
+                #expect(response.body.string.contains("https://www.upwork.com/freelancers/~01205e5fc3aa23ffcd"))
+                #expect(response.body.string.contains("View my Upwork profile"))
+                #expect(response.body.string.contains("name=\"formToken\""))
+                #expect(response.body.string.contains("data-action=\"contact\""))
+                #expect(response.body.string.contains("Project type") == false)
                 #expect(response.body.string.contains("aria-current=\"page\">Contact"))
+                #expect(response.headers.first(name: "Content-Security-Policy")?.contains("https://challenges.cloudflare.com") == true)
+            }
+
+            try await app.testing().test(.GET, "/contact/") { response async in
+                #expect(response.status == .ok)
+                #expect(response.body.string.contains("data-action=\"contact\""))
+                let policy = response.headers.first(name: "Content-Security-Policy") ?? ""
+                #expect(policy.contains("script-src 'self' https://challenges.cloudflare.com"))
+                #expect(policy.contains("frame-src https://challenges.cloudflare.com"))
             }
 
             try await app.testing().test(.GET, "sitemap.xml") { response async in
@@ -227,79 +226,90 @@ struct GalewilliamsSiteTests {
     @Test("Invalid contact intake renders inline validation feedback")
     func invalidContactIntakeRendersInlineValidationFeedback() async throws {
         try await withApp { app in
-            let intake = ContactIntake(
-                name: "Gale",
-                email: "gale@example.com",
-                projectType: "plugin-integration",
-                timeline: "prototype in 2 weeks",
-                details: "Too short.",
-                website: nil
-            )
+            let form = try contactForm(for: app, details: "Too short.")
             var headers = HTTPHeaders()
             var body = ByteBufferAllocator().buffer(capacity: 256)
-            try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+            try URLEncodedFormEncoder().encode(form, to: &body, headers: &headers)
 
             try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
-                #expect(response.status == .ok)
-                #expect(response.body.string.contains("Share at least 20 characters about what you need built."))
+                #expect(response.status == .unprocessableEntity)
+                #expect(response.body.string.contains("Share at least 20 characters about your inquiry."))
                 #expect(response.body.string.contains("gale@example.com"))
                 #expect(response.body.string.contains("aria-invalid=\"true\" aria-describedby=\"details-error\""))
                 #expect(response.body.string.contains("id=\"details-error\""))
-                #expect(response.body.string.contains("<option value=\"plugin-integration\" selected>Plugin or tool integration</option>"))
             }
         }
     }
 
-    @Test("Missing or forged project types render an accessible select error")
-    func invalidProjectTypeRendersAccessibleSelectError() async throws {
+    @Test("Invalid form timing and Turnstile challenges are rejected before persistence")
+    func contactProtectionRejectsInvalidSubmissions() async throws {
         try await withApp { app in
-            for projectType in ["", "forged-project-type"] {
-                let intake = ContactIntake(
-                    name: "Gale",
-                    email: "gale@example.com",
-                    projectType: projectType,
-                    timeline: "prototype in 2 weeks",
-                    details: "Build a Codex plugin intake flow with enough detail.",
-                    website: nil
-                )
-                var headers = HTTPHeaders()
-                var body = ByteBufferAllocator().buffer(capacity: 256)
-                try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+            var headers = HTTPHeaders()
+            var body = ByteBufferAllocator().buffer(capacity: 256)
+            let invalidTimingForm = ContactIntakeForm(
+                name: "Gale",
+                email: "gale@example.com",
+                details: "I would like to discuss an open-source collaboration.",
+                website: nil,
+                formToken: "invalid",
+                turnstileResponse: "valid-test-token"
+            )
+            try URLEncodedFormEncoder().encode(invalidTimingForm, to: &body, headers: &headers)
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .badRequest)
+                #expect(response.body.string.contains("form session is no longer valid"))
+            }
 
-                try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
-                    #expect(response.status == .ok)
-                    #expect(response.body.string.contains("Choose the project type that best fits your request."))
-                    #expect(response.body.string.contains("aria-invalid=\"true\" aria-describedby=\"project-type-error\""))
-                    #expect(response.body.string.contains("id=\"project-type-error\""))
-                }
+            app.contactChallengeVerifier = StubContactChallengeVerifier(result: .rejected)
+            body.clear()
+            let challengeRejectedForm = try contactForm(for: app)
+            try URLEncodedFormEncoder().encode(challengeRejectedForm, to: &body, headers: &headers)
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .badRequest)
+                #expect(response.body.string.contains("anti-spam check could not verify"))
+            }
+
+            app.contactChallengeVerifier = StubContactChallengeVerifier(result: .unavailable)
+            body.clear()
+            let challengeUnavailableForm = try contactForm(for: app)
+            try URLEncodedFormEncoder().encode(challengeUnavailableForm, to: &body, headers: &headers)
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .serviceUnavailable)
+                #expect(response.body.string.contains("anti-spam check is temporarily unavailable"))
+            }
+
+            body.clear()
+            let honeypotForm = try contactForm(for: app, website: "https://spam.example")
+            try URLEncodedFormEncoder().encode(honeypotForm, to: &body, headers: &headers)
+            try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
+                #expect(response.status == .ok)
+                #expect(response.body.string.contains("message has been received"))
             }
         }
     }
 
     @Test("Omitted contact controls render field errors and retain submitted values")
     func omittedContactControlsRenderFieldErrorsAndRetainSubmittedValues() async throws {
-        let submissions: [(field: String, form: ContactIntakeForm, message: String)] = [
-            ("name", .init(name: nil, email: "gale@example.com", projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Enter your name so I know how to address your request."),
-            ("email", .init(name: "Gale", email: nil, projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Enter a readable email address so I can reply."),
-            ("project type", .init(name: "Gale", email: "gale@example.com", projectType: nil, timeline: "prototype in 2 weeks", details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Choose the project type that best fits your request."),
-            ("timeline", .init(name: "Gale", email: "gale@example.com", projectType: "plugin-integration", timeline: nil, details: "Build a Codex plugin intake flow with enough detail.", website: nil), "Share the timeline you are working toward."),
-            ("details", .init(name: "Gale", email: "gale@example.com", projectType: "plugin-integration", timeline: "prototype in 2 weeks", details: nil, website: nil), "Share at least 20 characters about what you need built."),
-        ]
-
         try await withApp { app in
+            let formToken = try #require(app.contactFormSecurityConfiguration).signingSecret
+            let token = ContactFormTimingProtection(secret: formToken).issueToken()
+            let submissions: [(field: String, form: ContactIntakeForm, message: String)] = [
+                ("name", .init(name: nil, email: "gale@example.com", details: "I would like to discuss an open-source collaboration.", website: nil, formToken: token, turnstileResponse: "valid-test-token"), "Enter your name so I know how to address your message."),
+                ("email", .init(name: "Gale", email: nil, details: "I would like to discuss an open-source collaboration.", website: nil, formToken: token, turnstileResponse: "valid-test-token"), "Enter a readable email address so I can reply."),
+                ("details", .init(name: "Gale", email: "gale@example.com", details: nil, website: nil, formToken: token, turnstileResponse: "valid-test-token"), "Share at least 20 characters about your inquiry."),
+            ]
+
             for submission in submissions {
                 var headers = HTTPHeaders()
                 var body = ByteBufferAllocator().buffer(capacity: 256)
                 try URLEncodedFormEncoder().encode(submission.form, to: &body, headers: &headers)
 
                 try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
-                    #expect(response.status == .ok, "The omitted \(submission.field) field should return inline validation feedback.")
+                    #expect(response.status == .unprocessableEntity, "The omitted \(submission.field) field should return inline validation feedback.")
                     #expect(response.body.string.contains(submission.message))
                     #expect(response.body.string.contains("Gale") || submission.field == "name")
                     #expect(response.body.string.contains("gale@example.com") || submission.field == "email")
-                    #expect(response.body.string.contains("<option value=\"plugin-integration\" selected>") || submission.field == "project type")
-                    #expect(response.body.string.contains("prototype in 2 weeks") || submission.field == "timeline")
-                    #expect(response.body.string.contains("Build a Codex plugin intake flow with enough detail.") || submission.field == "details")
+                    #expect(response.body.string.contains("I would like to discuss an open-source collaboration.") || submission.field == "details")
                 }
             }
         }
@@ -308,20 +318,17 @@ struct GalewilliamsSiteTests {
     @Test("Contact form values remain escaped after validation")
     func contactFormValuesRemainEscapedAfterValidation() async throws {
         try await withApp { app in
-            let intake = ContactIntake(
+            let form = try contactForm(
+                for: app,
                 name: "<script>alert(1)</script>",
-                email: "gale@example.com",
-                projectType: "plugin-integration",
-                timeline: "prototype in 2 weeks",
-                details: "Too short.",
-                website: nil
+                details: "Too short."
             )
             var headers = HTTPHeaders()
             var body = ByteBufferAllocator().buffer(capacity: 256)
-            try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+            try URLEncodedFormEncoder().encode(form, to: &body, headers: &headers)
 
             try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
-                #expect(response.status == .ok)
+                #expect(response.status == .unprocessableEntity)
                 #expect(response.body.string.contains("&lt;script&gt;alert(1)&lt;/script&gt;"))
                 #expect(response.body.string.contains("<script>alert(1)</script>") == false)
             }
@@ -347,14 +354,17 @@ struct GalewilliamsSiteTests {
                         let intake = ContactIntake(
                             name: "Integration Lead",
                             email: "integration-lead-\(UUID().uuidString)@example.com",
-                            projectType: "plugin-integration",
-                            timeline: "prototype in 2 weeks",
-                            details: "Build a durable integration-test lead workflow with notification tracking.",
-                            website: nil
+                            details: "Exercise a durable integration-test inquiry workflow with notification tracking."
+                        )
+                        let form = try contactForm(
+                            for: app,
+                            name: intake.name,
+                            email: intake.email,
+                            details: intake.details
                         )
                         var headers = HTTPHeaders()
                         var body = ByteBufferAllocator().buffer(capacity: 256)
-                        try URLEncodedFormEncoder().encode(intake, to: &body, headers: &headers)
+                        try URLEncodedFormEncoder().encode(form, to: &body, headers: &headers)
 
                         try await app.testing().test(.POST, "contact", headers: headers, body: body) { response async in
                             #expect(response.status == .ok)
@@ -368,6 +378,9 @@ struct GalewilliamsSiteTests {
                             Issue.record("Database integration contact submission did not persist a lead record for the submitted email address.")
                             return
                         }
+
+                        #expect(lead.projectType == "other-inquiry")
+                        #expect(lead.timeline == "Not provided")
 
                         let notifications = try await LeadNotification.query(on: app.db)
                             .filter(\LeadNotification.$lead.$id == leadID)
@@ -454,15 +467,36 @@ struct GalewilliamsSiteTests {
     }
 
     private func withApp(_ test: (Application) async throws -> Void) async throws {
-        let app = try await Application.make(.testing)
-        do {
-            try configure(app)
-            try await test(app)
-            try await app.asyncShutdown()
-        } catch {
-            try? await app.asyncShutdown()
-            throw error
+        try await withContactFormSecurityEnvironment {
+            let app = try await Application.make(.testing)
+            do {
+                try configure(app)
+                app.contactChallengeVerifier = StubContactChallengeVerifier(result: .accepted)
+                try await test(app)
+                try await app.asyncShutdown()
+            } catch {
+                try? await app.asyncShutdown()
+                throw error
+            }
         }
+    }
+
+    private func contactForm(
+        for app: Application,
+        name: String? = "Gale",
+        email: String? = "gale@example.com",
+        details: String? = "I would like to discuss an open-source collaboration.",
+        website: String? = nil
+    ) throws -> ContactIntakeForm {
+        let security = try #require(app.contactFormSecurityConfiguration)
+        return .init(
+            name: name,
+            email: email,
+            details: details,
+            website: website,
+            formToken: ContactFormTimingProtection(secret: security.signingSecret).issueToken(),
+            turnstileResponse: "valid-test-token"
+        )
     }
 
     private func withAdminCredentials(
@@ -512,6 +546,29 @@ struct GalewilliamsSiteTests {
         try await test()
     }
 
+    private func withContactFormSecurityEnvironment(_ test: () async throws -> Void) async throws {
+        let values = [
+            "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+            "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA",
+            "CONTACT_FORM_SECRET": "0123456789abcdef0123456789abcdef",
+            "TURNSTILE_EXPECTED_HOSTNAME": "galewilliams.com",
+        ]
+        let previousValues = values.keys.reduce(into: [String: String?]()) { values, name in
+            values[name] = Environment.get(name)
+        }
+
+        for (name, value) in values {
+            setEnvironmentValue(value, for: name)
+        }
+        defer {
+            for (name, value) in previousValues {
+                setEnvironmentValue(value, for: name)
+            }
+        }
+
+        try await test()
+    }
+
     private func setEnvironmentValue(_ value: String?, for name: String) {
         if let value {
             setenv(name, value, 1)
@@ -523,6 +580,27 @@ struct GalewilliamsSiteTests {
 
 private struct ReviewSubmission: Content {
     let csrfToken: String
+}
+
+private struct StubContactChallengeVerifier: ContactChallengeVerifying {
+    enum Result {
+        case accepted
+        case rejected
+        case unavailable
+    }
+
+    let result: Result
+
+    func verify(token: String, clientAddress: String?, configuration: ContactFormSecurityConfiguration, for request: Request) async throws {
+        switch result {
+            case .accepted:
+                return
+            case .rejected:
+                throw ContactFormProtectionError.challengeRejected(codes: ["test-rejection"])
+            case .unavailable:
+                throw ContactFormProtectionError.challengeUnavailable(cause: "Test verification outage.")
+        }
+    }
 }
 
 private actor RecordingLeadNotificationEmailSender: LeadNotificationEmailSending {

@@ -2,67 +2,69 @@
     #export("body"):
         #extend("components/page-intro")
 
-        #if(notice):
-            #extend("components/site-notice")
-        #endif
+        <section class="contact-primary text-band" aria-labelledby="project-contact-heading">
+            <p class="card-kicker">Software projects</p>
+            <h2 id="project-contact-heading">Start through Upwork</h2>
+            <p>For new iPhone, iPad, and Mac software projects, Upwork is the best place to review my experience and start a project conversation.</p>
+            <a class="button primary" href="#(upworkURL)">View my Upwork profile</a>
+        </section>
 
-        <form class="intake-form" method="post" action="/contact">
-            <div class="honeypot-field" aria-hidden="true">
-                <label>
-                    Website
-                    <input name="website" type="text" tabindex="-1" autocomplete="off">
-                </label>
+        <section class="contact-secondary" aria-labelledby="other-inquiries-heading">
+            <div class="section-heading">
+                <p class="card-kicker">Other inquiries</p>
+                <h2 id="other-inquiries-heading">Send a short message</h2>
+                <p>Use this form for open-source work, an existing project, press, speaking, or another professional inquiry that does not belong on Upwork.</p>
             </div>
-            <div class="form-field">
-                <label for="name">
-                    Name
-                    <input id="name" name="name" type="text" autocomplete="name" value="#(form.name)" required#if(fieldErrors.name): aria-invalid="true" aria-describedby="name-error"#endif>
-                </label>
-                #if(fieldErrors.name):
-                    <p id="name-error" class="field-error">#(fieldErrors.name)</p>
-                #endif
-            </div>
-            <div class="form-field">
-                <label for="email">
-                    Email
-                    <input id="email" name="email" type="email" autocomplete="email" value="#(form.email)" required#if(fieldErrors.email): aria-invalid="true" aria-describedby="email-error"#endif>
-                </label>
-                #if(fieldErrors.email):
-                    <p id="email-error" class="field-error">#(fieldErrors.email)</p>
-                #endif
-            </div>
-            <div class="form-field">
-                <label for="project-type">
-                    Project type
-                    <select id="project-type" name="projectType" required#if(fieldErrors.projectType): aria-invalid="true" aria-describedby="project-type-error"#endif>
-                        #for(projectType in projectTypes):
-                            <option value="#(projectType.value)"#if(projectType.isSelected): selected#endif#if(projectType.isPlaceholder): disabled#endif>#(projectType.label)</option>
-                        #endfor
-                    </select>
-                </label>
-                #if(fieldErrors.projectType):
-                    <p id="project-type-error" class="field-error">#(fieldErrors.projectType)</p>
-                #endif
-            </div>
-            <div class="form-field">
-                <label for="timeline">
-                    Timeline
-                    <input id="timeline" name="timeline" type="text" placeholder="Example: prototype in 2 weeks" value="#(form.timeline)" required#if(fieldErrors.timeline): aria-invalid="true" aria-describedby="timeline-error"#endif>
-                </label>
-                #if(fieldErrors.timeline):
-                    <p id="timeline-error" class="field-error">#(fieldErrors.timeline)</p>
-                #endif
-            </div>
-            <div class="form-field full-span">
-                <label for="details">
-                    Details
-                    <textarea id="details" name="details" rows="7" placeholder="What should exist when this project is done?" required#if(fieldErrors.details): aria-invalid="true" aria-describedby="details-error"#endif>#(form.details)</textarea>
-                </label>
-                #if(fieldErrors.details):
-                    <p id="details-error" class="field-error">#(fieldErrors.details)</p>
-                #endif
-            </div>
-            <button type="submit">Send intake</button>
-        </form>
+
+            #if(notice):
+                #extend("components/site-notice")
+            #endif
+
+            #if(isFormAvailable):
+                <form class="intake-form" method="post" action="/contact">
+                    <input name="formToken" type="hidden" value="#(formToken)">
+                    <div class="honeypot-field" aria-hidden="true">
+                        <label>
+                            Website
+                            <input name="website" type="text" tabindex="-1" autocomplete="off">
+                        </label>
+                    </div>
+                    <div class="form-field">
+                        <label for="name">
+                            Name
+                            <input id="name" name="name" type="text" autocomplete="name" maxlength="120" value="#(form.name)" required#if(fieldErrors.name): aria-invalid="true" aria-describedby="name-error"#endif>
+                        </label>
+                        #if(fieldErrors.name):
+                            <p id="name-error" class="field-error">#(fieldErrors.name)</p>
+                        #endif
+                    </div>
+                    <div class="form-field">
+                        <label for="email">
+                            Email
+                            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" value="#(form.email)" required#if(fieldErrors.email): aria-invalid="true" aria-describedby="email-error"#endif>
+                        </label>
+                        #if(fieldErrors.email):
+                            <p id="email-error" class="field-error">#(fieldErrors.email)</p>
+                        #endif
+                    </div>
+                    <div class="form-field full-span">
+                        <label for="details">
+                            Message
+                            <textarea id="details" name="details" rows="7" minlength="20" maxlength="4000" placeholder="What would you like me to know?" required#if(fieldErrors.details): aria-invalid="true" aria-describedby="details-error"#endif>#(form.details)</textarea>
+                        </label>
+                        #if(fieldErrors.details):
+                            <p id="details-error" class="field-error">#(fieldErrors.details)</p>
+                        #endif
+                    </div>
+                    <div class="turnstile-field full-span">
+                        <div class="cf-turnstile" data-sitekey="#(turnstileSiteKey)" data-action="contact" data-theme="dark"></div>
+                    </div>
+                    <button type="submit">Send inquiry</button>
+                </form>
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            #else:
+                <p class="form-error" role="status">The secondary contact form is temporarily unavailable. You can still contact me through Upwork.</p>
+            #endif
+        </section>
     #endexport
 #endextend

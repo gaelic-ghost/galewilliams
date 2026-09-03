@@ -98,6 +98,10 @@ Vapor app
 - Cloudflare proxy/TLS enabled after the origin is reachable. Set SSL/TLS mode
   to Full (strict): Caddy automatically provisions and renews the public
   origin certificate after DNS points at the instance and ports 80/443 are open.
+- A managed Turnstile widget restricted to `galewilliams.com`, with its public
+  site key and private secret provided to the app separately.
+- An edge rate-limit rule for the contact POST when the active Cloudflare plan
+  supports method matching.
 - SES DKIM records from AWS.
 - SPF record merged safely with existing mail provider records.
 - DMARC record if the domain does not already have one.
@@ -121,8 +125,19 @@ SITE_ORIGIN
 ADMIN_USERNAME
 ADMIN_PASSWORD
 ADMIN_CSRF_SECRET
+TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+TURNSTILE_EXPECTED_HOSTNAME
+CONTACT_FORM_SECRET
 LOG_LEVEL
 ```
+
+`CONTACT_FORM_SECRET` must be a separate random value containing at least 32
+characters. Do not reuse `ADMIN_CSRF_SECRET`. Keep
+`CONTACT_CLIENT_IP_HEADER` unset until the origin has been restricted to trusted
+Cloudflare traffic; accepting a client-IP header from an origin reachable by
+arbitrary clients would let callers choose their own rate-limit identity. Once
+that boundary is verified, set it to `CF-Connecting-IP`.
 
 The SES notification slice will add:
 
@@ -135,7 +150,55 @@ LEAD_NOTIFICATION_TO_EMAIL
 ```
 
 Use host-managed secrets or a root-owned `.env` on the Lightsail instance. Do
-not commit production values.
+not commit production secrets. The public Turnstile site key is recorded in
+`.env.example` and is the production Compose default; the corresponding
+`TURNSTILE_SECRET_KEY` must never be committed or put into browser code.
+
+### Contact Secrets In Tagged Deployments
+
+GitHub Actions is the source of truth for `TURNSTILE_SECRET_KEY` and
+`CONTACT_FORM_SECRET`. Both names were confirmed present in the **production
+environment** on 2026-09-03, with no repository-level copies remaining; their
+values were not read or verified. The deploy job already references that
+environment, so no workflow change is needed to consume them at this scope. See
+[GitHub's secret configuration instructions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+
+For a tagged release, the deployment workflow:
+
+1. Checks out the same tag used to build the image and transfers its production
+   Compose file and contact-secret installer over SSH.
+2. Validates both secrets in the runner, then streams them through encrypted SSH
+   standard input. It never puts secret values in command arguments, artifacts,
+   or a transferred temporary file.
+3. Replaces only those two assignments in `/srv/galewilliams/.env`, preserving
+   the other settings. The replacement is atomic, root-owned, and mode `0600`.
+   Temporary replacement files are created in the same protected destination
+   and removed on failure. Existing multiline dotenv values are rejected without
+   modification rather than risking corruption.
+4. Validates and installs the tag's Compose file before the existing migration
+   and runtime activation steps. This is necessary for new environment variables
+   to reach the app, worker, and scheduler containers.
+
+Both secrets are required by this deployment path. Blank values, surrounding
+whitespace, control characters, or a signing secret shorter than 32 bytes stop
+the deployment before runtime activation. Use a distinct, cryptographically
+random signing secret; do not reuse an admin or Turnstile secret. Quote and dollar
+characters are escaped for [Compose interpolation](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/).
+Never run `contact-secrets.py emit` on its own: its output is exclusively for
+the SSH pipe. Do not print production `.env` or expanded Compose configuration.
+
+Changing a GitHub secret does not update running containers immediately. It is
+applied on the next tagged deployment. Configuration installation precedes the
+migration: if later deployment steps fail, the running containers retain their
+old environment, while the host `.env` contains the newly installed secrets.
+Image rollback does not roll secrets back. See the recovery gate below before
+making any credential rotation that invalidates an old credential immediately.
+
+The application's missing-configuration behavior still disables the form safely,
+but this workflow will not silently turn a missing GitHub secret into a disabled
+form deployment. An intentional Upwork-only deployment requires an explicitly
+reviewed configuration change. No AWS Secrets Manager integration or Mac SSH
+access is required for the GitHub-driven path.
 
 ## First Deployment Runbook
 
@@ -145,16 +208,30 @@ not commit production values.
 4. Install Docker and the Docker Compose plugin.
 5. Clone the repository or copy a release artifact to the instance.
 6. Create a production `.env` on the instance with database and admin secrets.
-7. Build the image on the instance with `docker compose build`.
-8. Start PostgreSQL with `docker compose up -d db`.
-9. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
-10. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
-11. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
-12. Start Caddy with `docker compose up -d caddy`.
-13. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
-14. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
-15. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
-16. Create a first Lightsail snapshot after the deploy is verified.
+7. Confirm that the managed Turnstile widget containing site key
+   `0x4AAAAAAEkHuCcDfzybZSUB` allows `galewilliams.com`. Place its corresponding
+   secret in GitHub Actions as `TURNSTILE_SECRET_KEY`, and store a distinct
+   random `CONTACT_FORM_SECRET` alongside it. Tagged deployments install both
+   into the host environment as described above. For manual host provisioning,
+   the app leaves the form unavailable when either secret is missing.
+8. Build the image on the instance with `docker compose build`.
+9. Start PostgreSQL with `docker compose up -d db`.
+10. Do not deploy a production schema migration until the deferred PostgreSQL backup-and-restore plan has been selected, implemented, and verified. A Lightsail snapshot alone is not a tested database-restore procedure.
+11. Run migrations with `docker compose run migrate`. Keep migrations forward-compatible: a release may add compatible schema, but destructive schema removal requires a separate later release after rollback is no longer needed.
+12. Start the app, notifications worker, and notification reconciler with `docker compose up -d app worker scheduler`.
+13. Start Caddy with `docker compose up -d caddy`.
+14. Verify `http://<static-ip>/api/health` and `http://<static-ip>/api/ready`.
+15. Point Cloudflare DNS at the static IP and set SSL/TLS mode to Full (strict).
+16. Configure the contact endpoint edge rate limit supported by the active
+    Cloudflare plan. Prefer matching `POST /contact`, counting by source IP,
+    and challenging or blocking after five attempts in ten minutes. Plans that
+    cannot match the HTTP method or use a ten-minute counting period must rely
+    on Turnstile and the application limiter rather than applying an unsafe
+    path-wide rule that could impede ordinary contact-page views.
+17. Verify `https://galewilliams.com/api/health` and `https://galewilliams.com/api/ready`.
+18. Submit one secondary inquiry through the production widget and confirm its
+    persisted record and SES notification.
+19. Create a first Lightsail snapshot after the deploy is verified.
 
 ## Cost Guardrails
 
@@ -175,7 +252,20 @@ not commit production values.
 - `docker compose run migrate` succeeds on production.
 - `/api/health` returns `ok` through Cloudflare.
 - `/api/ready` confirms that the deployed web process can reach PostgreSQL before the site is treated as ready for contact intake.
-- `/contact` saves a lead.
+- `/contact` presents Upwork as the primary project path and loads Turnstile
+  from `https://challenges.cloudflare.com` without a CSP error.
+- A valid secondary inquiry saves one lead; invalid, replayed, expired, and
+  unavailable Turnstile checks save and email nothing.
+- Application rate limits apply independently to source IP and normalized
+  email (five attempts per ten minutes for each). Rotating one must not reset
+  the other's quota. Until the trusted client-IP boundary is configured,
+  visitors behind the same proxy address may share the IP quota.
+- Both `/contact` and `/contact/` allow the widget script and frame. Siteverify
+  configuration/provider failures use the unavailable response and error
+  telemetry, distinct from rejected visitor tokens; see
+  [Cloudflare's error code reference](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/#error-codes-reference).
+- The edge rate-limit rule is verified against `POST /contact` without
+  limiting ordinary `GET /contact` page views.
 - `/admin/leads` requires owner credentials.
 - The Redis notifications worker records a successful SES message ID or a
   descriptive failed-delivery state for every queued lead notification.
@@ -205,7 +295,9 @@ For a production incident:
 1. Check `/api/health`, `/api/ready`, and the Compose service status.
 2. If the web process is healthy but readiness fails, investigate PostgreSQL
    before treating the contact form as available.
-3. If Redis or SES is unavailable, leads may still persist with a durable
+3. If Redis is unavailable before submission, the secondary form rejects the
+   inquiry without persisting it because rate limiting is fail-closed. If Redis
+   queueing or SES fails after persistence, the lead retains a durable
    notification failure state; restore those dependencies and let the
    reconciler return pending notification records to the queue.
 4. Restore runtime services to the prior image only when the migration remains
@@ -218,4 +310,7 @@ For a production incident:
 - [Amazon Lightsail pricing](https://aws.amazon.com/lightsail/pricing/)
 - [Amazon SES domain identities](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html)
 - [Amazon SES production access](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html)
+- [Cloudflare Turnstile setup](https://developers.cloudflare.com/turnstile/get-started/)
+- [Cloudflare Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
+- [Cloudflare rate-limiting rules](https://developers.cloudflare.com/waf/rate-limiting-rules/)
 - [Vapor Docker deployment](https://docs.vapor.codes/deploy/docker/)

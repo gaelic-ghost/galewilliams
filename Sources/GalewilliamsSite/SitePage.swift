@@ -137,9 +137,9 @@ struct SitePage: Encodable {
     static let contact = SitePage(
         title: "Contact | Gale Williams",
         eyebrow: "Contact",
-        heading: "Tell me what you need to make.",
-        summary: "Share the outcome, platform, constraints, and timeline. I’ll review the details and follow up.",
-        description: "Contact Gale Williams about an app, automation, or integration project.",
+        heading: "Let’s find the right place to talk.",
+        summary: "Start a software project through Upwork, or use the secondary form for another kind of inquiry.",
+        description: "Contact Gale Williams about software projects and other professional inquiries.",
         path: "/contact"
     )
 
