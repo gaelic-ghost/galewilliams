@@ -3,8 +3,7 @@
 ## Status
 
 Draft website plan for final copy review. The positioning and structural
-decisions recorded below are approved; the candidate wording still needs a
-final review before implementation.
+decisions recorded below are approved.
 
 This document covers `galewilliams.com`. Upwork profile wording, portfolio
 ordering, skills, and rates are intentionally out of scope and should be handled
@@ -139,8 +138,8 @@ Ship and support:
 
 Specialized engineering:
 
-1. iOS 27 modernization, App Intents and Siri AI integration, Core AI and MLX, and adaptive interfaces for the foldable iPhone Duo
-2. AI and Agents, Siri AI and Apple Private Cloud Compute (PCC), Core AI and MLX, Core ML
+1. iOS 27 modernization and adaptive interfaces.
+2. App Intents and Siri AI, Foundation Models and Private Cloud Compute, Core AI and MLX, and Core ML
 3. Swift backends, APIs, and web surfaces
 4. Audio, speech, transcription, MIDI, and media software
 
@@ -176,10 +175,10 @@ commercial mechanics are part of this messaging pass.
 | Home card 3 | **Full-stack support** — “Swift backends, APIs, integrations, and web surfaces built to support the grandest of plans.” |
 | Services title | “iOS and macOS Software Services \| Gale Williams” |
 | Services eyebrow | “Services” |
-| Services heading| “Apple-platform software, built end to end.” |
+| Services heading | “Apple-platform software, built end to end.” |
 | Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
 | About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
-| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three."             |
+| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it’s being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three."             |
 | Apps heading | “Apps and releases” |
 | Apps summary | “Released apps, TestFlight betas, downloads, and support links will appear here as they become available.” |
 | Apps empty state | “No public releases are listed yet.”  |
@@ -211,7 +210,7 @@ commercial mechanics are part of this messaging pass.
 
 #### Instrumented Beta Run
 
->Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
+> Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
 
 #### Launch and Distribution
 
@@ -225,13 +224,13 @@ commercial mechanics are part of this messaging pass.
 
 #### Latest and greatest
 
-> Adaptive interfaces for everything from the foldable iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
+> Modernize for iOS 27 with adaptive interfaces. Look great on everything from the new iPhone Duo, to the fan-favorite iPad mini and cult-classic iPhone mini.
 
 #### AI and intelligent system integration
 
-> Siri AI, and Private Cloud Compute (PCC) integrations for sleek, secure integrations with Apple's hybrid intelligence systems.
-> Core AI and MLX for high-performance, local AI and agents.
-> Evaluation of existing Core ML or MLX workloads, modernizing with Core AI where it provides a concrete product or performance benefit.
+> Bring your app to center stage with Apple’s intelligent system experiences, App Intents and Siri AI, or build features with Foundation Models and Private Cloud Compute (PCC).
+Run high-performance models locally with Core AI and MLX.
+Modernize existing Core ML or MLX workloads with Core AI when it provides a concrete product or performance benefit.
 
 #### Swift backends and web surfaces
 
@@ -270,6 +269,8 @@ Once the candidate copy is approved, update the website in one coherent pass:
 - Homepage introduction and three capability cards
 - Unified services page content and hierarchy
 - Permanent application redirects for the two retired service routes
+- Remove obsolete `service-track.leaf`
+- Check if `OfferCatalog.leaf` is still needed, if not, remove it.
 - About page introduction and body
 - Apps page introduction and empty state
 - Footer wording
