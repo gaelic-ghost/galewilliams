@@ -175,7 +175,7 @@ commercial mechanics are part of this messaging pass.
 | Home card 2 | **Mac** — “Apps, command-line tools, and background services that feel at home on macOS.” |
 | Home card 3 | **Full-stack support** — “Swift backends, APIs, integrations, and web surfaces built to support the grandest of plans.” |
 | Services title | “iOS and macOS Software Services \| Gale Williams” |
-||Services eyebrow|"Services"
+| Services eyebrow | “Services” |
 | Services heading| “Apple-platform software, built end to end.” |
 | Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
 | About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
@@ -194,53 +194,53 @@ commercial mechanics are part of this messaging pass.
 
 ### Build
 
-### New iPhone and iPad products
+#### New iPhone and iPad products
 
 > Turn an idea or an existing workflow into native software for iPhone, iPad,
 > or Mac. I can help define the first release and carry it through architecture,
 > interface design, implementation, testing, and distribution with monetization.
 
-### Mac apps and system software
+#### Mac apps and system software
 
 > Build software that takes full advantage of the Mac, including menu bar utilities, command-line tools, background services, system framework integrations, and local AI inference.
 
-### Existing-app improvements and modernization
+#### Existing-app improvements and modernization
 
 > Improve, modernize, or extend your existing software. Add new screens and features, adopt Swift concurrency, update frameworks, improve accessibility and performance, fix the bugs nobody else wants to touch, or prepare for the next release.
 
 ### Ship and Support
 
-### Instrumented Beta Run
+#### Instrumented Beta Run
 
 >Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
 
-### Launch and Distribution
+#### Launch and Distribution
 
->Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
->Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined release candidate with more post-launch support.
+> Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
+> Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined release candidate with more post-launch support.
 
-### Ongoing Care
+#### Ongoing Care
 
->Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
+> Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
 
 ### Specialized Engineering
 
-### Latest and greatest
+#### Latest and greatest
 
->Adaptive interfaces for everything from the foldable iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
+> Adaptive interfaces for everything from the foldable iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
 > Siri AI, Private Cloud Compute (PCC), and Core AI for sleek, secure integrations with Apple Intelligence and on-device inference.
 
-### AI and intelligent system integration
+#### AI and intelligent system integration
 
 > Siri AI, and Private Cloud Compute (PCC) integrations for sleek, secure integrations with Apple's hybrid intelligence systems.
 > Core AI and MLX for high-performance, local AI and agents.
 > Evaluation of existing Core ML or MLX workloads, modernizing with Core AI where it provides a concrete product or performance benefit.
 
-### Swift backends and web surfaces
+#### Swift backends and web surfaces
 
 > When an Apple-platform product needs a backend API, third-party integrations, or companion website, I can build the supporting layer in Swift and deploy it to AWS or a VPS. My server-side stack includes Hummingbird, Vapor, Lambda, DynamoDB, and Lightsail.
 
-### Audio and media software
+#### Audio and media software
 
 > I bring specialized experience with audio software engineering, including speech synthesis and transcription, MIDI, recording and playback, and media processing pipelines. I work directly with AVFoundation, Core Audio, and Core Media to deliver the performance and deep platform integration Apple users expect.
 
