@@ -43,9 +43,8 @@ unlimited fixed-price obligations.
 
 The following boundaries are recommended but not yet approved:
 
-- Waiting for App Review, client approval, credentials, required assets, or an
-  eligible build pauses the service window rather than consuming it.
-- Define whether waiting for builds, access, testers, assets, App Review, or client decisions pauses or consumes the scheduled window.
+- Define whether waiting for builds, access, testers, assets, App Review, or
+  client decisions pauses or consumes the scheduled window.
 - The standard telemetry baseline does not automatically include a remote
   collector, custom MetricKit ingestion endpoint, dashboard, analytics system,
   or long-term diagnostic storage. Those remain separately scoped options.
@@ -54,8 +53,8 @@ The following boundaries are recommended but not yet approved:
 
 - Sell a concrete outcome, not a bucket of engineering time.
 - Use fixed prices only when the product passes an eligibility review.
-- State what starts the clock. Waiting for builds, access, testers, assets, or
-  client decisions does not consume a scheduled beta or support window.
+- Define what starts, pauses, resumes, and ends each scheduled beta or support
+  window.
 - Bound remediation by an agreed engineering allowance, build count, issue
   class, or combination of those—not by promising to fix every discovered bug.
 - Keep a small validation period before every launch and a small observation
@@ -234,9 +233,9 @@ launch watch.
 >
 > Take a finished app through the last hard mile. I’ll prepare and validate the
 > release, configure privacy-aware diagnostics, and launch through the App Store
-> or signed and notarized direct Mac distribution. Choose a deeper pre-launch
-> beta with a shorter launch watch, or a streamlined release candidate with more
-> post-launch support.
+> or signed and notarized direct Mac distribution. Launch directly with six weeks
+> of post-launch support, or choose a two- or four-week beta and use the rest of
+> that six-week window after launch.
 
 ### Included Baseline
 

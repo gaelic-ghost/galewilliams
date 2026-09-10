@@ -2,8 +2,7 @@
 
 ## Status
 
-Draft website plan for final copy review. The positioning and structural
-decisions recorded below are approved.
+Approved website messaging plan.
 
 This document covers `galewilliams.com`. Upwork profile wording, portfolio
 ordering, skills, and rates are intentionally out of scope and should be handled
@@ -138,7 +137,7 @@ Ship and support:
 
 Specialized engineering:
 
-1. iOS 27 modernization and adaptive interfaces.
+1. iOS 27 modernization and adaptive interfaces
 2. App Intents and Siri AI, Foundation Models and Private Cloud Compute, Core AI and MLX, and Core ML
 3. Swift backends, APIs, and web surfaces
 4. Audio, speech, transcription, MIDI, and media software
@@ -224,13 +223,13 @@ commercial mechanics are part of this messaging pass.
 
 #### Latest and greatest
 
-> Modernize for iOS 27 with adaptive interfaces. Look great on everything from the new iPhone Duo, to the fan-favorite iPad mini and cult-classic iPhone mini.
+> Modernize for iOS 27 with adaptive interfaces. Look great on everything from the new iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
 
 #### AI and intelligent system integration
 
 > Bring your app to center stage with Apple’s intelligent system experiences, App Intents and Siri AI, or build features with Foundation Models and Private Cloud Compute (PCC).
-Run high-performance models locally with Core AI and MLX.
-Modernize existing Core ML or MLX workloads with Core AI when it provides a concrete product or performance benefit.
+> Run high-performance models locally with Core AI and MLX.
+> Modernize existing Core ML or MLX workloads with Core AI when it provides a concrete product or performance benefit.
 
 #### Swift backends and web surfaces
 
@@ -270,7 +269,7 @@ Once the candidate copy is approved, update the website in one coherent pass:
 - Unified services page content and hierarchy
 - Permanent application redirects for the two retired service routes
 - Remove obsolete `service-track.leaf`
-- Check if `OfferCatalog.leaf` is still needed, if not, remove it.
+- Check if `OfferCatalog.Swift` is still needed, if not, remove it.
 - About page introduction and body
 - Apps page introduction and empty state
 - Footer wording
