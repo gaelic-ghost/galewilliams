@@ -51,7 +51,7 @@ Primary statement:
 
 Supporting statement:
 
-> I take Apple-platform products all the way from idea to launch, including the app, backend APIs, App Store or Direct distribution, and monetization.
+> I take Apple-platform products all the way from idea to launch, including the app, backend APIs, App Store or direct Mac distribution, and monetization.
 
 Short professional label:
 
@@ -142,7 +142,7 @@ Specialized engineering:
 1. iOS 27 modernization, App Intents and Siri AI integration, Core AI and MLX, and adaptive interfaces for the foldable iPhone Duo
 2. AI and Agents, Siri AI and Apple Private Cloud Compute (PCC), Core AI and MLX, Core ML
 3. Swift backends, APIs, and web surfaces
-4. Audio, speech, transcription, MIDI, and media software (namedrop Core Media or Core Audio and AVFoundation as those are common keywords for this stuff)
+4. Audio, speech, transcription, MIDI, and media software
 
 The first implementation should present these as clear service capabilities.
 The structure should leave room for future bounded offers without pretending
@@ -173,13 +173,13 @@ commercial mechanics are part of this messaging pass.
 | Home summary | “I design and build native Apple-platform products end to end, from screens and features to the system services and backends they depend on.” |
 | Home card 1 | **iPhone and iPad** — “Native apps made for humans. Fast, efficient, thoroughly polished.” |
 | Home card 2 | **Mac** — “Apps, command-line tools, and background services that feel at home on macOS.” |
-| Home card 3 | **Full-stack support** — “Swift backends, APIs, integrations, and web surfaces; Built to support the grandest of plans.” |
+| Home card 3 | **Full-stack support** — “Swift backends, APIs, integrations, and web surfaces built to support the grandest of plans.” |
 | Services title | “iOS and macOS Software Services \| Gale Williams” |
 ||Services eyebrow|"Services"
 | Services heading| “Apple-platform software, built end to end.” |
 | Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
 | About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
-| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see, to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three"             |
+| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three"             |
 | Apps heading | “Apps and releases” |
 | Apps summary | “Released apps, TestFlight betas, downloads, and support links will appear here as they become available.” |
 | Apps empty state | “No public releases are listed yet.”  |
@@ -192,7 +192,7 @@ commercial mechanics are part of this messaging pass.
 
 ## Draft Services Copy
 
-## Build
+### Build
 
 ### New iPhone and iPad products
 
@@ -200,15 +200,15 @@ commercial mechanics are part of this messaging pass.
 > or Mac. I can help define the first release and carry it through architecture,
 > interface design, implementation, testing, and distribution with monetization.
 
-### Mac apps And system software
+### Mac apps and system software
 
 > Build software that takes full advantage of the Mac, including menu bar utilities, command-line tools, background services, system framework integrations, and local AI inference.
 
 ### Existing-app improvements and modernization
 
-> Improve, modernize, or extend your existing software. Add new screens and features, adopt Swift concurrency, update frameworks, improve accessibility and perfomrance, fix the bugs nobody else wants to touch, or prepare for the next release.
+> Improve, modernize, or extend your existing software. Add new screens and features, adopt Swift concurrency, update frameworks, improve accessibility and performance, fix the bugs nobody else wants to touch, or prepare for the next release.
 
-## Ship and Support
+### Ship and Support
 
 ### Instrumented Beta Run
 
@@ -217,24 +217,22 @@ commercial mechanics are part of this messaging pass.
 ### Launch and Distribution
 
 >Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
-Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined release candidate with more post-launch support.
+>Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined release candidate with more post-launch support.
 
 ### Ongoing Care
 
 >Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
 
-## Specialized Engineering
+### Specialized Engineering
 
-### Latest Apple-platform work
+### Latest and greatest
 
->iOS 27 modernization.
-Adaptive, fold-friendly interfaces for the new iPhone Duo, the fan-favorite iPad Mini, and cult classic iPhone Mini.
-> Siri AI and Private Cloud Compute (PCC) integrations for sleek, and secure integrations with Apple Intelligence.
->Core AI for the latest in private, on-device Agents
+>Adaptive interfaces for everything from the foldable iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
+> Siri AI, Private Cloud Compute (PCC), and Core AI for sleek, secure integrations with Apple Intelligence and on-device inference.
 
 ### AI and intelligent system integration
 
-> Siri AI, and Private Cloud Compute (PCC) integrations for sleek, secure integrations witih Apple's hybrid intelligence systems.
+> Siri AI, and Private Cloud Compute (PCC) integrations for sleek, secure integrations with Apple's hybrid intelligence systems.
 > Core AI and MLX for high-performance, local AI and agents.
 > Evaluation of existing Core ML or MLX workloads, modernizing with Core AI where it provides a concrete product or performance benefit.
 

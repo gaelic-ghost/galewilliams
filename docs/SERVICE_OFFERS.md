@@ -23,6 +23,32 @@ The offers should reduce sales and scoping overhead without turning unknown
 codebases, unbounded bug fixing, App Review, or production support into
 unlimited fixed-price obligations.
 
+## Recorded Decisions
+
+- Offer both two-week and four-week Instrumented Beta Runs.
+- A launch without an external beta includes six weeks of post-launch
+  observation and support.
+- A beta-plus-launch engagement uses the same six-week service window,
+  allocated at the client’s choice as either:
+  - two weeks of beta and four weeks of post-launch support; or
+  - four weeks of beta and two weeks of post-launch support.
+- Every launch includes some focused, privacy-aware unified logging and
+  MetricKit coverage when the product and deployment targets support it. The
+  exact standard baseline remains to be defined.
+- The remediation unit, included build and App Review allowances, ongoing-care
+  terms, service-window pause rules, and centralized MetricKit handling are not
+  yet decided.
+
+## Proposed Operating Rules
+
+The following boundaries are recommended but not yet approved:
+
+- Waiting for App Review, client approval, credentials, required assets, or an
+  eligible build pauses the service window rather than consuming it.
+- The standard telemetry baseline does not automatically include a remote
+  collector, custom MetricKit ingestion endpoint, dashboard, analytics system,
+  or long-term diagnostic storage. Those remain separately scoped options.
+
 ## Offer Principles
 
 - Sell a concrete outcome, not a bucket of engineering time.
@@ -56,13 +82,14 @@ The website should present three related Ship and Support offers:
 | Ongoing Care | Reserved post-launch maintenance and release capacity | After an eligibility review | Renewal or custom engagement |
 
 Launch and Distribution is the central offer. It includes a minimum release-
-candidate check and a minimum launch watch, then lets the client choose where a
-larger fixed support allocation goes:
+candidate check and a post-launch watch. The client can launch directly or use
+part of the standard six-week service window for a deeper external beta:
 
-| Launch path | Deeper allocation | Minimum on the other side |
+| Launch path | Pre-launch allocation | Post-launch allocation |
 | --- | --- | --- |
-| Beta-first | Time-scoped external beta, evidence review, and remediation | Short post-launch watch |
-| Launch-first | Production observation, report handling, and remediation | Internal beta or release-candidate verification |
+| Launch-only | Internal beta or release-candidate verification | Six weeks |
+| Two-week beta | Two-week external beta, evidence review, and remediation | Four weeks |
+| Four-week beta | Four-week external beta, evidence review, and remediation | Two weeks |
 
 The standalone Instrumented Beta Run is for a product that needs stabilization
 or evidence before anyone commits to a launch. It may be credited into or
@@ -218,7 +245,8 @@ launch watch.
   declarations, versioning, and archive readiness.
 - Produce and validate the release candidate using the selected channel.
 - Configure a focused baseline of privacy-aware logging and available Apple
-  diagnostics for launch questions.
+  diagnostics for launch questions, including MetricKit review and integration
+  when the product and deployment targets support it.
 - Perform minimum internal beta or release-candidate verification.
 - Deliver through one approved distribution channel.
 - Monitor agreed evidence and incoming reports during the included launch watch.
@@ -231,24 +259,25 @@ launch watch.
 
 Emphasize pre-launch evidence and stabilization:
 
-- External TestFlight period of the approved duration
+- Two-week or four-week external TestFlight period
 - Tester instructions and feedback management
 - Agreed diagnostic-review cadence
 - Larger pre-launch remediation allowance
 - Agreed replacement-build limit
-- Shorter post-launch observation and support window
+- Four-week post-launch window after a two-week beta, or a two-week post-launch
+  window after a four-week beta
 
 This path is the default recommendation for a new product, a major update, an
 unfamiliar codebase, a new distribution channel, or a release with meaningful
 account, data, payment, hardware, or migration risk.
 
-### Path B: Launch-First Watch
+### Path B: Launch-Only Watch
 
 Emphasize production observation after a smaller release-candidate check:
 
 - Internal TestFlight or equivalent release-candidate verification
 - Store or direct-distribution launch
-- Longer post-launch observation and support window
+- Six weeks of post-launch observation and support
 - Larger post-launch remediation allowance
 - Agreed patch-release limit
 
@@ -377,7 +406,9 @@ small maintenance need.
 
 ### Candidate Terms
 
-- A short launch-care period may be included in Launch and Distribution.
+- Launch and Distribution includes six weeks of post-launch care when selected
+  without an external beta. A selected two- or four-week beta uses the same
+  service window and leaves four or two weeks of post-launch care respectively.
 - One-, three-, and six-month care terms may be offered at standard prices.
 - Nine-, twelve-, eighteen-, or twenty-four-month terms require custom review
   until longer-term demand and operating cost are understood.
@@ -435,7 +466,7 @@ The website flow should reveal only questions relevant to the selected offer.
 ### Launch Questions
 
 - App Store, direct Mac distribution, or both as separately scoped channels?
-- Beta-first or launch-first emphasis?
+- Launch-only, two-week-beta, or four-week-beta path?
 - Is App Store Connect already configured and contractually ready?
 - Which metadata, artwork, privacy responses, and support resources already
   exist?
@@ -472,25 +503,25 @@ than hidden overage or an impossible promise.
 ## Commercial Decisions Before Publication
 
 1. Final public names and descriptions for all three offers
-2. Standard beta durations and what pauses or extends them
+2. Whether and how client, App Review, credential, asset, build, or other waits
+   pause or extend a beta or support window
 3. Tester responsibility, cohort limits, and supported device matrix
 4. Included beta builds, patch releases, and App Review rounds
 5. Remediation allowance and eligible defect definition
-6. Standard telemetry baseline and custom-ingestion pricing
-7. Beta-first and launch-first support-window allocation
-8. App Store and direct Mac distribution baseline prices
-9. Direct-distribution package and website options
-10. Supported monetization configurations
-11. Ongoing-care terms, allowances, response targets, and rollover rules
-12. Client delay, cancellation, rescheduling, refund, and handoff rules
-13. Invoice schedule, deposit, taxes, third-party charges, and payment timing
-14. Source, artifact, credential, account, and data ownership
-15. Warranty treatment for defects in work delivered under the offer
+6. Exact MetricKit baseline behavior and custom-ingestion option or pricing
+7. App Store and direct Mac distribution baseline prices
+8. Direct-distribution package and website options
+9. Supported monetization configurations
+10. Ongoing-care terms, allowances, response targets, and rollover rules
+11. Client cancellation, rescheduling, refund, and handoff rules
+12. Invoice schedule, deposit, taxes, third-party charges, and payment timing
+13. Source, artifact, credential, account, and data ownership
+14. Warranty treatment for defects in work delivered under the offer
 
 ## Implementation Sequence
 
 1. Approve the offer names, outcomes, dependencies, exclusions, and composition.
-2. Choose initial standard durations, allowances, and launch paths.
+2. Choose the remaining allowances, pause rules, and launch-path boundaries.
 3. Price the eligible baseline and each selectable option.
 4. Review commercial and legal terms with appropriate professional help where
    needed.
