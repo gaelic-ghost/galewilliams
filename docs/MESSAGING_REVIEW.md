@@ -215,8 +215,7 @@ commercial mechanics are part of this messaging pass.
 
 #### Launch and Distribution
 
-> Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
-> Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined release candidate with more post-launch support.
+> Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution. Launch directly with six weeks of post-launch support, or choose a two- or four-week beta and use the rest of that six-week window after launch.
 
 #### Ongoing Care
 
