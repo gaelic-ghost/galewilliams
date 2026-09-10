@@ -45,6 +45,7 @@ The following boundaries are recommended but not yet approved:
 
 - Waiting for App Review, client approval, credentials, required assets, or an
   eligible build pauses the service window rather than consuming it.
+- Define whether waiting for builds, access, testers, assets, App Review, or client decisions pauses or consumes the scheduled window.
 - The standard telemetry baseline does not automatically include a remote
   collector, custom MetricKit ingestion endpoint, dashboard, analytics system,
   or long-term diagnostic storage. Those remain separately scoped options.
