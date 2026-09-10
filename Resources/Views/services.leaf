@@ -2,24 +2,78 @@
     #export("body"):
         #extend("components/page-intro")
 
-        <section class="choice-grid" aria-label="Service tracks">
-            <a class="choice-panel" href="/services/personal">
-                <span class="card-kicker">For you</span>
-                <h2>Tools for your own work.</h2>
-                <p>Automations, apps, and integrations for the systems you use every day.</p>
-                <span class="panel-link">Explore personal services</span>
-            </a>
-            <a class="choice-panel" href="/services/business">
-                <span class="card-kicker">For your team</span>
-                <h2>Software for a growing business.</h2>
-                <p>Workflows, internal tools, websites, and apps built around how your team works.</p>
-                <span class="panel-link">Explore business services</span>
-            </a>
+        <section class="services-section" aria-labelledby="build-heading">
+            <div class="section-heading">
+                <p class="card-kicker">Build</p>
+                <h2 id="build-heading">Create something new—or make an existing product better.</h2>
+            </div>
+            <div class="service-grid">
+                <article class="service-panel">
+                    <h3>New iPhone and iPad products</h3>
+                    <p>Turn an idea or an existing workflow into native software for iPhone or iPad. I can help define the first release and carry it through architecture, interface design, implementation, testing, and distribution with monetization.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Mac apps and system software</h3>
+                    <p>Build software that takes full advantage of the Mac, including menu bar utilities, command-line tools, background services, system framework integrations, and local AI inference.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Existing-app improvements and modernization</h3>
+                    <p>Improve, modernize, or extend your existing software. Add new screens and features, adopt Swift concurrency, update frameworks, improve accessibility and performance, fix the bugs nobody else wants to touch, or prepare for the next release.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="services-section" aria-labelledby="ship-heading">
+            <div class="section-heading">
+                <p class="card-kicker">Ship and support</p>
+                <h2 id="ship-heading">Get through beta, launch, and what comes next.</h2>
+            </div>
+            <div class="service-grid">
+                <article class="service-panel">
+                    <h3>Beta testing and release readiness</h3>
+                    <p>Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I can configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, and turn the evidence into a clear path toward release.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Launch and distribution</h3>
+                    <p>Take a finished app through the last hard mile. I can prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Post-launch maintenance</h3>
+                    <p>Keep your product sharp after launch with compatibility updates, crash and performance investigation, and scoped release support.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="services-section" aria-labelledby="specialized-heading">
+            <div class="section-heading">
+                <p class="card-kicker">Specialized engineering</p>
+                <h2 id="specialized-heading">Deep platform work where the details matter.</h2>
+            </div>
+            <div class="service-grid specialized-grid">
+                <article class="service-panel">
+                    <h3>Latest and greatest</h3>
+                    <p>Modernize for iOS 27 with adaptive interfaces. Look great on everything from the new iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>AI and intelligent system integration</h3>
+                    <p>Bring your app to center stage with Apple’s intelligent system experiences, App Intents and Siri AI, or build features with Foundation Models and Private Cloud Compute (PCC).</p>
+                    <p>Run high-performance models locally with Core AI and MLX.</p>
+                    <p>Modernize existing Core ML or MLX workloads with Core AI when it provides a concrete product or performance benefit.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Swift backends and web surfaces</h3>
+                    <p>When an Apple-platform product needs a backend API, third-party integrations, or companion website, I can build the supporting layer in Swift and deploy it to AWS or a VPS. My server-side stack includes Hummingbird, Vapor, Lambda, DynamoDB, and Lightsail.</p>
+                </article>
+                <article class="service-panel">
+                    <h3>Audio and media software</h3>
+                    <p>I bring specialized experience with audio software engineering, including speech synthesis and transcription, MIDI, recording and playback, and media processing pipelines. I work directly with AVFoundation, Core Audio, and Core Media to deliver the performance and deep platform integration Apple users expect.</p>
+                </article>
+            </div>
         </section>
 
         <section class="text-band">
-            <h2>Not sure where the idea fits?</h2>
-            <p>Tell me what is getting in the way. We’ll work out the useful next step.</p>
+            <h2>Have a product in mind?</h2>
+            <p>Start a project through Upwork and tell me what you want to build, improve, or launch.</p>
             #extend("components/action-row")
         </section>
     #endexport

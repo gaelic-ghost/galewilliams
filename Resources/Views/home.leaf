@@ -11,19 +11,19 @@
 
         <section class="signal-grid" aria-label="Core work">
             <article>
-                <span class="card-kicker">Agents</span>
-                <h2>Practical agents for real workflows.</h2>
-                <p>Clear inputs, approval points, and useful results.</p>
+                <span class="card-kicker">iPhone and iPad</span>
+                <h2>Native apps made for humans.</h2>
+                <p>Fast, efficient, thoroughly polished.</p>
             </article>
             <article>
-                <span class="card-kicker">Apps</span>
-                <h2>Purpose-built apps tailored to you.</h2>
-                <p>Software shaped around the job, platform, and people using it.</p>
+                <span class="card-kicker">Mac</span>
+                <h2>Software that feels at home on macOS.</h2>
+                <p>Apps, command-line tools, and background services.</p>
             </article>
             <article>
-                <span class="card-kicker">Integrations</span>
-                <h2>Tools that work together.</h2>
-                <p>Connect the systems you already rely on without unnecessary complexity.</p>
+                <span class="card-kicker">Full-stack support</span>
+                <h2>Everything your app depends on.</h2>
+                <p>Swift backends, APIs, integrations, and web surfaces built to support the grandest of plans.</p>
             </article>
         </section>
     #endexport

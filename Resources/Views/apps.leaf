@@ -3,8 +3,7 @@
         #extend("components/page-intro")
 
         <section class="text-band">
-            <h2>No public releases yet.</h2>
-            <p>When an app or plugin is ready, this page will include the real download, install, and support information. Until then, see the services page for custom work.</p>
+            <h2>No public releases are listed yet.</h2>
             #extend("components/action-row")
         </section>
     #endexport

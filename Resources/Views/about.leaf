@@ -4,8 +4,8 @@
 
         <section class="text-band">
             <h2>How I work</h2>
-            <p>I like software that is direct, understandable, and genuinely useful. That means asking good questions, working in clear steps, and leaving you with something you can actually use.</p>
-            <p>Most of my work sits where Apple platforms, web services, automation, and AI meet. I care about practical systems, honest tradeoffs, and tools that do not make people fight them.</p>
+            <p>Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together.</p>
+            <p>I care about software that feels clean, cohesive, and intuitive, whether it’s being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three.</p>
         </section>
     #endexport
 #endextend

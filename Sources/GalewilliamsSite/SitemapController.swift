@@ -43,12 +43,10 @@ struct SitemapController: RouteCollection {
 
 enum PublicSiteMap {
     static let entries: [SitemapEntry] = [
-        .init(label: "Home", summary: "Independent software studio for apps, automations, and integrations.", path: "/"),
-        .init(label: "Services", summary: "Browse personal and small-business service tracks.", path: "/services"),
-        .init(label: "Personal services", summary: "Personal AI tools, automations, and integrations.", path: "/services/personal"),
-        .init(label: "Business services", summary: "Business automation, app, and integration services.", path: "/services/business"),
-        .init(label: "About", summary: "Learn about Gale Williams.", path: "/about"),
-        .init(label: "Contact", summary: "Start a project intake.", path: "/contact"),
+        .init(label: "Home", summary: "Independent software engineering for iPhone, iPad, and Mac.", path: "/"),
+        .init(label: "Services", summary: "End-to-end Apple-platform software services, release support, and specialized engineering.", path: "/services"),
+        .init(label: "About", summary: "Learn about Gale Williams and their approach to Apple-platform software.", path: "/about"),
+        .init(label: "Contact", summary: "Start a software project or send another professional inquiry.", path: "/contact"),
     ]
 }
 

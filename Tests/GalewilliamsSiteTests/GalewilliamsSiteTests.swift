@@ -11,7 +11,10 @@ struct GalewilliamsSiteTests {
     @Test("Primary pages expose expected paths")
     func primaryPagesExposeExpectedPaths() {
         #expect(SitePage.home.chrome.canonicalURL == "https://galewilliams.com")
+        #expect(SitePage.home.chrome.title == "Gale Williams | iOS and macOS software engineer")
+        #expect(SitePage.home.intro.eyebrow == "Independent software engineer")
         #expect(SitePage.services.chrome.canonicalURL == "https://galewilliams.com/services")
+        #expect(SitePage.services.intro.heading == "Apple-platform software, built end to end.")
         #expect(SitePage.apps.chrome.robotsDirective == "noindex, nofollow")
         #expect(SitePage.about.intro.heading == "Hi, I’m Gale.")
         #expect(SitePage.contact.chrome.canonicalURL == "https://galewilliams.com/contact")
@@ -25,7 +28,7 @@ struct GalewilliamsSiteTests {
         #expect(labels == ["Home", "Services", "Apps", "About", "Contact"])
         #expect(items.first?.isCurrent == true)
         #expect(SitePage.contact.chrome.navItems.last?.isCurrent == true)
-        #expect(OfferCatalog.personalServices.chrome.navItems.first(where: { $0.label == "Services" })?.isCurrent == true)
+        #expect(SitePage.services.chrome.navItems.first(where: { $0.label == "Services" })?.isCurrent == true)
     }
 
     @Test("Contact page can carry a status message")
@@ -171,7 +174,7 @@ struct GalewilliamsSiteTests {
     @Test("Public routes render successfully")
     func publicRoutesRenderSuccessfully() async throws {
         try await withApp { app in
-            for path in ["/", "/services", "/services/personal", "/services/business", "/apps", "/about", "/contact", "/sitemap"] {
+            for path in ["/", "/services", "/apps", "/about", "/contact", "/sitemap"] {
                 try await app.testing().test(.GET, path) { response async in
                     #expect(response.status == .ok)
                     #expect(response.body.string.contains("Gale Williams"))
@@ -189,6 +192,21 @@ struct GalewilliamsSiteTests {
 
             try await app.testing().test(.GET, "apps") { response async in
                 #expect(response.body.string.contains("<meta name=\"robots\" content=\"noindex, nofollow\">"))
+                #expect(response.body.string.contains("No public releases are listed yet."))
+            }
+
+            try await app.testing().test(.GET, "services") { response async in
+                #expect(response.body.string.contains("New iPhone and iPad products"))
+                #expect(response.body.string.contains("Beta testing and release readiness"))
+                #expect(response.body.string.contains("six weeks") == false)
+                #expect(response.body.string.contains("AI and intelligent system integration"))
+            }
+
+            for path in ["services/personal", "services/business"] {
+                try await app.testing().test(.GET, path) { response async in
+                    #expect(response.status == .movedPermanently)
+                    #expect(response.headers.first(name: .location) == "/services")
+                }
             }
 
             try await app.testing().test(.GET, "contact") { response async in
@@ -212,7 +230,9 @@ struct GalewilliamsSiteTests {
             try await app.testing().test(.GET, "sitemap.xml") { response async in
                 #expect(response.status == .ok)
                 #expect(response.headers.contentType?.description.contains("application/xml") == true)
-                #expect(response.body.string.contains("https://galewilliams.com/services/personal"))
+                #expect(response.body.string.contains("https://galewilliams.com/services"))
+                #expect(response.body.string.contains("/services/personal") == false)
+                #expect(response.body.string.contains("/services/business") == false)
                 #expect(response.body.string.contains("/admin") == false)
             }
 

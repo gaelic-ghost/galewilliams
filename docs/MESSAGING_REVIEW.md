@@ -1,214 +1,283 @@
-# Messaging Review
+# Website Messaging Review
 
 ## Status
 
-Draft for review. This document proposes a direction and candidate copy; it
-does not authorize a public-site or Upwork rewrite by itself.
+Approved website messaging plan.
 
-## Objective
+This document covers `galewilliams.com`. Upwork profile wording, portfolio
+ordering, skills, and rates are intentionally out of scope and should be handled
+in a separate document and external-edit pass.
 
-Present Gale Williams primarily as an experienced iOS and macOS software
-engineer. Lead with understandable Apple-platform development services and
-outcomes. Treat audio, integrations, automation, and AI as supporting
-capabilities or project-specific experience rather than the identity of the
-business.
+## Approved Direction
 
-The contact page is already moving in this direction: Upwork is the primary
-path for new software projects, while the protected secondary form is reserved
-for other professional inquiries.
+Present Gale Williams as an independent software engineer who designs and builds
+Apple-platform products end to end. Lead with native software for iPhone, iPad,
+and Mac. Describe system software, Swift backends, web surfaces, integrations,
+and audio engineering as supporting depth within that focus.
 
-## Recommended Positioning
+The site should make the primary work understandable before naming frameworks,
+hosting choices, or other implementation details.
+
+Approved positioning decisions:
+
+- Use **independent software engineer** as the primary identity.
+- Use **iOS and macOS** in compact titles. Name iPhone, iPad, and Mac in visible
+  page copy where space allows.
+- Present end-to-end product ownership as a core strength: product definition,
+  architecture, interface or command-line implementation, system services,
+  supporting backends, testing, and release preparation.
+- Focus the service catalog on Swift and Apple platforms.
+- Include graphical apps, command-line tools, background services, and other
+  system software within the Apple-platform focus.
+- Present application backends and web surfaces as supporting parts of an
+  Apple-platform product. Gale builds these in Swift with Hummingbird or Vapor
+  and deploys them to AWS, including Lambda, or to a VPS when appropriate.
+- Present audio, speech, MIDI, and media engineering as a visible supporting
+  specialization, not as an equal top-level business identity.
+- Replace the personal/SMB service split with one complete `/services` page.
+- Keep the current contact page structure and copy during this messaging pass.
+  Upwork remains the primary path for new software projects; the protected
+  secondary form remains for other professional inquiries.
+- Do not market standalone Android or general-purpose web-app delivery on this
+  site. Mention web work where it supports an Apple-platform product.
+
+## Positioning Statements
 
 Primary statement:
 
-> I design and build thoughtful, reliable software for iPhone, iPad, and Mac.
+> I design and build native software for iPhone, iPad, and Mac.
 
 Supporting statement:
 
-> From a focused utility to a production app and its supporting services, I can
-> help shape the product, build the interface and underlying systems, connect
-> the services it depends on, and prepare it for release.
+> I take Apple-platform products all the way from idea to launch, including the app, backend APIs, App Store or direct Mac distribution, and monetization.
 
 Short professional label:
 
-> iOS and macOS software engineer
+> Independent iOS and macOS software engineer
 
-This direction is deliberately traditional and legible. It tells a prospective
-client what Gale builds before discussing implementation techniques.
+This positioning is deliberately direct. It tells prospective clients what
+Gale builds, how much of the product Gale can own, and where the supporting
+technical specialties fit.
 
 ## Voice And Vocabulary
 
 Use:
 
 - First-person, direct language: “I design,” “I build,” and “I can help.”
-- Platform names people recognize: iPhone, iPad, Mac, iOS, iPadOS, and macOS.
-- Concrete work: new apps, existing-app improvements, integrations, debugging,
-  performance, accessibility, testing, and release preparation.
-- “Independent software engineer” or “independent software studio” depending
-  on whether the page is describing Gale personally or the business surface.
-- Audio, speech, MIDI, and media software where that expertise is relevant.
+- Familiar product names in prominent copy: iPhone, iPad, and Mac.
+- Platform names in compact or technical contexts: iOS, iPadOS, and macOS.
+- Concrete work: new products, existing-app improvements, graphical
+  interfaces, command-line tools, background services, integrations,
+  accessibility, debugging, performance, testing, and release preparation.
+- “Independent software engineer” when describing Gale or the business.
+- “Swift backends,” “APIs,” or “web surfaces” when describing server-side work
+  that supports an app.
+- Audio, speech, MIDI, and media software where that specialization is
+  relevant.
 
 De-emphasize:
 
 - Agentic, agents, AI workflows, RAG, and automation in headlines or global
   descriptions.
-- Plugins as a top-level business category; describe the actual app or
-  integration outcome instead.
-- Broad “personal versus business” segmentation when both audiences need the
+- Plugins as a top-level business category. Describe the app, system service,
+  integration, or user outcome instead.
+- Broad personal-versus-business segmentation when both audiences need the
   same Apple-platform engineering capabilities.
-- “Flat-rate” until a bounded offer, scope, and price have been approved.
+- Standalone Android development and general-purpose website or web-app work.
+- “Flat-rate” or other pricing language until a bounded offer, scope, and price
+  have been approved.
+- Repeated adjectives such as “thoughtful,” “clear,” “reliable,” and “useful”
+  when a concrete capability or outcome can say more.
 
-AI and automation do not need to be disowned. They can remain accurate
-portfolio details, skills, or implementation options when a specific project
-benefits from them.
+AI and automation do not need to be disowned. They can remain accurate project
+details, implementation options, or portfolio evidence when a particular
+product benefits from them.
 
-## Proposed Site Structure
+## Credibility And External Links
 
-Recommended: make `/services` the complete services page and retire the
-personal/SMB split. Redirect `/services/personal` and `/services/business` to
-`/services` so existing links continue to work.
+Credibility should ultimately come from verifiable work and history rather than
+unsupported marketing claims. Likely sources include:
 
-Suggested service groups:
+- GitHub projects
+- Released App Store software
+- Public TestFlight betas where appropriate
+- LinkedIn and relevant industry history
+- Focused project or product descriptions
 
-1. New iPhone, iPad, and Mac apps
-2. Existing-app improvements and modernization
-3. App integrations and supporting services
-4. Audio, speech, MIDI, and media software
+A reusable header or footer component may later present a concise row of icons
+linking to GitHub, LinkedIn, the App Store, and other approved profiles. That is
+deferred until after the current higher-priority site work and is not part of
+this messaging implementation.
 
-This is a small information-architecture change, not merely a wording change.
-It should be approved before implementation because it changes routes and how
-prospective clients understand the service catalog.
+## Services Structure
+
+Make `/services` the complete services page. Permanently redirect
+`/services/personal` and `/services/business` to `/services`, and remove the old
+pages from the HTML and XML sitemaps.
+
+Keep these redirects in the Vapor application rather than relying on
+Cloudflare configuration. Two application routes are small, portable, visible
+in the repository, and directly covered by tests. Cloudflare redirects would
+add external configuration without materially simplifying the site.
+
+Organize the page into build, ship/support, and specialized engineering, so the
+hierarchy matches the positioning.
+
+Build:
+
+1. New iPhone and iPad products
+2. Mac apps, command-line tools, and background services
+3. Existing-app improvements and modernization
+
+Ship and support:
+
+1. Beta testing and release readiness
+2. Launch and distribution
+3. Post-launch maintenance
+
+Specialized engineering:
+
+1. iOS 27 modernization and adaptive interfaces
+2. App Intents and Siri AI, Foundation Models and Private Cloud Compute, Core AI and MLX, and Core ML
+3. Swift backends, APIs, and web surfaces
+4. Audio, speech, transcription, MIDI, and media software
+
+The first implementation should present these as clear service capabilities.
+The structure should leave room for future bounded offers without pretending
+that prices, choices, or fulfillment rules have already been approved.
+
+### Future Structured Project Start
+
+The intended later services experience is a low-friction, productized flow:
+
+1. Pick a bounded project option.
+2. Make a small number of relevant choices.
+3. Supply the minimum useful project details.
+4. Submit the request for Gale’s review.
+5. Receive an invoice or a request for clarification.
+
+That future flow is distinct from the live secondary contact form. It will need
+approved offers, scope boundaries, prices, intake fields, review rules, payment
+handling, and fulfillment expectations before implementation. None of those
+commercial mechanics are part of this messaging pass.
 
 ## Site Copy Matrix
 
-| Surface | Current emphasis | Proposed copy |
-| --- | --- | --- |
-| Home title | “Agentic apps, plugins, and integrations” | “Gale Williams \| iOS and macOS software engineer” |
-| Home eyebrow | “Independent software studio” | Keep as written |
-| Home heading | “Software that makes work easier.” | “Thoughtful software for iPhone, iPad, and Mac.” |
-| Home summary | Apps, automations, and integrations | “I design and build Apple-platform apps that are clear, capable, and made for the people using them.” |
-| Home card 1 | Agents | “iPhone and iPad” — “Native apps built around a focused, useful experience.” |
-| Home card 2 | Apps | “Mac” — “Purpose-built Mac software that feels at home on the platform.” |
-| Home card 3 | Integrations | “Supporting services” — “APIs, cloud services, and integrations that help the app do its job.” |
-| Services intro | Automation-to-app range | “New apps, improvements to existing software, and the services that support them.” |
-| About summary | Apps, automations, integrations | “I’m an independent software engineer focused on thoughtful, reliable software for Apple platforms.” |
-| About body | Apple platforms, web services, automation, and AI | “My work spans native Apple-platform development, supporting web services and integrations, and audio or speech systems. I care about practical architecture, honest tradeoffs, accessibility, and software that does not make people fight it.” |
-| Footer | Agentic apps, plugins, integrations | “iPhone, iPad, and Mac software by Gale Williams.” |
-| Global project CTA | “Start a project” | Keep; it now leads to the Upwork-primary contact page |
+| Surface | Candidate direction |
+| --- | --- |
+| Home title | “Gale Williams \| iOS and macOS software engineer” |
+| Home eyebrow | “Independent software engineer” |
+| Home heading | “Software for iPhone, iPad, and Mac.” |
+| Home summary | “I design and build native Apple-platform products end to end, from screens and features to the system services and backends they depend on.” |
+| Home card 1 | **iPhone and iPad** — “Native apps made for humans. Fast, efficient, thoroughly polished.” |
+| Home card 2 | **Mac** — “Apps, command-line tools, and background services that feel at home on macOS.” |
+| Home card 3 | **Full-stack support** — “Swift backends, APIs, integrations, and web surfaces built to support the grandest of plans.” |
+| Services title | “iOS and macOS Software Services \| Gale Williams” |
+| Services eyebrow | “Services” |
+| Services heading | “Apple-platform software, built end to end.” |
+| Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
+| About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
+| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it’s being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three."             |
+| Apps heading | “Apps and releases” |
+| Apps summary | “Released apps, TestFlight betas, downloads, and support links will appear here as they become available.” |
+| Apps empty state | “No public releases are listed yet.”  |
+| Contact page | Keep the current Upwork-primary project path and secondary professional-inquiry form as written. Do not turn the secondary form back into project intake. |
+| Footer | “iPhone, iPad, and Mac software by Gale Williams.” |
+| Social card | “Apps · Systems · Swift” |
+| HTML sitemap | Describe the unified services page and remove the personal and business service entries. |
+| XML sitemap | Remove the retired service URLs. Keep `/services` as the canonical service URL. |
+| Global project CTA | Keep “Start a project.” It leads to the Upwork-primary contact page. |
 
 ## Draft Services Copy
 
-### Page introduction
+### Build
 
-Eyebrow:
+#### New iPhone and iPad products
 
-> Services
+> Turn an idea or an existing workflow into native software for iPhone or iPad. I can help define the first release and carry it through architecture,
+> interface design, implementation, testing, and distribution with monetization.
 
-Heading:
+#### Mac apps and system software
 
-> Apple-platform software, built with care.
+> Build software that takes full advantage of the Mac, including menu bar utilities, command-line tools, background services, system framework integrations, and local AI inference.
 
-Summary:
+#### Existing-app improvements and modernization
 
-> I build new apps, improve existing software, and connect the services an app
-> needs behind the scenes.
+> Improve, modernize, or extend your existing software. Add new screens and features, adopt Swift concurrency, update frameworks, improve accessibility and performance, fix the bugs nobody else wants to touch, or prepare for the next release.
 
-### New apps
+### Ship and Support
 
-> Turn an idea or an existing workflow into a native iPhone, iPad, or Mac app.
-> We’ll define the useful first release, choose the right platform shape, and
-> build toward software that can grow without becoming confusing.
+#### Beta testing and release readiness
 
-### Existing apps
+> Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I can configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, and turn the evidence into a clear path toward release.
 
-> Improve, modernize, or extend an app that already exists. This can include
-> new features, interface work, Swift and framework updates, performance,
-> accessibility, difficult bugs, or release preparation.
+#### Launch and distribution
 
-### Integrations and supporting services
+> Take a finished app through the last hard mile. I can prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
 
-> Connect an app to APIs, cloud services, local tools, accounts, data, or other
-> systems it depends on. The app remains the product; the integration exists to
-> make it useful and reliable.
+#### Post-launch maintenance
 
-### Audio and media software
+> Keep your product sharp after launch with compatibility updates, crash and performance investigation, and scoped release support.
 
-> Build or improve software involving audio, speech, MIDI, playback, recording,
-> media processing, or Apple’s audio frameworks.
+### Specialized Engineering
 
-## Upwork Review
+#### Latest and greatest
 
-### Current mismatch
+> Modernize for iOS 27 with adaptive interfaces. Look great on everything from the new iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
 
-The current profile title and opening overview place AI agents and automation
-beside macOS and iOS as equal specialties. The strongest-lanes list, portfolio
-titles, and skills repeat that emphasis. A visitor sent from the revised contact
-page will therefore encounter the old positioning immediately.
+#### AI and intelligent system integration
 
-### Proposed title
+> Bring your app to center stage with Apple’s intelligent system experiences, App Intents and Siri AI, or build features with Foundation Models and Private Cloud Compute (PCC).
+> Run high-performance models locally with Core AI and MLX.
+> Modernize existing Core ML or MLX workloads with Core AI when it provides a concrete product or performance benefit.
 
-> iOS & macOS Software Engineer | Swift, SwiftUI, Audio
+#### Swift backends and web surfaces
 
-### Proposed overview
+> When an Apple-platform product needs a backend API, third-party integrations, or companion website, I can build the supporting layer in Swift and deploy it to AWS or a VPS. My server-side stack includes Hummingbird, Vapor, Lambda, DynamoDB, and Lightsail.
 
-> Heya! I design and build software for iPhone, iPad, and Mac.
->
-> I’m a strong fit when you need one experienced engineer to take an
-> Apple-platform app from an early idea through architecture, interface design,
-> implementation, integration, testing, and release.
->
-> My strongest areas are:
->
-> - Native iOS, iPadOS, and macOS apps in Swift, SwiftUI, UIKit, and AppKit.
-> - Existing-app improvements, modernization, debugging, and performance work.
-> - APIs, cloud services, and integrations that support the app.
-> - Audio, speech, MIDI, and media software.
->
-> I work directly, communicate clearly, and leave you with software you can
-> understand and maintain.
->
-> Thanks for reading!
+#### Audio and media software
 
-### Portfolio treatment
+> I bring specialized experience with audio software engineering, including speech synthesis and transcription, MIDI, recording and playback, and media processing pipelines. I work directly with AVFoundation, Core Audio, and Core Media to deliver the performance and deep platform integration Apple users expect.
 
-- Keep SpeakSwiftly prominent, but describe it as a macOS speech and voice
-  service rather than leading with AI.
-- Keep SwiftASB as evidence of SDK and integration architecture, while moving
-  “AI Agent” out of the title if the revised description remains accurate.
-- Keep SwiftlyFetch as evidence of local search and knowledge-system work, but
-  do not make RAG terminology the first thing a general software client sees.
-- Prefer future portfolio entries that show shipped iOS/macOS interfaces,
-  platform integration, audio, accessibility, or release outcomes.
+## Metadata Drafts
 
-### Skills ordering
+Homepage description:
 
-Place Swift, macOS, iOS, SwiftUI, UIKit, AppKit, Xcode, software architecture,
-desktop application development, API integration, and audio/media skills first.
-Keep accurate AI and automation skills lower in the list rather than removing
-useful evidence of experience.
+> Gale Williams designs and builds native iPhone, iPad, and Mac apps, system
+> software, and supporting Swift services.
 
-## Decisions Needed Before Implementation
+Services description:
 
-1. Use “independent software engineer” or “independent software studio” as the
-   dominant identity?
-2. Keep iPad explicit everywhere, or use “iOS and macOS” as shorthand in titles?
-3. Keep audio/media as a visible fourth service, or treat it as portfolio-only
-   specialization?
-4. Replace the personal/SMB service routes with one services page, as
-   recommended, or preserve the two-audience structure?
-5. Keep “Heya!” in the Upwork overview, or use a more formal opening there?
-6. Should the site mention Android or web-app delivery at all, or present those
-   only as supporting work around an Apple-platform product?
-7. Is the existing public hourly rate part of this positioning review, or
-   intentionally out of scope?
+> End-to-end iOS and macOS software development, including native apps, Mac
+> system software, Swift backends, integrations, and audio products.
 
-## Approval And Implementation Sequence
+About description:
 
-1. Review the positioning statement, vocabulary, service structure, and seven
-   decisions above.
-2. Revise this document until the copy is approved.
-3. Implement the approved site copy, route redirects, metadata, sitemap, and
-   tests in one coherent pass.
-4. Review the rendered site before release.
-5. Update the Upwork profile to match. Treat this as a separate external edit
-   requiring explicit authorization at the time it is performed.
+> Learn about Gale Williams, an independent iOS and macOS software engineer
+> focused on end-to-end Apple-platform products.
+
+Apps description:
+
+> Apps, TestFlight betas, downloads, and support information from Gale Williams.
+
+## Implementation Coverage
+
+Once the candidate copy is approved, update the website in one coherent pass:
+
+- Page titles, descriptions, Open Graph metadata, and Twitter metadata
+- Homepage introduction and three capability cards
+- Unified services page content and hierarchy
+- Permanent application redirects for the two retired service routes
+- Remove obsolete `service-track.leaf`
+- Check if `OfferCatalog.swift` is still needed; if not, remove it.
+- About page introduction and body
+- Apps page introduction and empty state
+- Footer wording
+- Dedicated social-preview card wording and asset
+- HTML sitemap summaries and entries
+- XML sitemap URLs
+- README route and public-surface descriptions where they become inaccurate
+- Route, redirect, canonical URL, sitemap, metadata, and representative-copy
+  tests
+
+The contact page does not need a messaging rewrite in this pass.
