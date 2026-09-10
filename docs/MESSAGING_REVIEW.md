@@ -212,7 +212,7 @@ commercial mechanics are part of this messaging pass.
 
 ### Instrumented Beta Run
 
->Put the app in real testers’ hands without flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
+>Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
 
 ### Launch and Distribution
 
@@ -221,7 +221,7 @@ Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined re
 
 ### Ongoing Care
 
->Keep the product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
+>Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
 
 ## Specialized Engineering
 
@@ -229,14 +229,14 @@ Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined re
 
 >iOS 27 modernization...
 Adaptive, fold-friendly interfaces for the new iPhone Duo..?
-> Siri AI and Private Cloud Compute (PCC) integrations for sleek and secure intelligence.
->Core AI and MLX for the latest in local Agentic AI 
+> Siri AI and Private Cloud Compute (PCC) integrations for sleek, and secure integrations with Apple Intelligence.
+>Core AI for the latest in private, on-device Agents
 
 ### AI and intelligent system integration
 
->Siri AI and Private Cloud Compute (PCC) integrations for sleek and secure intelligence.
->Core AI and MLX for the latest in local agentic AI.
->Evaluation of existing Core ML or MLX workloads, modernizing with Core AI where it provides a concrete product or performance benefit.
+> Siri AI, and Private Cloud Compute (PCC) integrations for sleek, secure integrations witih Apple's hybrid intelligence systems.
+> Core AI and MLX for high-performance, local AI and agents.
+> Evaluation of existing Core ML or MLX workloads, modernizing with Core AI where it provides a concrete product or performance benefit.
 
 ### Swift backends and web surfaces
 
