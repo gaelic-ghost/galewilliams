@@ -121,7 +121,7 @@ in the repository, and directly covered by tests. Cloudflare redirects would
 add external configuration without materially simplifying the site.
 
 Organize the page into build, ship/support, and specialized engineering, so the
-hierarchy matches the positioning. 
+hierarchy matches the positioning.
 
 Build:
 
