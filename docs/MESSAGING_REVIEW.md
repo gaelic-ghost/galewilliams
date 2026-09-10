@@ -227,8 +227,8 @@ Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined re
 
 ### Latest Apple-platform work
 
->iOS 27 modernization...
-Adaptive, fold-friendly interfaces for the new iPhone Duo..?
+>iOS 27 modernization.
+Adaptive, fold-friendly interfaces for the new iPhone Duo, the fan-favorite iPad Mini, and cult classic iPhone Mini
 > Siri AI and Private Cloud Compute (PCC) integrations for sleek, and secure integrations with Apple Intelligence.
 >Core AI for the latest in private, on-device Agents
 
