@@ -196,8 +196,7 @@ commercial mechanics are part of this messaging pass.
 
 #### New iPhone and iPad products
 
-> Turn an idea or an existing workflow into native software for iPhone, iPad,
-> or Mac. I can help define the first release and carry it through architecture,
+> Turn an idea or an existing workflow into native software for iPhone or iPad. I can help define the first release and carry it through architecture,
 > interface design, implementation, testing, and distribution with monetization.
 
 #### Mac apps and system software
@@ -228,7 +227,6 @@ commercial mechanics are part of this messaging pass.
 #### Latest and greatest
 
 > Adaptive interfaces for everything from the foldable iPhone Duo to the fan-favorite iPad mini and cult-classic iPhone mini.
-> Siri AI, Private Cloud Compute (PCC), and Core AI for sleek, secure integrations with Apple Intelligence and on-device inference.
 
 #### AI and intelligent system integration
 
