@@ -179,7 +179,7 @@ commercial mechanics are part of this messaging pass.
 | Services heading| “Apple-platform software, built end to end.” |
 | Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
 | About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
-| About body | NEEDS EDITED: "Most of my work lives deep in Swift and Apple’s platforms: the interface people see, the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive—whether it is being used by a person, assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three"             |
+| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see, to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three"             |
 | Apps heading | “Apps and releases” |
 | Apps summary | “Released apps, TestFlight betas, downloads, and support links will appear here as they become available.” |
 | Apps empty state | “No public releases are listed yet.”  |
@@ -228,7 +228,7 @@ Choose a deeper pre-launch beta with a shorter launch watch, or a streamlined re
 ### Latest Apple-platform work
 
 >iOS 27 modernization.
-Adaptive, fold-friendly interfaces for the new iPhone Duo, the fan-favorite iPad Mini, and cult classic iPhone Mini
+Adaptive, fold-friendly interfaces for the new iPhone Duo, the fan-favorite iPad Mini, and cult classic iPhone Mini.
 > Siri AI and Private Cloud Compute (PCC) integrations for sleek, and secure integrations with Apple Intelligence.
 >Core AI for the latest in private, on-device Agents
 
