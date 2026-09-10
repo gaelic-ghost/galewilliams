@@ -131,9 +131,9 @@ Build:
 
 Ship and support:
 
-1. Instrumented Beta Run
-2. Launch and Distribution
-3. Ongoing Care
+1. Beta testing and release readiness
+2. Launch and distribution
+3. Post-launch maintenance
 
 Specialized engineering:
 
@@ -207,17 +207,17 @@ commercial mechanics are part of this messaging pass.
 
 ### Ship and Support
 
-#### Instrumented Beta Run
+#### Beta testing and release readiness
 
-> Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.
+> Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I can configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, and turn the evidence into a clear path toward release.
 
-#### Launch and Distribution
+#### Launch and distribution
 
-> Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution. Launch directly with six weeks of post-launch support, or choose a two- or four-week beta and use the rest of that six-week window after launch.
+> Take a finished app through the last hard mile. I can prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.
 
-#### Ongoing Care
+#### Post-launch maintenance
 
-> Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.
+> Keep your product sharp after launch with compatibility updates, crash and performance investigation, and scoped release support.
 
 ### Specialized Engineering
 

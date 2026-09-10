@@ -197,7 +197,8 @@ struct GalewilliamsSiteTests {
 
             try await app.testing().test(.GET, "services") { response async in
                 #expect(response.body.string.contains("New iPhone and iPad products"))
-                #expect(response.body.string.contains("Instrumented Beta Run"))
+                #expect(response.body.string.contains("Beta testing and release readiness"))
+                #expect(response.body.string.contains("six weeks") == false)
                 #expect(response.body.string.contains("AI and intelligent system integration"))
             }
 

@@ -30,16 +30,16 @@
             </div>
             <div class="service-grid">
                 <article class="service-panel">
-                    <h3>Instrumented Beta Run</h3>
-                    <p>Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I’ll configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, fix issues within the agreed engineering budget, and deliver a release candidate with a findings report.</p>
+                    <h3>Beta testing and release readiness</h3>
+                    <p>Put the app in real testers’ hands so you can lift off confidently instead of flying blind. I can configure TestFlight, add focused logging and MetricKit diagnostics, monitor crashes and performance, organize tester reports, and turn the evidence into a clear path toward release.</p>
                 </article>
                 <article class="service-panel">
-                    <h3>Launch and Distribution</h3>
-                    <p>Take a finished app through the last hard mile. I’ll prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution. Launch directly with six weeks of post-launch support, or choose a two- or four-week beta and use the rest of that six-week window after launch.</p>
+                    <h3>Launch and distribution</h3>
+                    <p>Take a finished app through the last hard mile. I can prepare and validate the release, configure privacy-aware diagnostics, and launch through the App Store or signed and notarized direct Mac distribution.</p>
                 </article>
                 <article class="service-panel">
-                    <h3>Ongoing Care</h3>
-                    <p>Keep your product sharp after launch with compatibility updates, crash and performance investigation, release support, and a reserved monthly engineering allowance.</p>
+                    <h3>Post-launch maintenance</h3>
+                    <p>Keep your product sharp after launch with compatibility updates, crash and performance investigation, and scoped release support.</p>
                 </article>
             </div>
         </section>
