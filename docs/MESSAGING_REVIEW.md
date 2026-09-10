@@ -286,10 +286,3 @@ Once the candidate copy is approved, update the website in one coherent pass:
   tests
 
 The contact page does not need a messaging rewrite in this pass.
-
-## Remaining Review Before Implementation
-
-1. Approve the exact services copy.
-
-After those wording decisions are recorded here, implementation can proceed.
-Upwork review and editing remain a separate project with separate authorization.
