@@ -20,11 +20,12 @@ TBD
 
 ### What This Project Is
 
-A server-rendered professional site built with Vapor, Leaf, Fluent, PostgreSQL,
-Redis, and Docker. It serves public pages, sends new software-project inquiries
-to Upwork, accepts protected secondary inquiries, keeps review behind owner
-authentication, and records notification delivery work durably before Redis
-and Amazon SES process it.
+A server-rendered professional site for Gale Williams’s Apple-platform software
+engineering work, built with Vapor, Leaf, Fluent, PostgreSQL, Redis, and Docker.
+It serves public pages, sends new software-project inquiries to Upwork, accepts
+protected secondary inquiries, keeps review behind owner authentication, and
+records notification delivery work durably before Redis and Amazon SES process
+it.
 
 ### Motivation
 
@@ -38,12 +39,14 @@ the development commands below when working on the service itself.
 
 ## Usage
 
-Public pages include the homepage, services, apps, about, and contact routes.
-The contact page makes Upwork the primary new-project path. Its shorter
-secondary form uses Cloudflare Turnstile, a signed form-age token, a honeypot,
-and Redis rate limiting before a valid inquiry can be persisted and queued for
-Amazon SES notification. Owner administration uses credentials supplied
-through environment variables; it is not a public account system.
+Public pages include the homepage, unified Apple-platform services, apps, about,
+and contact routes. The retired personal and business service routes permanently
+redirect to `/services`. The contact page makes Upwork the primary new-project
+path. Its shorter secondary form uses Cloudflare Turnstile, a signed form-age
+token, a honeypot, and Redis rate limiting before a valid inquiry can be
+persisted and queued for Amazon SES notification. Owner administration uses
+credentials supplied through environment variables; it is not a public account
+system.
 
 Operational readiness is split deliberately:
 

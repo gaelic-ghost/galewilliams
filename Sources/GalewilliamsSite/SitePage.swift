@@ -91,11 +91,11 @@ struct SiteNotice: Encodable {
 
 struct SitePage: Encodable {
     static let home = SitePage(
-        title: "Gale Williams | Agentic apps, plugins, and integrations",
-        eyebrow: "Independent software studio",
-        heading: "Software that makes work easier.",
-        summary: "Apps, automations, and integrations built around the way you actually work.",
-        description: "Gale Williams builds apps, automations, and integrations around the way you actually work.",
+        title: "Gale Williams | iOS and macOS software engineer",
+        eyebrow: "Independent software engineer",
+        heading: "Software for iPhone, iPad, and Mac.",
+        summary: "I design and build native Apple-platform products end to end, from screens and features to the system services and backends they depend on.",
+        description: "Gale Williams designs and builds native iPhone, iPad, and Mac apps, system software, and supporting Swift services.",
         path: "/",
         actions: [
             .init(label: "View services", path: "/services", style: .primary),
@@ -105,21 +105,21 @@ struct SitePage: Encodable {
     )
 
     static let services = SitePage(
-        title: "Services | Gale Williams",
+        title: "iOS and macOS Software Services | Gale Williams",
         eyebrow: "Services",
-        heading: "Software built around your work.",
-        summary: "From a focused automation to a new app, we start with the work you want to make easier.",
-        description: "Services from Gale Williams for focused apps, automations, and integrations.",
+        heading: "Apple-platform software, built end to end.",
+        summary: "I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.",
+        description: "End-to-end iOS and macOS software development, including native apps, Mac system software, Swift backends, integrations, and audio products.",
         path: "/services",
         actions: [.init(label: "Start a project", path: "/contact", style: .primary)]
     )
 
     static let apps = SitePage(
-        title: "Apps | Gale Williams",
+        title: "Apps and Releases | Gale Williams",
         eyebrow: "Apps",
-        heading: "Apps and plugins.",
-        summary: "This is where released software will live. There are no public downloads or installable plugins available right now.",
-        description: "Released Gale Williams apps and plugins will appear here when they are publicly available.",
+        heading: "Apps and releases",
+        summary: "Released apps, TestFlight betas, downloads, and support links will appear here as they become available.",
+        description: "Apps, TestFlight betas, downloads, and support information from Gale Williams.",
         path: "/apps",
         shouldIndex: false,
         actions: [.init(label: "View services", path: "/services", style: .primary)]
@@ -129,8 +129,8 @@ struct SitePage: Encodable {
         title: "About | Gale Williams",
         eyebrow: "About",
         heading: "Hi, I’m Gale.",
-        summary: "I build apps, automations, and integrations that make complicated work easier to handle.",
-        description: "Learn about Gale Williams, an independent builder of apps, automations, and integrations.",
+        summary: "I’m an independent software engineer focused on native apps and system software for Apple platforms.",
+        description: "Learn about Gale Williams, an independent iOS and macOS software engineer focused on end-to-end Apple-platform products.",
         path: "/about"
     )
 
@@ -164,37 +164,6 @@ struct SitePage: Encodable {
         self.actions = actions
         self.actionRowClass = actionRowClass
     }
-}
-
-struct ServiceTrackPage: Encodable {
-    let chrome: SiteChrome
-    let intro: PageIntro
-    let audience: String
-    let offers: [ServiceOffer]
-    let nextStepNote: String
-    let actions: [SiteAction]
-    let actionRowClass = "action-row compact"
-
-    init(page: SitePage, audience: String, offers: [ServiceOffer], nextStepNote: String) {
-        chrome = page.chrome
-        intro = page.intro
-        self.audience = audience
-        self.offers = offers
-        self.nextStepNote = nextStepNote
-        actions = [
-            .init(label: "Start intake", path: "/contact", style: .primary),
-            .init(label: "Compare service tracks", path: "/services"),
-        ]
-    }
-}
-
-struct ServiceOffer: Encodable {
-    let kicker: String
-    let title: String
-    let summary: String
-    let details: [String]
-    let actionLabel: String
-    let actionPath: String
 }
 
 struct HealthResponse: Content {

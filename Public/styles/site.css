@@ -154,6 +154,7 @@ textarea:focus-visible {
 
 h1,
 h2,
+h3,
 p {
     margin-top: 0;
 }
@@ -171,6 +172,12 @@ h2 {
     margin-bottom: 12px;
     font-size: clamp(1.3rem, 2vw, 1.7rem);
     line-height: 1.18;
+}
+
+h3 {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    line-height: 1.24;
 }
 
 .summary {
@@ -193,8 +200,7 @@ button {
 }
 
 .signal-grid,
-.service-list,
-.offer-grid {
+.service-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
@@ -202,9 +208,7 @@ button {
 }
 
 .signal-grid article,
-.service-list article,
-.choice-panel,
-.offer-panel,
+.service-panel,
 .app-listing,
 .intake-form,
 .text-band {
@@ -215,9 +219,7 @@ button {
 }
 
 .signal-grid p,
-.service-list p,
-.choice-panel p,
-.offer-panel p,
+.service-panel p,
 .app-listing p,
 .text-band p {
     color: var(--muted);
@@ -232,67 +234,27 @@ button {
     padding-bottom: 24px;
 }
 
-.service-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.choice-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+.services-section {
     padding-bottom: 64px;
 }
 
-.choice-panel {
-    display: grid;
-    align-content: start;
-    min-height: 220px;
-    color: var(--text);
-    text-decoration: none;
-}
-
-.panel-link {
-    align-self: end;
-    color: var(--cyan);
-    font-weight: 800;
-}
-
-.section-lede {
+.services-section .section-heading {
     border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 18px;
-    padding: 18px 0;
+    margin-bottom: 22px;
+    padding-top: 22px;
 }
 
-.section-lede p {
+.services-section .section-heading h2 {
     max-width: 760px;
     margin-bottom: 0;
-    color: var(--muted);
-    line-height: 1.58;
 }
 
-.offer-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.service-grid.specialized-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.offer-panel {
-    display: grid;
-    gap: 12px;
-    align-content: start;
-}
-
-.offer-panel .button {
-    justify-self: start;
-    margin-top: 4px;
-}
-
-.detail-list {
-    display: grid;
-    gap: 10px;
-    margin: 0;
-    padding-left: 18px;
-    color: var(--muted);
-    line-height: 1.5;
+.service-panel p:last-child {
+    margin-bottom: 0;
 }
 
 .action-row.compact {
@@ -526,9 +488,8 @@ button {
     }
 
     .signal-grid,
-    .service-list,
-    .choice-grid,
-    .offer-grid,
+    .service-grid,
+    .service-grid.specialized-grid,
     .admin-row,
     .detail-grid,
     .intake-form {

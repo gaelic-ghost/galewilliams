@@ -13,12 +13,12 @@ func routes(_ app: Application) throws {
         try await request.view.render("services", SitePage.services).encodeResponse(for: request)
     }
 
-    app.get("services", "personal") { request async throws in
-        try await request.view.render("service-track", OfferCatalog.personalServices).encodeResponse(for: request)
+    app.get("services", "personal") { request in
+        request.redirect(to: "/services", redirectType: .permanent)
     }
 
-    app.get("services", "business") { request async throws in
-        try await request.view.render("service-track", OfferCatalog.businessServices).encodeResponse(for: request)
+    app.get("services", "business") { request in
+        request.redirect(to: "/services", redirectType: .permanent)
     }
 
     app.get("apps") { request async throws in

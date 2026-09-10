@@ -269,7 +269,7 @@ Once the candidate copy is approved, update the website in one coherent pass:
 - Unified services page content and hierarchy
 - Permanent application redirects for the two retired service routes
 - Remove obsolete `service-track.leaf`
-- Check if `OfferCatalog.Swift` is still needed, if not, remove it.
+- Check if `OfferCatalog.swift` is still needed; if not, remove it.
 - About page introduction and body
 - Apps page introduction and empty state
 - Footer wording
