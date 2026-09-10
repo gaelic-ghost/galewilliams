@@ -134,7 +134,7 @@ Build:
 Ship and support:
 
 1. Instrumented Beta Run
-2. Launch/Distribution
+2. Launch and Distribution
 3. Ongoing Care
 
 Specialized engineering:
@@ -179,7 +179,7 @@ commercial mechanics are part of this messaging pass.
 | Services heading| “Apple-platform software, built end to end.” |
 | Services summary | “I build native iPhone, iPad, and Mac apps, system tools, and the Swift services behind them.” |
 | About summary | “I’m an independent software engineer focused on native apps and system software for Apple platforms.” |
-| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three"             |
+| About body | "Most of my work ties deeply into the Swift language and Apple’s platforms. I enjoy working on each layer of a project, from the interface people see to the system services doing the heavy lifting, and the backend that keeps everything connected. I like owning the whole product because the pieces work better when they’re designed together. I care about software that feels clean, cohesive, and intuitive, whether it's being used by a person, their assistive technology, or an AI agent. Clear structure, meaningful labels, and predictable interactions make software more accessible to all three."             |
 | Apps heading | “Apps and releases” |
 | Apps summary | “Released apps, TestFlight betas, downloads, and support links will appear here as they become available.” |
 | Apps empty state | “No public releases are listed yet.”  |
